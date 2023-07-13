@@ -3,6 +3,7 @@ export class Playhead {
     constructor({
         playing = false,
         interval = 4, 
+        pattern,
         instrument = 92, 
         offset = -12,
         legato = 0.5,
@@ -10,6 +11,7 @@ export class Playhead {
     }) {
         this.playing = playing
         this.interval = interval
+        this.pattern = pattern
         this.instrument = instrument
         this.offset = offset
         this.legato = legato
