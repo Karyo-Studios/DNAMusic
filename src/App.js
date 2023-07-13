@@ -135,12 +135,13 @@ function App() {
 
   const p1 = new Playhead({
     playing: true,
-    pattern: [0, 3 / 8, 6 / 8], // 1(3,8)
+    pattern: [0, 2 / 8, 3 / 8, 5 / 8, 6 / 8],
     interval: 4,
+    offset: 0,
+    legato: 0.5,
     instrument: 92,
-    offset: -12,
-    legato: 0.6,
-    color: "#ffff00",
+    // instrument: 96,
+    color: "#0000ff",
   });
 
   const p2 = new Playhead({
@@ -155,6 +156,16 @@ function App() {
 
   const p3 = new Playhead({
     playing: true,
+    pattern: [0, 3 / 8, 6 / 8], // 1(3,8)
+    interval: 4,
+    instrument: 92,
+    offset: -12,
+    legato: 0.6,
+    color: "#ffff00",
+  });
+
+  const p4 = new Playhead({
+    playing: false,
     pattern: [0],
     interval: 8,
     offset: -24,
@@ -163,15 +174,15 @@ function App() {
     color: "#00ff00",
   });
 
-  const p4 = new Playhead({
-    playing: true,
-    pattern: [0],
-    interval: 1,
+  const p5 = new Playhead({
+    playing: false,
+    pattern: [0,0.75],
+    interval: 4,
     offset: 0,
     legato: 0.5,
     instrument: 92,
     // instrument: 96,
-    color: "#0000ff",
+    color: "#ff00ff",
   });
 
   const [count1, setCount1] = useState(0);
@@ -236,10 +247,11 @@ function App() {
 
   // const [playheads, setPlayheads] = useState([p1, p2, p3, p4]);
   const [playheads, setPlayheads] = useState([
-    p4, // 4
+    p1, // 4
     p2, // 2
-    p1, /// 1
-    p3, /// 3
+    p3, /// 1
+    p4, /// 3
+    p5, // 5
   ]);
 
   // main loop to update counters
@@ -400,14 +412,14 @@ function App() {
           <div className="flex flex-wrap my-3 min-h-[6rem]">
             {nodes.map((node, index) => (
               <div
-                className="relative bg-[#ddd] w-[4.5rem] h-[7rem] mx-[0.5rem] mb-[0.5rem] text-center drop-shadow"
+                className="relative bg-[#ddd] w-[4.5rem] h-[9rem] mx-[0.5rem] mb-[0.5rem] text-center drop-shadow"
                 key={node.index}
               >
                 <div className="flex flex-col absolute bottom-0 left-0">
                   {playheads.map((p, i) => (
                     <div
                       key={p + i}
-                      className={`h-[0.75rem]`}
+                      className={`h-[1rem]`}
                       style={{
                         backgroundColor: `${p.color}`,
                         opacity: index === counters[i] ? 1 : 0.2,
