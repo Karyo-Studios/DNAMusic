@@ -6,10 +6,16 @@ TODOs:
   - instruments
   - start / stop
 
+  - euclidian rhythms 
+  - work on player settings
+
+  - euclid function
+    
+
 */
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Playhead } from "./playhead";
+import { p1, p2, p3, p4, p5 } from './defaults'
 import { parseSequence, toMidi } from "./helpers";
 import { queryPattern } from "./pattern";
 import { loadSoundfont, startPresetNote } from "sfumato";
@@ -26,6 +32,7 @@ function App() {
     "ACTCACCCTGAAGTTCTCAGGATCCACGTGCAGCTTGTCACAGTGCAGCTCACTCAGTGT"
   );
   const [bpm, setBpm] = useState(120);
+  const [masterSteps, setMasterSteps] = useState(8);
   const [cps, setCps] = useState(60 / bpm);
   const [nodes, setNodes] = useState([]);
   const [counter, setCounter] = useState(0);
@@ -81,13 +88,19 @@ function App() {
   };
 
   const updatePlayhead = (i, p) => {
-    setPlayheads([
-      ...playheads.slice(0, i),
-      {
-        ...p,
-      },
-      ...playheads.slice(i + 1),
-    ]);
+    if (i === 0) {
+      setPlayhead1(p);
+    } else if (i === 1) {
+      setPlayhead2(p);
+    } else if (i === 2) {
+      setPlayhead3(p);
+    } else if (i === 3) {
+      setPlayhead4(p);
+    } else if (i === 4) {
+      setPlayhead5(p);
+    } else {
+      console.error("please use correct playhead index");
+    }
   };
 
   // const updateCounters = (i, c) => {
@@ -133,65 +146,11 @@ function App() {
     return audioContext;
   };
 
-  const p1 = new Playhead({
-    playing: true,
-    pattern: [0, 2 / 8, 3 / 8, 5 / 8, 6 / 8],
-    interval: 4,
-    offset: 0,
-    legato: 0.5,
-    instrument: 92,
-    // instrument: 96,
-    color: "#0000ff",
-  });
-
-  const p2 = new Playhead({
-    playing: true,
-    interval: 2,
-    pattern: [0, 0.5, 0.75],
-    offset: 12,
-    instrument: 66,
-    legato: 0.5,
-    color: "#ff0000",
-  });
-
-  const p3 = new Playhead({
-    playing: true,
-    pattern: [0, 3 / 8, 6 / 8], // 1(3,8)
-    interval: 4,
-    instrument: 92,
-    offset: -12,
-    legato: 0.6,
-    color: "#ffff00",
-  });
-
-  const p4 = new Playhead({
-    playing: false,
-    pattern: [0],
-    interval: 8,
-    offset: -24,
-    instrument: 80,
-    legato: 1,
-    color: "#00ff00",
-  });
-
-  const p5 = new Playhead({
-    playing: false,
-    pattern: [0,0.75],
-    interval: 4,
-    offset: 0,
-    legato: 0.5,
-    instrument: 92,
-    // instrument: 96,
-    color: "#ff00ff",
-  });
-
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
   const [count3, setCount3] = useState(0);
   const [count4, setCount4] = useState(0);
   const [count5, setCount5] = useState(0);
-
-  const counters = [count1, count2, count3, count4, count5];
 
   const countRef1 = useRef(0);
   const countRef2 = useRef(0);
@@ -199,13 +158,33 @@ function App() {
   const countRef4 = useRef(0);
   const countRef5 = useRef(0);
 
+  const [playhead1, setPlayhead1] = useState(p1)
+  const [playhead2, setPlayhead2] = useState(p2)
+  const [playhead3, setPlayhead3] = useState(p3)
+  const [playhead4, setPlayhead4] = useState(p4)
+  const [playhead5, setPlayhead5] = useState(p5)
+
   const playheadRef1 = useRef(0);
   const playheadRef2 = useRef(0);
   const playheadRef3 = useRef(0);
   const playheadRef4 = useRef(0);
   const playheadRef5 = useRef(0);
 
-  const refs = [countRef1, countRef2, countRef3, countRef4, countRef5];
+  const counters = [count1, count2, count3, count4, count5];
+
+  const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
+
+  const playheadRefs = [playheadRef1, playheadRef2, playheadRef3, playheadRef4, playheadRef5];
+
+  // main playheads array, just used for accessing
+  const playheads = [
+    playhead1,
+    playhead2,
+    playhead3,
+    playhead4,
+    playhead5,
+  ];
+
 
   const updatePos = (i, p) => {
     if (i === 0) {
@@ -223,6 +202,7 @@ function App() {
     }
   };
 
+  // playhead pos refs
   useEffect(() => {
     countRef1.current = count1;
   }, [count1]);
@@ -239,23 +219,31 @@ function App() {
     countRef5.current = count5;
   }, [count5]);
 
+  // playhead refs
+  useEffect(() => {
+    playheadRef1.current = playhead1;
+  }, [playhead1]);
+  useEffect(() => {
+    playheadRef2.current = playhead2;
+  }, [playhead2]);
+  useEffect(() => {
+    playheadRef3.current = playhead3;
+  }, [playhead3]);
+  useEffect(() => {
+    playheadRef4.current = playhead4;
+  }, [playhead4]);
+  useEffect(() => {
+    playheadRef5.current = playhead5;
+  }, [playhead5]);
+
   const stopAll = () => {
     for (let i = 0; i < playheads.length; i++) {
       updatePos(i, 0);
     }
   };
 
-  // const [playheads, setPlayheads] = useState([p1, p2, p3, p4]);
-  const [playheads, setPlayheads] = useState([
-    p1, // 4
-    p2, // 2
-    p3, /// 1
-    p4, /// 3
-    p5, // 5
-  ]);
-
   // main loop to update counters
-  let clicksPerCycle = 2;
+  let clicksPerCycle = 4;
   let clicks = 0;
 
   useEffect(() => {
@@ -263,7 +251,6 @@ function App() {
     const lookahead = counter + 1;
     if (playing && nodes.length) {
       interval = setInterval(() => {
-        // console.log('clicks', clicks)
         clicks++;
         if (clicks === clicksPerCycle) {
           setCounter(counter + 1);
@@ -272,13 +259,14 @@ function App() {
           //   playNote(92, 100, 100); // metronome
           // }
           for (let i = 0; i < playheads.length; i++) {
-            const current = playheads[i];
-            if (!current.playing) {
+            const active = playheads[i];
+            const activeRef = playheadRefs[i];
+            if (!active.playing) {
               continue;
             }
             const haps = queryPattern(
-              current.pattern,
-              current.interval,
+              active.pattern,
+              active.interval,
               counter,
               lookahead
             );
@@ -287,14 +275,17 @@ function App() {
 
             haps.forEach((hap) => {
               setTimeout(() => {
-                const pos = refs[i].current; // make sure to use ref
-                const note = getNote(pos) + current.offset;
-                playNote(
-                  current.instrument,
-                  note + noteOffsetRef.current,
-                  current.legato * 500
-                );
-                updatePos(i, (pos + 1) % nodes.length);
+                if (activeRef.current.playing) {
+                  const pos = countRefs[i].current; // make sure to use ref
+                  // for some reason the note is begin rendered one behind the note, TODO investigate this
+                  const note = getNote((pos + 1) % nodes.length) + activeRef.current.offset;
+                  updatePos(i, (pos + 1) % nodes.length);
+                  playNote(
+                    activeRef.current.instrument,
+                    note + noteOffsetRef.current,
+                    activeRef.current.legato * 500
+                  );
+                }
               }, timeWindow * (hap - counter));
             });
           }
@@ -382,8 +373,6 @@ function App() {
                 BPM: {bpm} {playing && ((counter - 1) / 2) % 2 === 0 ? "*" : ""}{" "}
                 {/* {counter} */}
               </p>
-              {/* <p>{renderCount.current}</p> */}
-              {/* <p>COUNTER: {counter}</p> */}
               <div>
                 <input
                   type="range"
@@ -398,6 +387,33 @@ function App() {
                 />
               </div>
             </div>
+            <div className="mx-[1rem]">
+              <p>
+                STEPS: {masterSteps}
+              </p>
+              <p>{renderCount.current}</p>
+              <p>COUNTER: {counter}</p>
+              <div>
+                <input
+                  type="range"
+                  min="3"
+                  max="16"
+                  value={masterSteps}
+                  onChange={(e) => {
+                    setMasterSteps(e.target.value);
+                    for (let i = 0; i < playheads.length; i++) {
+                      if (playheads[i].followSteps) {
+                        const updated = playheads[i].updateEuclid(masterSteps, playheads[i].events)
+                        console.log(updated)
+                        updatePlayhead(i, updated)
+                      }
+                    }
+                  }}
+                  step="1"
+                  aria-label="master steps slider"
+                />
+              </div>
+            </div>
             <div className="flex">
               <button
                 className="bg-[#ddd] py-2 mr-1 w-[7rem]"
@@ -406,6 +422,21 @@ function App() {
                 }
               >
                 KEY: {noteOffset}
+              </button>
+            </div>
+            <div className="flex">
+              <button
+                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
+                onClick={() => {
+                  if (playheads[0].playing) {
+                    updatePlayhead(0, playheads[0].pause())
+                  } else {
+                    updatePlayhead(0, playheads[0].start())
+                  }
+                }
+                }
+              >
+                TEST
               </button>
             </div>
           </div>
@@ -472,13 +503,13 @@ function App() {
               <div className="px-3 w-[7rem] leading-[2.7rem]">
                 Pos: {counters[index]}
               </div>
-              <div className="px-3 w-[7rem] leading-[2.7rem]">
-                Time: {p.interval}
+              <div className="px-3 w-[8rem] leading-[2.7rem]">
+                Length: {p.interval}
               </div>
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  updatePlayhead(index, p.updateStep(p.interval - 1));
+                  updatePlayhead(index, p.updateStep(p.interval / 2));
                 }}
               >
                 -
@@ -486,14 +517,73 @@ function App() {
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  const updated = p.updateStep(p.interval + 1);
+                  const updated = p.updateStep(p.interval * 2);
                   updatePlayhead(index, updated);
                 }}
               >
                 +
               </button>
-              <div className="px-3 leading-[2.7rem]">
-                Pattern: {JSON.stringify(p.pattern)}
+              <div className="px-3 py-2 flex flex-col">
+                <div className="relative w-[12rem] bg-[#ddd] h-[1.5rem]">
+                  {
+                    p.pattern.map((hap) => {
+                      return <div
+                        key={hap}
+                        className="absolute bg-[#00f] w-[4px] t-0 h-[100%]"
+                        style={{
+                          left: `${hap * 100}%`,
+                          backgroundColor: `${p.color}`
+                        }}></div>
+                    })
+                  }
+                </div>
+                <div className="flex">
+                  <input
+                    className="p-1 w-[12rem]"
+                    type="range"
+                    min="1"
+                    max={parseInt(p.steps)}
+                    value={p.events}
+                    onChange={(e) => {
+                      // const updated = { ...p, events: parseInt(e.target.value) }
+                      // console.log(updated)
+                      // const updated 
+                      // const updated = p.updateEuclid(masterSteps, e.target.value)
+                      // updatePlayhead(index, updated)
+
+                      if (p.followSteps) {
+                        updatePlayhead(index, p.updateEuclid(masterSteps, e.target.value))
+                      } else {
+                        updatePlayhead(index, p.updateEuclid(p.steps, e.target.value))
+                      }
+                    }}
+                    step="1"
+                    aria-label="event slider"
+                  />
+                  {/* <p>events {p.events}</p> */}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex">
+                  <input
+                    className="p-1 w-[6rem]"
+                    type="range"
+                    min="0"
+                    max="32"
+                    disabled={p.followSteps}
+                    value={p.steps}
+                    onChange={(e) => {
+                      const updated = p.updateEuclid(e.target.value, p.events)
+                      updatePlayhead(index, updated)
+                    }}
+                    step="1"
+                    aria-label="bpm slider"
+                  />
+                  <p onClick={() => {
+                    const updated = p.followStep(!p.followSteps)
+                    updatePlayhead(index, updated)
+                  }} className='px-2'>steps {p.steps}</p>
+                </div>
               </div>
             </div>
           ))}
