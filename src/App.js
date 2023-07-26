@@ -5,8 +5,7 @@ TODOs:
   - legato
   - instruments
   - start / stop
-
-  - euclidian rhythms 
+  
   - work on player settings
 
   - euclid function
@@ -22,11 +21,17 @@ import { loadSoundfont, startPresetNote } from "sfumato";
 import { noteMappings } from "./mappings";
 import { loadedSequences } from "./loadedSequences";
 
+
+
 import "./App.css";
 
-///////////////////////////////////////////////////////
-// Main App
-///////////////////////////////////////////////////////
+function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue(value => value + 1); // update state to force render
+  // A function that increment 👆🏻 the previous state like here 
+  // is better than directly setting `setValue(value + 1)`
+}
+
 function App() {
   const [userInputSequence, setUserInputSequence] = useState(
     "ACTCACCCTGAAGTTCTCAGGATCCACGTGCAGCTTGTCACAGTGCAGCTCACTCAGTGT"
@@ -38,9 +43,7 @@ function App() {
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [audioContext, setAudioContext] = useState();
-
   const [noteOffset, setNoteOffset] = useState(0);
-
   const noteOffsetRef = useRef(0);
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
@@ -57,13 +60,14 @@ function App() {
   };
 
   const renderCount = useRef(0);
-
   useEffect(() => {
     renderCount.current = renderCount.current + 1;
   });
 
   window.examplePattern = [0, 3 / 8, 3 / 4];
   window.queryPattern = queryPattern;
+
+  const forceUpdate = useForceUpdate();
 
   // loading sounds
   const fonts = [
@@ -176,6 +180,9 @@ function App() {
 
   const playheadRefs = [playheadRef1, playheadRef2, playheadRef3, playheadRef4, playheadRef5];
 
+  const setPlayheads = [setPlayhead1, setPlayhead2, setPlayhead3, setPlayhead4, setPlayhead5]
+
+
   // main playheads array, just used for accessing
   const playheads = [
     playhead1,
@@ -221,18 +228,34 @@ function App() {
 
   // playhead refs
   useEffect(() => {
+    // if (playheadRef1.current.events !== playhead1.events) {
+    //   const updated = playhead1.updateEuclid(masterSteps, playhead1.events)
+    //   setPlayhead1(updated)
+    // }
     playheadRef1.current = playhead1;
   }, [playhead1]);
   useEffect(() => {
+    // if (playheadRef2.current.events !== playhead2.events) {
+    //   setPlayhead2(playhead2.updateEuclid(masterSteps, playhead2.events))
+    // }
     playheadRef2.current = playhead2;
   }, [playhead2]);
   useEffect(() => {
+    // if (playheadRef3.current.events !== playhead3.events) {
+    //   setPlayhead3(playhead3.updateEuclid(masterSteps, playhead3.events))
+    // }
     playheadRef3.current = playhead3;
   }, [playhead3]);
   useEffect(() => {
+    // if (playheadRef4.current.events !== playhead4.events) {
+    //   setPlayhead4(playhead4.updateEuclid(masterSteps, playhead4.events))
+    // }
     playheadRef4.current = playhead4;
   }, [playhead4]);
   useEffect(() => {
+    // if (playheadRef5.current.events !== playhead5.events) {
+    //   setPlayhead5(playhead5.updateEuclid(masterSteps, playhead5.events))
+    // }
     playheadRef5.current = playhead5;
   }, [playhead5]);
 
@@ -405,7 +428,7 @@ function App() {
                       if (playheads[i].followSteps) {
                         const updated = playheads[i].updateEuclid(masterSteps, playheads[i].events)
                         console.log(updated)
-                        updatePlayhead(i, updated)
+                        setPlayheads[i](updated)
                       }
                     }
                   }}
@@ -495,7 +518,7 @@ function App() {
                   backgroundColor: p.playing ? "#ddd" : "#bbb",
                 }}
                 onClick={() =>
-                  updatePlayhead(index, p.playing ? p.pause() : p.start())
+                  setPlayheads[index]({ ...p, playing: !p.playing })
                 }
               >
                 Playhead {index + 1}
@@ -509,7 +532,7 @@ function App() {
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  updatePlayhead(index, p.updateStep(p.interval / 2));
+                  setPlayheads[index]({ ...playheadRefs[index].current, interval: p.interval / 2 })
                 }}
               >
                 -
@@ -517,8 +540,7 @@ function App() {
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  const updated = p.updateStep(p.interval * 2);
-                  updatePlayhead(index, updated);
+                  setPlayheads[index]({ ...playheadRefs[index].current, interval: p.interval * 2 })
                 }}
               >
                 +
@@ -543,27 +565,24 @@ function App() {
                     type="range"
                     min="1"
                     max={parseInt(p.steps)}
-                    value={p.events}
+                    value={parseInt(p.events)}
                     onChange={(e) => {
                       // const updated = { ...p, events: parseInt(e.target.value) }
-                      // console.log(updated)
-                      // const updated 
-                      // const updated = p.updateEuclid(masterSteps, e.target.value)
-                      // updatePlayhead(index, updated)
-
-                      if (p.followSteps) {
-                        updatePlayhead(index, p.updateEuclid(masterSteps, e.target.value))
-                      } else {
-                        updatePlayhead(index, p.updateEuclid(p.steps, e.target.value))
-                      }
+                      forceUpdate();
+                      const updated = playheadRefs[index].current.updateEuclid(masterSteps, parseInt(e.target.value))
+                      setPlayheads[index](updated)
+                      // if (p.followSteps) {
+                      //   updatePlayhead(index, p.updateEuclid(masterSteps, e.target.value))
+                      // } else {
+                      //   updatePlayhead(index, p.updateEuclid(p.steps, e.target.value))
+                      // }
                     }}
                     step="1"
                     aria-label="event slider"
                   />
-                  {/* <p>events {p.events}</p> */}
                 </div>
               </div>
-              <div className="flex flex-col">
+              {/* <div className="flex flex-col">
                 <div className="flex">
                   <input
                     className="p-1 w-[6rem]"
@@ -584,7 +603,7 @@ function App() {
                     updatePlayhead(index, updated)
                   }} className='px-2'>steps {p.steps}</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

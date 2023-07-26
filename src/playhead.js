@@ -23,6 +23,8 @@ export class Playhead {
     this.steps = steps
     this.events = events
     this.followSteps = true
+    // this.euclid = this.updateEuclid(steps, events)
+    // this.pattern = euclidToPattern(this.euclid)
   }
 
   start = () => {
@@ -41,10 +43,11 @@ export class Playhead {
   }
 
   updateStep = (newStep) => {
+    let copy = { ...this }
     if (newStep > 0) {
-      this.interval = newStep
+      copy.interval = newStep
     }
-    return this
+    return copy
   }
 
   followStep = (follow) => {
@@ -53,14 +56,16 @@ export class Playhead {
   }
 
   updateEuclid = (steps, events) => {
-    this.steps = parseInt(steps)
-    this.events = parseInt(events)
+    console.log(steps, events)
+    let copy = { ...this }
+    copy.steps = parseInt(steps)
+    copy.events = parseInt(events)
     if (steps < events) {
-      this.events = this.steps
+      copy.events = copy.steps
     }
-    this.euclid = getPattern(this.events, this.steps)
-    this.pattern = euclidToPattern(this.euclid)
-    return this
+    copy.euclid = getPattern(copy.events, copy.steps)
+    copy.pattern = euclidToPattern(copy.euclid)
+    return copy
   }
 }
 
