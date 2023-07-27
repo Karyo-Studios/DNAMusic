@@ -13,7 +13,7 @@ export const p1 = new Playhead({
 
 export const p2 = new Playhead({
   playing: true,
-  interval: 2,
+  interval: 4,
   pattern: [0, 0.5, 0.75],
   offset: 12,
   instrument: 66,
@@ -34,7 +34,7 @@ export const p3 = new Playhead({
 export const p4 = new Playhead({
   playing: false,
   pattern: [0],
-  interval: 8,
+  interval: 4,
   offset: -24,
   instrument: 80,
   legato: 1,

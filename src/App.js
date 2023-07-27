@@ -17,7 +17,7 @@ import { p1, p2, p3, p4, p5 } from './defaults'
 import { parseSequence, toMidi } from "./helpers";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
-import { noteMappings } from "./mappings";
+import { noteMappings, dnaMapping, numberMapping, emojiPalettes } from "./mappings";
 import { loadedSequences } from "./loadedSequences";
 
 import "./App.css";
@@ -30,6 +30,10 @@ function App() {
   const [masterSteps, setMasterSteps] = useState(8);
   const [cps, setCps] = useState(60 / bpm);
   const [nodes, setNodes] = useState([]);
+  const [sequence, setSequence] = useState([]);
+  const [emojiMap, setEmojiMap] = useState(Math.floor(Math.random() * emojiPalettes.length));
+  const [emojiEnabled, setEmojiEnabled] = useState(false);
+  const [scaleAmount, setScaleAmount] = useState(3);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [audioContext, setAudioContext] = useState();
@@ -267,7 +271,9 @@ function App() {
   };
 
   useMemo(() => {
-    setNodes(parseSequence(userInputSequence));
+    const { nodes, sequence } = parseSequence(userInputSequence)
+    setNodes(nodes);
+    setSequence(sequence);
   }, [userInputSequence]);
 
   return (
@@ -291,50 +297,91 @@ function App() {
           <div className="mx-[0.5rem]">
             <h1 className="text-[2rem]">DNA Sonification</h1>
             <p>Sequence:</p>
-            <textarea
-              className="p-2 max-w-[30rem] w-[80%] min-w-[10rem]"
-              value={userInputSequence}
-              onChange={(e) => setUserInputSequence(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-wrap my-3 min-h-[6rem]">
-            {nodes.map((node, index) => (
-              <div
-                className="relative bg-[#ddd] w-[4.5rem] h-[9rem] mx-[0.5rem] mb-[0.5rem] text-center drop-shadow"
-                key={node.index}
-              >
-                <div className="flex flex-col absolute bottom-0 left-0">
-                  {playheads.map((p, i) => (
-                    <div
-                      key={p + i}
-                      className={`h-[1rem]`}
-                      style={{
-                        backgroundColor: `${p.color}`,
-                        opacity: index === counters[i] ? 1 : 0.2,
-                        width:
-                          index === counters[i] && playing && p.playing
-                            ? "4.5rem"
-                            : "0.5rem",
-                        transitionDuration:
-                          index === counters[i] ? "100ms" : "500ms",
-                        msTransitionProperty: "width,opacity",
-
-                        // opacity: p.index === 0 ? 1 : 0.5
-                      }}
-                    ></div>
-                  ))}
-                </div>
-                <div>
-                  {/* <p className="leading-[1.4rem]">{noteMappings[node.aminoacid]}</p> */}
-                  <p className="tracking-[0.6rem] font-mono mt-[0.25rem] ml-[0.4rem]">
-                    {node.nucleotide}
-                  </p>
-                  <p className="text-[1.5rem] leading-[2rem]">
-                    {node.aminoacid}
-                  </p>
-                </div>
+            <div className="flex">
+              <textarea
+                className="p-2 max-w-[30rem] w-[80%] min-w-[10rem]"
+                value={userInputSequence}
+                onChange={(e) => setUserInputSequence(e.target.value)}
+              />
+            </div>
+            <div className="m-2 flex">
+              <p className="mr-1">
+                zoom:
+              </p>
+              <div >
+                <input
+                  className="w-[10rem]"
+                  type="range"
+                  min="0.5"
+                  max="5"
+                  value={scaleAmount}
+                  onChange={(e) => {
+                    setScaleAmount(e.target.value);
+                  }}
+                  step="0.1"
+                  aria-label="scale amount slider"
+                />
               </div>
-            ))}
+              <p className="ml-2">
+                {((scaleAmount / 5) * 100).toFixed(1)}%
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap my-3 tracking-[0.5rem]">
+            {/* <div> */}
+            {
+              sequence.map((letter, index) => {
+                return <div
+                  className={`
+                    relative z-[-99]
+                    border-box border-[#000]  
+                    `}
+                  style={{
+                    fontSize: `${scaleAmount * 0.6}rem`,
+                    width: `${scaleAmount}rem`,
+                    height: `${scaleAmount}rem`,
+                    borderWidth: `${scaleAmount * 0.02}rem`,
+                    border: 'solid'
+                  }}
+                >
+                  <div className="text-center z-[99]">
+                    {
+                      emojiEnabled ?
+                        emojiPalettes[emojiMap].emojis[dnaMapping[letter]]
+                        :
+                        letter
+                    }
+                  </div>
+                  <div className="absolute top-0 left-0 z-[-999]">
+                    {playheads.map((p, i) => {
+                      const active = index >= counters[i] * 3 && index < (counters[i] + 1) * 3
+                      // const active = index === counters[i] * 3
+                      return <div
+                        key={p + i}
+                        className='absolute top-0 left-0 z-[-999]'
+                        style={{
+                          backgroundColor: `${p.color}`,
+                          opacity: active ? 0.6 : 0,
+                          width: `${scaleAmount}rem`,
+                          height:
+                            active && p.playing
+                              ? `${scaleAmount}rem`
+                              : "0rem",
+                          top:
+                            active && p.playing
+                              ? "0rem"
+                              : `${scaleAmount / 2}rem`,
+                          // transitionDuration:
+                          //   active ? "300ms" : "400ms",
+                          // msTransitionProperty: "height,opacity,top",
+                        }}
+                      ></div>
+                    })}
+                  </div>
+                </div>
+              })
+            }
+            {/* </div> */}
           </div>
           <div className="mx-[0.5rem] mb-[1.5rem] flex">
             <div className="flex">
@@ -401,21 +448,21 @@ function App() {
                 KEY: {noteOffset}
               </button>
             </div>
-            <div className="flex">
+            {/* <div className="flex">
               <button
                 className="bg-[#ddd] py-2 mr-1 w-[7rem]"
                 onClick={() => {
-                  console.log(WebMidi._outputs)
+                  setEmojiMap(Math.floor(Math.random() * emojiPalettes.length));
                 }
                 }
               >
                 TEST
               </button>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <p>RENDERFRAME: {renderCount.current}</p>
               <p>COUNTER: {counter}</p>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="mx-[0.5rem]">
@@ -499,9 +546,6 @@ function App() {
                     value={parseInt(p.rotation)}
                     onChange={(e) => {
                       updatePlayhead(index, updateEuclid({ ...p, rotation: parseInt(e.target.value) }))
-                      // let playhead = { ...p, events: parseInt(e.target.value) }
-                      // let newPattern = updateEuclid(playhead)
-                      // updatePlayhead(index, newPattern)
                     }}
                     step="1"
                     aria-label="event slider"
@@ -545,6 +589,37 @@ function App() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+          <div className="mt-[2rem]">
+            <div className="flex">
+              <button
+                className="m-2"
+                style={{
+                  textDecoration: emojiEnabled ? 'none' : 'line-through'
+                }}
+                onClick={() => { setEmojiEnabled(!emojiEnabled) }}
+              >
+                Emojis!
+              </button>
+              {
+                emojiEnabled &&
+                <div className="flex">
+                  {emojiPalettes[emojiMap].emojis.map((emoji, i) => {
+                    return <p className="m-2 align-middle">{numberMapping[i]}:{emoji} </p>
+                  })}
+                  <p
+                    className="m-2 flex align-middle"
+                    onClick={() => {
+                      setEmojiMap(Math.floor(Math.random() * emojiPalettes.length));
+                    }}
+                  >
+                    re-roll
+                  </p>
+                </div>
+              }
+              <div>
+              </div>
             </div>
           </div>
           <div className="mt-[2rem]">
