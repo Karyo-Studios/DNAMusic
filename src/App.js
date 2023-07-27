@@ -304,84 +304,6 @@ function App() {
                 onChange={(e) => setUserInputSequence(e.target.value)}
               />
             </div>
-            <div className="m-2 flex">
-              <p className="mr-1">
-                zoom:
-              </p>
-              <div >
-                <input
-                  className="w-[10rem]"
-                  type="range"
-                  min="0.5"
-                  max="5"
-                  value={scaleAmount}
-                  onChange={(e) => {
-                    setScaleAmount(e.target.value);
-                  }}
-                  step="0.1"
-                  aria-label="scale amount slider"
-                />
-              </div>
-              <p className="ml-2">
-                {((scaleAmount / 5) * 100).toFixed(1)}%
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap my-3 tracking-[0.5rem]">
-            {/* <div> */}
-            {
-              sequence.map((letter, index) => {
-                return <div
-                  className={`
-                    relative z-[-99]
-                    border-box border-[#000]  
-                    `}
-                  style={{
-                    fontSize: `${scaleAmount * 0.6}rem`,
-                    width: `${scaleAmount}rem`,
-                    height: `${scaleAmount}rem`,
-                    borderWidth: `${scaleAmount * 0.02}rem`,
-                    border: 'solid'
-                  }}
-                >
-                  <div className="text-center z-[99]">
-                    {
-                      emojiEnabled ?
-                        emojiPalettes[emojiMap].emojis[dnaMapping[letter]]
-                        :
-                        letter
-                    }
-                  </div>
-                  <div className="absolute top-0 left-0 z-[-999]">
-                    {playheads.map((p, i) => {
-                      const active = index >= counters[i] * 3 && index < (counters[i] + 1) * 3
-                      // const active = index === counters[i] * 3
-                      return <div
-                        key={p + i}
-                        className='absolute top-0 left-0 z-[-999]'
-                        style={{
-                          backgroundColor: `${p.color}`,
-                          opacity: active ? 0.6 : 0,
-                          width: `${scaleAmount}rem`,
-                          height:
-                            active && p.playing
-                              ? `${scaleAmount}rem`
-                              : "0rem",
-                          top:
-                            active && p.playing
-                              ? "0rem"
-                              : `${scaleAmount / 2}rem`,
-                          // transitionDuration:
-                          //   active ? "300ms" : "400ms",
-                          // msTransitionProperty: "height,opacity,top",
-                        }}
-                      ></div>
-                    })}
-                  </div>
-                </div>
-              })
-            }
-            {/* </div> */}
           </div>
           <div className="mx-[0.5rem] mb-[1.5rem] flex">
             <div className="flex">
@@ -463,6 +385,85 @@ function App() {
               <p>RENDERFRAME: {renderCount.current}</p>
               <p>COUNTER: {counter}</p>
             </div> */}
+          </div>
+          <div className="flex flex-wrap my-3 tracking-[0.5rem]">
+            {/* <div> */}
+            {
+              sequence.map((letter, index) => {
+                return <div
+                  className={`
+                    relative z-[-99]
+                    border-box
+                    `}
+                  style={{
+                    fontSize: `${scaleAmount * 0.6}rem`,
+                    width: `${scaleAmount}rem`,
+                    height: `${scaleAmount}rem`,
+                    borderWidth: `${scaleAmount * 0.02}rem`,
+                    border: 'solid',
+                    borderColor: '#888'
+                  }}
+                >
+                  <div className="text-center z-[99]">
+                    {
+                      emojiEnabled ?
+                        emojiPalettes[emojiMap].emojis[dnaMapping[letter]]
+                        :
+                        letter
+                    }
+                  </div>
+                  <div className="absolute top-0 left-0 z-[-999]">
+                    {playheads.map((p, i) => {
+                      const active = index >= counters[i] * 3 && index < (counters[i] + 1) * 3
+                      // const active = index === counters[i] * 3
+                      return <div
+                        key={p + i}
+                        className='absolute top-0 left-0 z-[-999]'
+                        style={{
+                          backgroundColor: `${p.color}`,
+                          opacity: active ? 0.6 : 0,
+                          width: `${scaleAmount}rem`,
+                          height:
+                            active && p.playing
+                              ? `${scaleAmount}rem`
+                              : "0rem",
+                          top:
+                            active && p.playing
+                              ? "0rem"
+                              : `${scaleAmount / 2}rem`,
+                          // transitionDuration:
+                          //   active ? "300ms" : "400ms",
+                          // msTransitionProperty: "height,opacity,top",
+                        }}
+                      ></div>
+                    })}
+                  </div>
+                </div>
+              })
+            }
+            {/* </div> */}
+          </div>
+          <div className="m-2 flex">
+            <p className="mr-1">
+              zoom:
+            </p>
+            <div >
+              <input
+                className="w-[10rem]"
+                type="range"
+                min="0.5"
+                max="5"
+                value={scaleAmount}
+                onChange={(e) => {
+                  setScaleAmount(e.target.value);
+                }}
+                step="0.1"
+                aria-label="scale amount slider"
+              />
+            </div>
+            <p className="ml-2">
+              {((scaleAmount / 5) * 100).toFixed(1)}%
+            </p>
           </div>
         </div>
         <div className="mx-[0.5rem]">
