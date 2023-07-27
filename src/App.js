@@ -5,32 +5,22 @@ TODOs:
   - legato
   - instruments
   - start / stop
-  
-  - work on player settings
-
-  - euclid function
     
-
 */
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { loadSoundfont, startPresetNote } from "sfumato";
+
+import { enableWebMidi, WebMidi } from './webmidi';
+
 import { p1, p2, p3, p4, p5 } from './defaults'
 import { parseSequence, toMidi } from "./helpers";
 import { queryPattern } from "./pattern";
-import { loadSoundfont, startPresetNote } from "sfumato";
+import { updateEuclid } from "./playhead";
 import { noteMappings } from "./mappings";
 import { loadedSequences } from "./loadedSequences";
 
-
-
 import "./App.css";
-
-function useForceUpdate() {
-  const [value, setValue] = useState(0); // integer state
-  return () => setValue(value => value + 1); // update state to force render
-  // A function that increment 👆🏻 the previous state like here 
-  // is better than directly setting `setValue(value + 1)`
-}
 
 function App() {
   const [userInputSequence, setUserInputSequence] = useState(
@@ -45,6 +35,7 @@ function App() {
   const [audioContext, setAudioContext] = useState();
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
+
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
   }, [noteOffset]);
@@ -59,6 +50,10 @@ function App() {
     setCps(60 / tempo);
   };
 
+  // midi settings 
+  const [midiEnabled, setMidiEnabled] = useState(false);
+  const [midiOutputDevice, setMidiOutputDevice] = useState(null);
+
   const renderCount = useRef(0);
   useEffect(() => {
     renderCount.current = renderCount.current + 1;
@@ -66,8 +61,6 @@ function App() {
 
   window.examplePattern = [0, 3 / 8, 3 / 4];
   window.queryPattern = queryPattern;
-
-  const forceUpdate = useForceUpdate();
 
   // loading sounds
   const fonts = [
@@ -90,26 +83,6 @@ function App() {
       return toMidi(noteMappings[nodes[index].aminoacid]);
     }
   };
-
-  const updatePlayhead = (i, p) => {
-    if (i === 0) {
-      setPlayhead1(p);
-    } else if (i === 1) {
-      setPlayhead2(p);
-    } else if (i === 2) {
-      setPlayhead3(p);
-    } else if (i === 3) {
-      setPlayhead4(p);
-    } else if (i === 4) {
-      setPlayhead5(p);
-    } else {
-      console.error("please use correct playhead index");
-    }
-  };
-
-  // const updateCounters = (i, c) => {
-  //   setCounters([...counters.slice(0, i), c, ...counters.slice(i + 1)]);
-  // };
 
   const captureKeyboardEvent = (event) => {
     if (event.keyCode === 32) {
@@ -139,6 +112,8 @@ function App() {
         document.removeEventListener("ontouchstart", listener);
       });
     });
+
+    enableWebMidi()
   }, []);
 
   const getAudioContext = () => {
@@ -162,52 +137,10 @@ function App() {
   const countRef4 = useRef(0);
   const countRef5 = useRef(0);
 
-  const [playhead1, setPlayhead1] = useState(p1)
-  const [playhead2, setPlayhead2] = useState(p2)
-  const [playhead3, setPlayhead3] = useState(p3)
-  const [playhead4, setPlayhead4] = useState(p4)
-  const [playhead5, setPlayhead5] = useState(p5)
-
-  const playheadRef1 = useRef(0);
-  const playheadRef2 = useRef(0);
-  const playheadRef3 = useRef(0);
-  const playheadRef4 = useRef(0);
-  const playheadRef5 = useRef(0);
-
   const counters = [count1, count2, count3, count4, count5];
-
   const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
 
-  const playheadRefs = [playheadRef1, playheadRef2, playheadRef3, playheadRef4, playheadRef5];
-
-  const setPlayheads = [setPlayhead1, setPlayhead2, setPlayhead3, setPlayhead4, setPlayhead5]
-
-
-  // main playheads array, just used for accessing
-  const playheads = [
-    playhead1,
-    playhead2,
-    playhead3,
-    playhead4,
-    playhead5,
-  ];
-
-
-  const updatePos = (i, p) => {
-    if (i === 0) {
-      setCount1(p);
-    } else if (i === 1) {
-      setCount2(p);
-    } else if (i === 2) {
-      setCount3(p);
-    } else if (i === 3) {
-      setCount4(p);
-    } else if (i === 4) {
-      setCount5(p);
-    } else {
-      console.error("please use correct playhead index");
-    }
-  };
+  const setCounters = [setCount1, setCount2, setCount3, setCount4, setCount5]
 
   // playhead pos refs
   useEffect(() => {
@@ -226,42 +159,27 @@ function App() {
     countRef5.current = count5;
   }, [count5]);
 
-  // playhead refs
+
+  const [playheads, setPlayheads] = useState([p1, p2, p3, p4, p5]);
+  const playheadsRef = useRef(null);
+
   useEffect(() => {
-    // if (playheadRef1.current.events !== playhead1.events) {
-    //   const updated = playhead1.updateEuclid(masterSteps, playhead1.events)
-    //   setPlayhead1(updated)
-    // }
-    playheadRef1.current = playhead1;
-  }, [playhead1]);
-  useEffect(() => {
-    // if (playheadRef2.current.events !== playhead2.events) {
-    //   setPlayhead2(playhead2.updateEuclid(masterSteps, playhead2.events))
-    // }
-    playheadRef2.current = playhead2;
-  }, [playhead2]);
-  useEffect(() => {
-    // if (playheadRef3.current.events !== playhead3.events) {
-    //   setPlayhead3(playhead3.updateEuclid(masterSteps, playhead3.events))
-    // }
-    playheadRef3.current = playhead3;
-  }, [playhead3]);
-  useEffect(() => {
-    // if (playheadRef4.current.events !== playhead4.events) {
-    //   setPlayhead4(playhead4.updateEuclid(masterSteps, playhead4.events))
-    // }
-    playheadRef4.current = playhead4;
-  }, [playhead4]);
-  useEffect(() => {
-    // if (playheadRef5.current.events !== playhead5.events) {
-    //   setPlayhead5(playhead5.updateEuclid(masterSteps, playhead5.events))
-    // }
-    playheadRef5.current = playhead5;
-  }, [playhead5]);
+    playheadsRef.current = playheads
+  }, [playheads])
+
+  const updatePlayhead = (i, p) => {
+    setPlayheads([
+      ...playheads.slice(0, i),
+      {
+        ...p,
+      },
+      ...playheads.slice(i + 1),
+    ]);
+  };
 
   const stopAll = () => {
     for (let i = 0; i < playheads.length; i++) {
-      updatePos(i, 0);
+      setCounters[i](0)
     }
   };
 
@@ -283,7 +201,8 @@ function App() {
           // }
           for (let i = 0; i < playheads.length; i++) {
             const active = playheads[i];
-            const activeRef = playheadRefs[i];
+            const activeRef = playheadsRef.current;
+            console.log(activeRef)
             if (!active.playing) {
               continue;
             }
@@ -298,22 +217,21 @@ function App() {
 
             haps.forEach((hap) => {
               setTimeout(() => {
-                if (activeRef.current.playing) {
+                if (activeRef[i].playing) {
                   const pos = countRefs[i].current; // make sure to use ref
                   // for some reason the note is begin rendered one behind the note, TODO investigate this
-                  const note = getNote((pos + 1) % nodes.length) + activeRef.current.offset;
-                  updatePos(i, (pos + 1) % nodes.length);
+                  const note = getNote((pos + 1) % nodes.length) + active.offset;
+                  setCounters[i]((pos + 1) % nodes.length);
                   playNote(
-                    activeRef.current.instrument,
+                    active.instrument,
                     note + noteOffsetRef.current,
-                    activeRef.current.legato * 500
+                    active.legato * 500
                   );
                 }
               }, timeWindow * (hap - counter));
             });
           }
         }
-        // hardcode 8 times per cycle
       }, (cps * 1000) / clicksPerCycle); // clicks);
     } else if (!playing && counter !== 0) {
       clearInterval(interval);
@@ -379,90 +297,6 @@ function App() {
               onChange={(e) => setUserInputSequence(e.target.value)}
             />
           </div>
-          <div className="mx-[0.5rem] mb-[1.5rem] flex">
-            <div className="flex">
-              <button
-                className="bg-[#ddd] p-2 mr-1 w-[4rem]"
-                onClick={() => (playing ? pause() : play())}
-              >
-                {playing ? "PAUSE" : "PLAY"}
-              </button>
-              <button className="bg-[#ddd] p-2 mr-1 w-[4rem]" onClick={stop}>
-                STOP
-              </button>
-            </div>
-            <div className="mx-[1rem]">
-              <p>
-                BPM: {bpm} {playing && ((counter - 1) / 2) % 2 === 0 ? "*" : ""}{" "}
-                {/* {counter} */}
-              </p>
-              <div>
-                <input
-                  type="range"
-                  min="20"
-                  max="260"
-                  value={bpm}
-                  onChange={(e) => {
-                    updateTempo(e.target.value);
-                  }}
-                  step="1"
-                  aria-label="bpm slider"
-                />
-              </div>
-            </div>
-            <div className="mx-[1rem]">
-              <p>
-                STEPS: {masterSteps}
-              </p>
-              <p>{renderCount.current}</p>
-              <p>COUNTER: {counter}</p>
-              <div>
-                <input
-                  type="range"
-                  min="3"
-                  max="16"
-                  value={masterSteps}
-                  onChange={(e) => {
-                    setMasterSteps(e.target.value);
-                    for (let i = 0; i < playheads.length; i++) {
-                      if (playheads[i].followSteps) {
-                        const updated = playheads[i].updateEuclid(masterSteps, playheads[i].events)
-                        console.log(updated)
-                        setPlayheads[i](updated)
-                      }
-                    }
-                  }}
-                  step="1"
-                  aria-label="master steps slider"
-                />
-              </div>
-            </div>
-            <div className="flex">
-              <button
-                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
-                onClick={() =>
-                  setNoteOffset(Math.floor(Math.random() * 12 - 6))
-                }
-              >
-                KEY: {noteOffset}
-              </button>
-            </div>
-            <div className="flex">
-              <button
-                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
-                onClick={() => {
-                  if (playheads[0].playing) {
-                    updatePlayhead(0, playheads[0].pause())
-                  } else {
-                    updatePlayhead(0, playheads[0].start())
-                  }
-                }
-                }
-              >
-                TEST
-              </button>
-            </div>
-          </div>
           <div className="flex flex-wrap my-3 min-h-[6rem]">
             {nodes.map((node, index) => (
               <div
@@ -502,6 +336,87 @@ function App() {
               </div>
             ))}
           </div>
+          <div className="mx-[0.5rem] mb-[1.5rem] flex">
+            <div className="flex">
+              <button
+                className="bg-[#ddd] p-2 mr-1 w-[4rem]"
+                onClick={() => (playing ? pause() : play())}
+              >
+                {playing ? "PAUSE" : "PLAY"}
+              </button>
+              <button className="bg-[#ddd] p-2 mr-1 w-[4rem]" onClick={stop}>
+                STOP
+              </button>
+            </div>
+            <div className="mx-[1rem]">
+              <p>
+                BPM: {bpm} {playing && ((counter - 1) / 2) % 2 === 0 ? "*" : ""}{" "}
+                {/* {counter} */}
+              </p>
+              <div>
+                <input
+                  type="range"
+                  min="20"
+                  max="260"
+                  value={bpm}
+                  onChange={(e) => {
+                    updateTempo(e.target.value);
+                  }}
+                  step="1"
+                  aria-label="bpm slider"
+                />
+              </div>
+            </div>
+            <div className="mx-[1rem]">
+              <p>
+                STEPS: {masterSteps}
+              </p>
+              <div>
+                <input
+                  type="range"
+                  min="3"
+                  max="16"
+                  value={masterSteps}
+                  onChange={(e) => {
+                    setMasterSteps(e.target.value);
+                    let updated = [];
+                    for (let i = 0; i < playheads.length; i++) {
+                      const cur = playheads[i]
+                      updated.push(updateEuclid({ ...cur, steps: parseInt(e.target.value) }))
+                    }
+                    setPlayheads(updated)
+                  }}
+                  step="1"
+                  aria-label="master steps slider"
+                />
+              </div>
+            </div>
+            <div className="flex">
+              <button
+                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
+                onClick={() =>
+                  setNoteOffset(Math.floor(Math.random() * 12 - 6))
+                }
+              >
+                KEY: {noteOffset}
+              </button>
+            </div>
+            <div className="flex">
+              <button
+                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
+                onClick={() => {
+                  console.log(WebMidi._outputs)
+                }
+                }
+              >
+                TEST
+              </button>
+            </div>
+            <div>
+              <p>RENDERFRAME: {renderCount.current}</p>
+              <p>COUNTER: {counter}</p>
+            </div>
+          </div>
         </div>
         <div className="mx-[0.5rem]">
           {playheads.map((p, index) => (
@@ -518,12 +433,12 @@ function App() {
                   backgroundColor: p.playing ? "#ddd" : "#bbb",
                 }}
                 onClick={() =>
-                  setPlayheads[index]({ ...p, playing: !p.playing })
+                  updatePlayhead(index, { ...p, playing: !p.playing })
                 }
               >
                 Playhead {index + 1}
               </button>
-              <div className="px-3 w-[7rem] leading-[2.7rem]">
+              {/* <div className="px-3 w-[7rem] leading-[2.7rem]">
                 Pos: {counters[index]}
               </div>
               <div className="px-3 w-[8rem] leading-[2.7rem]">
@@ -532,7 +447,7 @@ function App() {
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  setPlayheads[index]({ ...playheadRefs[index].current, interval: p.interval / 2 })
+                  updatePlayhead(index, { ...p, interval: p.interval / 2 })
                 }}
               >
                 -
@@ -540,70 +455,74 @@ function App() {
               <button
                 className="bg-[#ddd] p-2 mr-1 w-[2rem]"
                 onClick={() => {
-                  setPlayheads[index]({ ...playheadRefs[index].current, interval: p.interval * 2 })
+                  updatePlayhead(index, { ...p, interval: p.interval * 2 })
                 }}
               >
                 +
+              </button> */}
+              <button
+                className="ml-2 w-[2rem]"
+                style={{
+                  opacity: p.events > 1 ? 1 : 0.5,
+                  color: p.color,
+                  fontWeight: 'bold'
+                }}
+                onClick={() => {
+                  if (p.events > 1) {
+                    updatePlayhead(index, updateEuclid({ ...p, events: p.events - 1 }))
+                  }
+                }}
+              >
+                {'-'}
               </button>
-              <div className="px-3 py-2 flex flex-col">
+              <div className="px-1 flex flex-col">
                 <div className="relative w-[12rem] bg-[#ddd] h-[1.5rem]">
                   {
                     p.pattern.map((hap) => {
                       return <div
                         key={hap}
-                        className="absolute bg-[#00f] w-[4px] t-0 h-[100%]"
+                        className="absolute bg-[#00f] t-0 h-[100%]"
                         style={{
-                          left: `${hap * 100}%`,
-                          backgroundColor: `${p.color}`
+                          left: `${16 * 12 * hap + (16 * 12 / masterSteps) * 0.1}px`,
+                          backgroundColor: `${p.color}`,
+                          width: `${(16 * 12 / masterSteps) * 0.8}px`
                         }}></div>
                     })
                   }
                 </div>
                 <div className="flex">
                   <input
-                    className="p-1 w-[12rem]"
+                    className="p-1 w-[12rem] opacity-[0.3]"
                     type="range"
-                    min="1"
-                    max={parseInt(p.steps)}
-                    value={parseInt(p.events)}
+                    min="0"
+                    max={p.steps - 1}
+                    value={parseInt(p.rotation)}
                     onChange={(e) => {
-                      // const updated = { ...p, events: parseInt(e.target.value) }
-                      forceUpdate();
-                      const updated = playheadRefs[index].current.updateEuclid(masterSteps, parseInt(e.target.value))
-                      setPlayheads[index](updated)
-                      // if (p.followSteps) {
-                      //   updatePlayhead(index, p.updateEuclid(masterSteps, e.target.value))
-                      // } else {
-                      //   updatePlayhead(index, p.updateEuclid(p.steps, e.target.value))
-                      // }
+                      updatePlayhead(index, updateEuclid({ ...p, rotation: parseInt(e.target.value) }))
+                      // let playhead = { ...p, events: parseInt(e.target.value) }
+                      // let newPattern = updateEuclid(playhead)
+                      // updatePlayhead(index, newPattern)
                     }}
                     step="1"
                     aria-label="event slider"
                   />
                 </div>
               </div>
-              {/* <div className="flex flex-col">
-                <div className="flex">
-                  <input
-                    className="p-1 w-[6rem]"
-                    type="range"
-                    min="0"
-                    max="32"
-                    disabled={p.followSteps}
-                    value={p.steps}
-                    onChange={(e) => {
-                      const updated = p.updateEuclid(e.target.value, p.events)
-                      updatePlayhead(index, updated)
-                    }}
-                    step="1"
-                    aria-label="bpm slider"
-                  />
-                  <p onClick={() => {
-                    const updated = p.followStep(!p.followSteps)
-                    updatePlayhead(index, updated)
-                  }} className='px-2'>steps {p.steps}</p>
-                </div>
-              </div> */}
+              <button
+                className="mr-2 w-[2rem]"
+                style={{
+                  opacity: p.events < masterSteps ? 1 : 0.5,
+                  color: p.color,
+                  fontWeight: 'bold'
+                }}
+                onClick={() => {
+                  if (p.events < masterSteps) {
+                    updatePlayhead(index, updateEuclid({ ...p, events: p.events + 1 }))
+                  }
+                }}
+              >
+                {'+'}
+              </button>
             </div>
           ))}
         </div>
@@ -626,6 +545,44 @@ function App() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+          <div className="mt-[2rem]">
+            <p>MIDI Settings:</p>
+            <div className="flex">
+              <button
+                className="p-2 w-[5rem]"
+                style={{
+                  backgroundColor: midiEnabled ? '#ddd' : '#bbb',
+                  textDecoration: midiEnabled ? 'none' : 'line-through'
+                }}
+                onClick={() => {
+                  setMidiEnabled(!midiEnabled)
+                }}
+              >
+                MIDI
+              </button>
+              <div className="p-2">
+                MIDI {midiEnabled ? 'enabled' : 'disabled'}
+              </div>
+            </div>
+            <div className="mt-[0.5rem]">
+              {
+                midiEnabled && WebMidi._outputs.map((midi, index) => {
+                  return <button
+                    key={midi._midiOutput.name}
+                    className="mr-2 mt-2 p-1 w-[8rem]"
+                    style={{
+                      backgroundColor: index === midiOutputDevice ? '#ddd' : '#bbb',
+                    }}
+                    onClick={() => {
+                      setMidiOutputDevice(index)
+                    }}
+                  >
+                    {midi._midiOutput.name}
+                  </button>
+                })
+              }
             </div>
           </div>
         </div>

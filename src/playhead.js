@@ -23,8 +23,8 @@ export class Playhead {
     this.steps = steps
     this.events = events
     this.followSteps = true
-    // this.euclid = this.updateEuclid(steps, events)
-    // this.pattern = euclidToPattern(this.euclid)
+    this.rotation = 0 // rotate used for euclidian rhythms
+    this.midiEnabled = false
   }
 
   start = () => {
@@ -54,19 +54,14 @@ export class Playhead {
     this.followSteps = follow
     return this
   }
-
-  updateEuclid = (steps, events) => {
-    console.log(steps, events)
-    let copy = { ...this }
-    copy.steps = parseInt(steps)
-    copy.events = parseInt(events)
-    if (steps < events) {
-      copy.events = copy.steps
-    }
-    copy.euclid = getPattern(copy.events, copy.steps)
-    copy.pattern = euclidToPattern(copy.euclid)
-    return copy
-  }
 }
 
+export const updateEuclid = (playhead) => {
+  if (playhead.steps < playhead.events) {
+    playhead.events = playhead.steps
+  }
+  playhead.euclid = getPattern(playhead.steps, playhead.events, playhead.rotation)
+  playhead.pattern = euclidToPattern(playhead.euclid)
+  return playhead
+}
 

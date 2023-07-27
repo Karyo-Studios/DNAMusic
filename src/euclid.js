@@ -1,6 +1,6 @@
 // from https://github.com/mkontogiannis/euclidean-rhythms/blob/master/src/index.ts
 
-export const getPattern = (pulses, steps) => {
+export const getPattern = (steps, pulses, rotation) => {
   if (pulses < 0 || steps < 0 || steps < pulses) {
     return [];
   }
@@ -41,8 +41,14 @@ export const getPattern = (pulses, steps) => {
 
   const pattern = [...first.flat(), ...second.flat()];
 
+  if (rotation !== 0) {
+    return rotate(pattern, rotation)
+  }
+
   return pattern;
 }
+
+export const rotate = (arr, n) => arr.slice(-n).concat(arr.slice(0, -n));
 
 export const euclidToPattern = (euclid) => {
   let pattern = []
@@ -53,3 +59,4 @@ export const euclidToPattern = (euclid) => {
   }
   return pattern
 }
+

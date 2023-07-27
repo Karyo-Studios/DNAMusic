@@ -18,7 +18,7 @@ export const p2 = new Playhead({
   offset: 12,
   instrument: 66,
   legato: 0.5,
-  color: "#ff0000",
+  color: "#ed1c51",
 });
 
 export const p3 = new Playhead({
@@ -28,7 +28,7 @@ export const p3 = new Playhead({
   instrument: 92,
   offset: -12,
   legato: 0.6,
-  color: "#ffff00",
+  color: "#ffa333",
 });
 
 export const p4 = new Playhead({
@@ -38,7 +38,7 @@ export const p4 = new Playhead({
   offset: -24,
   instrument: 80,
   legato: 1,
-  color: "#00ff00",
+  color: "#33ff74",
 });
 
 export const p5 = new Playhead({
