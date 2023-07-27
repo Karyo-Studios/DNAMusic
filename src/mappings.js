@@ -145,14 +145,6 @@ bg-clip-text font-bold text-transparent text-[3rem] tracking-[0.5rem]`
 
 export const emojiPalettes = [
   {
-    "theme": "Weather Elements",
-    "emojis": ["☀️", "🌧️", "❄️", "🌪️"]
-  },
-  {
-    "theme": "Seasons",
-    "emojis": ["🌸", "🍂", "🌞", "❄️"]
-  },
-  {
     "theme": "Fruits",
     "emojis": ["🍎", "🍌", "🍊", "🍇"]
   },

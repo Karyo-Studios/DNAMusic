@@ -7,6 +7,8 @@ export const p1 = new Playhead({
   offset: 0,
   legato: 0.5,
   instrument: 92,
+  steps: 8,
+  events: 5,
   // instrument: 96,
   color: "#0000ff",
 });
@@ -23,7 +25,7 @@ export const p2 = new Playhead({
 
 export const p3 = new Playhead({
   playing: true,
-  pattern: [0, 3 / 8, 6 / 8], // 1(3,8)
+  pattern: [0, 1 / 4, 2 / 4, 3 / 4], // 1(3,8)
   interval: 4,
   instrument: 92,
   offset: -12,
@@ -35,6 +37,7 @@ export const p4 = new Playhead({
   playing: false,
   pattern: [0],
   interval: 4,
+  events: 1,
   offset: -24,
   instrument: 80,
   legato: 1,
