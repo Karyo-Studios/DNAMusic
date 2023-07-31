@@ -11,7 +11,7 @@ TODOs:
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { loadSoundfont, startPresetNote } from "sfumato";
 
-import { enableWebMidi, WebMidi } from './webmidi';
+import { enableWebMidi, WebMidi, getDevice } from './webmidi';
 
 import { p1, p2, p3, p4, p5 } from './defaults'
 import { parseSequence, toMidi } from "./helpers";
@@ -60,7 +60,7 @@ function App() {
 
   // midi settings 
   const [midiEnabled, setMidiEnabled] = useState(false);
-  const [midiOutputDevice, setMidiOutputDevice] = useState(null);
+  const [midiOutputDevice, setMidiOutputDevice] = useState({ index: -1 });
 
   const renderCount = useRef(0);
   useEffect(() => {
@@ -222,6 +222,7 @@ function App() {
 
   useEffect(() => {
     let interval = null;
+    let device = null;
     const lookahead = counter + 1;
     if (playing && nodes.length) {
       interval = setInterval(() => {
@@ -246,6 +247,11 @@ function App() {
               lookahead
             );
 
+            // midi 
+            if (midiEnabled) {
+              device = getDevice(midiOutputDevice.name, WebMidi.outputs);
+            }
+
             const timeWindow = cps * 1000; // convert fraction to time
 
             haps.forEach((hap) => {
@@ -255,11 +261,19 @@ function App() {
                   // for some reason the note is begin rendered one behind the note, TODO investigate this
                   const note = getNote((pos + 1) % nodes.length) + active.offset;
                   setCounters[i]((pos + 1) % nodes.length);
-                  playNote(
-                    active.instrument,
-                    note + noteOffsetRef.current,
-                    active.legato * 500
-                  );
+                  if (midiEnabled && midiOutputDevice !== -1) {
+                    // play to midi channel of each playhead 
+                    device.playNote(note + noteOffsetRef.current, i + 1, {
+                      duration: active.legato * 500,
+                      attack: 0.8,
+                    });
+                  } else {
+                    playNote(
+                      active.instrument,
+                      note + noteOffsetRef.current,
+                      active.legato * 500
+                    );
+                  }
                 }
               }, timeWindow * (hap - counter));
             });
@@ -422,6 +436,7 @@ function App() {
                     relative
                     border-box
                     `}
+                key={letter + index}
                 style={{
                   fontSize: `${zoom * 0.6}rem`,
                   width: `${zoom}rem`,
@@ -680,7 +695,7 @@ function App() {
                 emojiEnabled &&
                 <div className="flex">
                   {emojiPalettes[emojiMap].emojis.map((emoji, i) => {
-                    return <p className="ml-2 align-middle">{numberMapping[i]}:{emoji} </p>
+                    return <p key={i} className="ml-2 align-middle">{numberMapping[i]}:{emoji} </p>
                   })}
                   <p
                     className="ml-2 flex align-middle"
@@ -723,10 +738,13 @@ function App() {
                     key={midi._midiOutput.name}
                     className="mr-2 mt-2 p-1 w-[8rem]"
                     style={{
-                      backgroundColor: index === midiOutputDevice ? '#ddd' : '#bbb',
+                      backgroundColor: index === midiOutputDevice.index ? '#ddd' : '#bbb',
                     }}
                     onClick={() => {
-                      setMidiOutputDevice(index)
+                      setMidiOutputDevice({
+                        name: midi._midiOutput.name,
+                        index
+                      })
                     }}
                   >
                     {midi._midiOutput.name}

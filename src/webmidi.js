@@ -37,7 +37,7 @@ export function enableWebMidi(options = {}) {
 // const outputByName = (name: string) => WebMidi.getOutputByName(name);
 const outputByName = (name) => WebMidi.getOutputByName(name);
 
-function getDevice(output, outputs) {
+export const getDevice = (output, outputs) => {
   if (!outputs.length) {
     throw new Error(`🔌 No MIDI devices found. Connect a device or enable IAC Driver.`);
   }
