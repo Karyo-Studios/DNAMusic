@@ -528,7 +528,7 @@ function App() {
                   index={index}
                 />
                 {
-                  showAdvanced && <div className="flex items-align">
+                  showAdvanced && <div className="flex items-center">
                     <SpeedToggle
                       leftOnClick={() => {
                         updatePlayhead(index, { ...p, interval: p.interval * 2 });
