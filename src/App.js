@@ -1,27 +1,27 @@
-/*
-
-TODOs:
-- create options for 
-  - legato
-  - instruments
-  - start / stop
-    
-*/
-
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { loadSoundfont, startPresetNote } from "sfumato";
 
-import { enableWebMidi, WebMidi, getDevice } from './webmidi';
+import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
-import { p1, p2, p3, p4, p5 } from './defaults'
+import { p1, p2, p3, p4, p5 } from "./defaults";
 import { parseSequence, toMidi } from "./helpers";
 import { mapN, randRange } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
-import { noteMappings, dnaMapping, numberMapping, emojiPalettes } from "./mappings";
+import { RotationToggle } from "./components/rotationToggle";
+import { PlayheadView } from "./components/playheadView";
+import { HitsToggle } from "./components/hitsToggle";
+import { SwitchButton } from "./components/switchButton";
+import {
+  noteMappings,
+  dnaMapping,
+  numberMapping,
+  emojiPalettes,
+} from "./mappings";
 import { loadedSequences } from "./loadedSequences";
 
 import "./App.css";
+import { SpeedToggle } from "./components/speedToggle";
 
 function App() {
   const [userInputSequence, setUserInputSequence] = useState(
@@ -32,10 +32,6 @@ function App() {
   const [cps, setCps] = useState(60 / bpm);
   const [nodes, setNodes] = useState([]);
   const [sequence, setSequence] = useState([]);
-  const [emojiMap, setEmojiMap] = useState(Math.floor(Math.random() * emojiPalettes.length));
-  const [emojiEnabled, setEmojiEnabled] = useState(false);
-  const [showGrid, setShowGrid] = useState(false);
-  const [showAnimations, setShowAnimations] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(3);
   const [counter, setCounter] = useState(0);
@@ -58,7 +54,7 @@ function App() {
     setCps(60 / tempo);
   };
 
-  // midi settings 
+  // midi settings
   const [midiEnabled, setMidiEnabled] = useState(false);
   const [midiOutputDevice, setMidiOutputDevice] = useState({ index: -1 });
 
@@ -96,11 +92,14 @@ function App() {
     if (event.keyCode === 32) {
       event.preventDefault();
       getAudioContext();
-      if (!playing) {
-        setPlaying(true);
-      } else {
-        setPlaying(false);
-      }
+      setPlaying(!playing);
+    }
+    if (event.keyCode >= 49 && event.keyCode < 54) {
+      const index = event.keyCode - 49;
+      updatePlayhead(index, {
+        ...playheads[index],
+        playing: !playheads[index].playing,
+      });
     }
   };
 
@@ -121,7 +120,7 @@ function App() {
       });
     });
 
-    enableWebMidi()
+    enableWebMidi();
   }, []);
 
   const getAudioContext = () => {
@@ -132,6 +131,8 @@ function App() {
     }
     return audioContext;
   };
+
+  const [ticker, setTicker] = useState(0);
 
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
@@ -148,7 +149,7 @@ function App() {
   const counters = [count1, count2, count3, count4, count5];
   const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
 
-  const setCounters = [setCount1, setCount2, setCount3, setCount4, setCount5]
+  const setCounters = [setCount1, setCount2, setCount3, setCount4, setCount5];
 
   // playhead pos refs
   useEffect(() => {
@@ -167,13 +168,22 @@ function App() {
     countRef5.current = count5;
   }, [count5]);
 
+  const initPlayheads = (ps) => {
+    let initialized = [];
+    for (let i = 0; i < ps.length; i++) {
+      initialized.push(updateEuclid({...ps[i]}));
+    }
+    return initialized;
+  };
 
-  const [playheads, setPlayheads] = useState([p1, p2, p3, p4, p5]);
+  const [playheads, setPlayheads] = useState(
+    initPlayheads([p1, p2, p3, p4, p5])
+  );
   const playheadsRef = useRef(null);
 
   useEffect(() => {
-    playheadsRef.current = playheads
-  }, [playheads])
+    playheadsRef.current = playheads;
+  }, [playheads]);
 
   const updatePlayhead = (i, p) => {
     setPlayheads([
@@ -187,37 +197,39 @@ function App() {
 
   const stopAll = () => {
     for (let i = 0; i < playheads.length; i++) {
-      setCounters[i](0)
+      setCounters[i](0);
     }
   };
 
   const generatePattern = () => {
-    // const newTempo = Math.floor(Math.random() * 100 + 100)
     setNoteOffset(randRange(-5, 5));
-    // updateTempo(newTempo);
     const tempo = randRange(100, 200);
     updateTempo(tempo);
-    const special = [5, 7, 15, 10, 7, 7, 13]
-    const steps = Math.random() > 0.3 ? randRange(3, 5) * randRange(2, 5) : special[Math.floor(Math.random() * special.length)]
-    const normalRotation = randRange(0, steps)
-    setMasterSteps(steps)
-    let updated = []
+    const special = [5, 7, 15, 10, 7, 7, 13];
+    const steps =
+      Math.random() > 0.3
+        ? randRange(3, 5) * randRange(2, 5)
+        : special[Math.floor(Math.random() * special.length)];
+    const normalRotation = randRange(0, steps);
+    setMasterSteps(steps);
+    let updated = [];
     for (let i = 0; i < playheads.length; i++) {
-      const events = tempo > 140 ? randRange(1, 5) : randRange(2, steps)
+      const events = tempo > 140 ? randRange(1, 5) : randRange(2, steps);
       const p = {
         ...playheads[i],
         steps,
+        interval: 4,
         events: i === 3 ? randRange(1, 2) : events,
         rotation: Math.random() > 0.5 ? normalRotation : randRange(0, steps),
-        playing: i === 0 ? true : Math.random() > 0.3
-      }
-      updated.push(updateEuclid(p))
+        playing: i === 0 ? true : Math.random() > 0.3,
+      };
+      updated.push(updateEuclid(p));
     }
-    setPlayheads(updated)
-  }
+    setPlayheads(updated);
+  };
 
   // main loop to update counters
-  let clicksPerCycle = 4;
+  let clicksPerCycle = 1;
   let clicks = 0;
 
   useEffect(() => {
@@ -227,19 +239,19 @@ function App() {
     if (playing && nodes.length) {
       interval = setInterval(() => {
         clicks++;
+        const timeWindow = cps * 1000; // convert fraction to time
         if (clicks === clicksPerCycle) {
           setCounter(counter + 1);
           clicks = 0;
-          // if ((counter ) % 2 === 0) {
-          //   playNote(92, 100, 100); // metronome
-          // }
+          for (let j = 0; j < masterSteps; j++) {
+            console.log(counter, timeWindow * (j / masterSteps));
+            setTimeout(() => {
+              setTicker(counter * masterSteps + j);
+            }, timeWindow * (j / masterSteps));
+          }
           for (let i = 0; i < playheads.length; i++) {
             const active = playheads[i];
             const activeRef = playheadsRef.current;
-            console.log(activeRef)
-            if (!active.playing) {
-              continue;
-            }
             const haps = queryPattern(
               active.pattern,
               active.interval,
@@ -247,22 +259,21 @@ function App() {
               lookahead
             );
 
-            // midi 
+            // midi
             if (midiEnabled) {
               device = getDevice(midiOutputDevice.name, WebMidi.outputs);
             }
-
-            const timeWindow = cps * 1000; // convert fraction to time
 
             haps.forEach((hap) => {
               setTimeout(() => {
                 if (activeRef[i].playing) {
                   const pos = countRefs[i].current; // make sure to use ref
                   // for some reason the note is begin rendered one behind the note, TODO investigate this
-                  const note = getNote((pos + 1) % nodes.length) + active.offset;
+                  const note =
+                    getNote((pos + 1) % nodes.length) + active.offset;
                   setCounters[i]((pos + 1) % nodes.length);
                   if (midiEnabled && midiOutputDevice !== -1) {
-                    // play to midi channel of each playhead 
+                    // play to midi channel of each playhead
                     device.playNote(note + noteOffsetRef.current, i + 1, {
                       duration: active.legato * 500,
                       attack: 0.8,
@@ -314,7 +325,7 @@ function App() {
   };
 
   useMemo(() => {
-    const { nodes, sequence } = parseSequence(userInputSequence)
+    const { nodes, sequence } = parseSequence(userInputSequence);
     setNodes(nodes);
     setSequence(sequence);
   }, [userInputSequence]);
@@ -335,45 +346,40 @@ function App() {
           </div>
         </div>
       )}
-      <div className="py-[1rem] px-[0.5rem] bg-[#f1f1f1] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
+      <div className="py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
         <div>
           <div className="">
             <div className="flex justify-between">
-              <h1 className="text-[2rem]">DNA Sonification</h1>
-              {
-                fullscreen &&
+              <h1 className="text-[2rem]">DNA Sequencer</h1>
+              {fullscreen && (
                 <button
-                  className="bg-[#ddd] p-2 mr-1 w-[8rem]"
-                  onClick={() => (setFullscreen(!fullscreen))}
+                  className="bg-[#666] p-2 mr-1 w-[8rem]"
+                  onClick={() => setFullscreen(!fullscreen)}
                 >
                   {!fullscreen ? "fullscreen" : "show UI"}
                 </button>
-              }
-            </div>
-            <p>Sequence:</p>
-            <div className="flex">
-              <textarea
-                className="p-2 max-w-[30rem] w-[80%] min-w-[10rem]"
-                value={userInputSequence}
-                onChange={(e) => setUserInputSequence(e.target.value)}
-              />
+              )}
             </div>
           </div>
           <div className=" mt-[1rem] flex">
             <div className="flex">
               <button
-                className="bg-[#ddd] p-2 mr-1 w-[4rem] hover:bg-[#bbb]"
+                className="bg-[#666] p-2 mr-1 w-[4rem] hover:bg-[#888] rounded-[0.25rem]"
                 onClick={() => (playing ? pause() : play())}
               >
                 {playing ? "PAUSE" : "PLAY"}
               </button>
-              <button className="bg-[#ddd] p-2 mr-1 w-[4rem] hover:bg-[#bbb]" onClick={stop}>
+              <button
+                className="bg-[#666] p-2 mr-1 w-[4rem] hover:bg-[#888] rounded-[0.25rem]"
+                onClick={stop}
+              >
                 STOP
               </button>
             </div>
             <div className="mx-[1rem]">
               <p>
-                tempo: {bpm}bpm {playing && ((counter - 1) / 2) % 2 === 0 ? "*" : ""}{" "}
+                tempo: {bpm}bpm{" "}
+                {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
                 {/* {counter} */}
               </p>
               <div>
@@ -391,47 +397,17 @@ function App() {
                 />
               </div>
             </div>
-            <div className="mx-[1rem]">
-              <p className="">
-                zoom: {((zoom / 5) * 100).toFixed(1)}%
-              </p>
-              <div >
-                <input
-                  className="w-[6rem]"
-                  type="range"
-                  min="0.5"
-                  max="5"
-                  value={zoom}
-                  onChange={(e) => {
-                    setZoom(e.target.value);
-                  }}
-                  step="0.25"
-                  aria-label="scale amount slider"
-                />
-              </div>
-            </div>
           </div>
-          {/* <div className="flex">
-              <button
-                className="bg-[#ddd] py-2 mr-1 w-[7rem]"
-                onClick={() => {
-                  setEmojiMap(Math.floor(Math.random() * emojiPalettes.length));
-                }
-                }
-              >
-                TEST
-              </button>
-            </div> */}
-          {/* <div>
-              <p>RENDERFRAME: {renderCount.current}</p>
-              <p>COUNTER: {counter}</p>
-            </div> */}
+          <div className="hidden">
+            <p>RENDERFRAME: {renderCount.current}</p>
+            <p>COUNTER: {counter}</p>
+          </div>
         </div>
-        <div className="flex flex-wrap my-3 tracking-[0.5rem] max-h-[20rem] overflow-scroll bg-[#fff]">
+        <div className="flex flex-wrap my-3 tracking-[0.5rem] max-h-[20rem] overflow-scroll">
           {/* <div> */}
-          {
-            sequence.map((letter, index) => {
-              return <div
+          {sequence.map((letter, index) => {
+            return (
+              <div
                 className={`
                     relative
                     border-box
@@ -441,217 +417,238 @@ function App() {
                   fontSize: `${zoom * 0.6}rem`,
                   width: `${zoom}rem`,
                   height: `${zoom}rem`,
-                  borderWidth: `${zoom * 0.02}rem`,
-                  border: 'solid',
-                  borderColor: showGrid ? '#888' : 'rgba(0,0,0,0)'
+                  backgroundColor: "#fff",
                 }}
               >
-                <div className="text-center">
-                  {
-                    emojiEnabled ?
-                      emojiPalettes[emojiMap].emojis[dnaMapping[letter]]
-                      :
-                      letter
-                  }
-                </div>
+                <div className="text-center text-[#000]">{letter}</div>
                 <div className="absolute top-0 left-0 z-[0]">
                   {playheads.map((p, i) => {
-                    const active = index >= counters[i] * 3 && index < (counters[i] + 1) * 3
+                    const active =
+                      index >= counters[i] * 3 && index < (counters[i] + 1) * 3;
                     // const active = index === counters[i] * 3
-                    return <div
-                      key={p + i}
-                      className='absolute top-0 left-0 z-[0]'
-                      style={{
-                        backgroundColor: `${p.color}`,
-                        opacity: active ? 0.6 : 0,
-                        width: `${zoom}rem`,
-                        height:
-                          active && p.playing
-                            ? `${zoom}rem`
-                            : "0rem",
-                        top:
-                          active && p.playing
-                            ? "0rem"
-                            : `${zoom / 2}rem`,
-                        transitionDuration: showAnimations ? '250ms' : '0s',
-                        msTransitionProperty: showAnimations ? "height,opacity,top" : 'none',
-                      }}
-                    ></div>
+                    return (
+                      <div
+                        key={p + i}
+                        className="absolute top-0 left-0 z-[0]"
+                        style={{
+                          backgroundColor: `${p.color}`,
+                          opacity: active ? 0.6 : 0,
+                          width: `${zoom}rem`,
+                          height: active && p.playing ? `${zoom}rem` : "0rem",
+                          top: active && p.playing ? "0rem" : `${zoom / 2}rem`,
+                        }}
+                      ></div>
+                    );
                   })}
                 </div>
               </div>
-            })
-          }
+            );
+          })}
           {/* </div> */}
         </div>
-        <div className="">
-          {playheads.map((p, index) => (
-            <div
-              key={"playheads" + index}
-              className="border-l-[0.5rem] relative my-2 px-2 flex"
-              style={{
-                borderColor: `${p.color}`,
-                opacity: p.playing ? 1 : 0.3,
-              }}
-            >
-              <button
-                className="p-2 mr-1"
+        <div className="flex text-center text-[#aaa] select-none">
+          <p className="w-[10rem]">sound</p>
+          <p className="w-[5rem]">hits</p>
+          <p className="w-[22.5rem]"></p>
+          <p className="w-[5rem]">offset</p>
+          <p className="w-[9.5rem]">speed</p>
+        </div>
+        <div className="flex">
+          <div className="">
+            {playheads.map((p, index) => (
+              <div
+                key={"playheads" + index}
+                className="border-l-[0.5rem] relative mb-3 px-2 flex items-center"
                 style={{
-                  backgroundColor: p.playing ? "#ddd" : "#888",
-                }}
-                onClick={() =>
-                  updatePlayhead(index, { ...p, playing: !p.playing })
-                }
-              >
-                Playhead {index + 1}
-              </button>
-              {/* <div className="px-3 w-[7rem] leading-[2.7rem]">
-                Pos: {counters[index]}
-              </div>
-              <div className="px-3 w-[8rem] leading-[2.7rem]">
-                Length: {p.interval}
-              </div>
-              <button
-                className="bg-[#ddd] p-2 mr-1 w-[2rem]"
-                onClick={() => {
-                  updatePlayhead(index, { ...p, interval: p.interval / 2 })
+                  borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
+                  // opacity: p.playing ? 1 : 0.5,
                 }}
               >
-                -
-              </button>
-              <button
-                className="bg-[#ddd] p-2 mr-1 w-[2rem]"
-                onClick={() => {
-                  updatePlayhead(index, { ...p, interval: p.interval * 2 })
-                }}
-              >
-                +
-              </button> */}
-              <button
-                className="ml-2 w-[2rem]"
-                style={{
-                  opacity: p.events > 1 ? 1 : 0.5,
-                  color: p.color,
-                  fontWeight: 'bold'
-                }}
-                onClick={() => {
-                  if (p.events > 1) {
-                    updatePlayhead(index, updateEuclid({ ...p, events: p.events - 1 }))
+                <button
+                  className="p-2 mr-2 w-[8rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
+                  onClick={() =>
+                    updatePlayhead(index, { ...p, playing: !p.playing })
                   }
-                }}
-              >
-                {'-'}
-              </button>
-              <div className="px-1 flex flex-col">
-                <div className="relative w-[12rem] bg-[#ddd] h-[1.5rem]">
-                  {
-                    p.pattern.map((hap) => {
-                      return <div
-                        key={hap}
-                        className="absolute bg-[#00f] t-0 h-[100%]"
-                        style={{
-                          left: `${16 * 12 * hap + (16 * 12 / masterSteps) * 0.1}px`,
-                          backgroundColor: `${p.color}`,
-                          width: `${(16 * 12 / masterSteps) * 0.8}px`
-                        }}></div>
-                    })
-                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <p>{p.instrumentName}</p>
+                    <div className="w-[1.2rem] h-[1.2rem] mx-[0.25rem]">
+                      {p.playing ? (
+                        <svg
+                          className="button"
+                          viewBox="0 0 60 60"
+                          style={{ fill: p.color }}
+                        >
+                          <polygon points="0,0 15,0 15,60 0,60" />
+                          <polygon points="25,0 40,0 40,60 25,60" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="button"
+                          viewBox="0 0 60 60"
+                          style={{ fill: p.color }}
+                        >
+                          <polygon points="0,0 50,30 0,60" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </button>
+                <div className="flex hidden">
+                  <div className="px-3 w-[7rem] leading-[2.7rem]">
+                    Pos: {counters[index]}
+                  </div>
                 </div>
-                <div className="flex">
-                  <input
-                    className="p-1 w-[12rem] opacity-[0.3]"
-                    type="range"
-                    min="0"
-                    max={p.steps - 1}
-                    value={parseInt(p.rotation)}
-                    onChange={(e) => {
-                      updatePlayhead(index, updateEuclid({ ...p, rotation: parseInt(e.target.value) }))
+                <div className="flex items-center">
+                  <p>|</p>
+                  <HitsToggle
+                    leftOnClick={() => {
+                      if (p.events > 1) {
+                        updatePlayhead(
+                          index,
+                          updateEuclid({ ...p, events: p.events - 1 })
+                        );
+                      }
                     }}
-                    step="1"
-                    aria-label="event slider"
+                    rightOnClick={() => {
+                      if (p.events < masterSteps) {
+                        updatePlayhead(
+                          index,
+                          updateEuclid({ ...p, events: p.events + 1 })
+                        );
+                      }
+                    }}
+                    p={p}
+                    masterSteps={masterSteps}
                   />
+                  {
+                    <p className="p-1 w-[1.6rem] underline underline-offset-[0.2rem]">
+                      {p.events}
+                    </p>
+                  }
+                </div>
+                <PlayheadView
+                  p={p}
+                  playing={playing}
+                  ticker={ticker}
+                  masterSteps={masterSteps}
+                  index={index}
+                />
+                <RotationToggle
+                  leftOnClick={() => {
+                    if (p.rotation > 0) {
+                      updatePlayhead(
+                        index,
+                        updateEuclid({ ...p, rotation: p.rotation - 1 })
+                      );
+                    }
+                  }}
+                  rightOnClick={() => {
+                    if (p.rotation < masterSteps - 1) {
+                      updatePlayhead(
+                        index,
+                        updateEuclid({ ...p, rotation: p.rotation + 1 })
+                      );
+                    }
+                  }}
+                  p={p}
+                  masterSteps={masterSteps}
+                />
+                {
+                  <p className="p-1 w-[1.6rem] underline underline-offset-[0.2rem]">
+                    {p.rotation}
+                  </p>
+                }
+                <SpeedToggle
+                  leftOnClick={() => {
+                    updatePlayhead(index, { ...p, interval: p.interval / 2 });
+                  }}
+                  rightOnClick={() => {
+                    updatePlayhead(index, { ...p, interval: p.interval * 2 });
+                  }}
+                />
+                <div className="w-[4rem] ml-1 underline underline-offset-[0.25rem]">
+                  /{p.interval}
                 </div>
               </div>
+            ))}
+          </div>
+          <div className="flex items-center mx-auto"></div>
+        </div>
+        <div className="flex mt-[1rem] items-center">
+          <div className="flex flex-col">
+            <div>
               <button
-                className="mr-2 w-[2rem]"
-                style={{
-                  opacity: p.events < masterSteps ? 1 : 0.5,
-                  color: p.color,
-                  fontWeight: 'bold'
-                }}
-                onClick={() => {
-                  if (p.events < masterSteps) {
-                    updatePlayhead(index, updateEuclid({ ...p, events: p.events + 1 }))
-                  }
-                }}
+                className="bg-[#666] p-[2rem] hover:bg-[#888] text-[1.4rem] rounded-[0.25rem]"
+                onClick={() => generatePattern()}
               >
-                {'+'}
+                Remix 🧬
               </button>
             </div>
-          ))}
-        </div>
-        <div className="my-[1rem] flex">
-          <div className="flex mx-2">
-            <button
-              className="bg-[#ddd] py-2 mr-1 w-[7rem] hover:bg-[#bbb]"
-              onClick={() =>
-                generatePattern()
-              }
-            >
-              Remix 🧬
-            </button>
-          </div>
-          <div>
-            <p>
-              Steps: {masterSteps}
-            </p>
-            <div>
-              <input
-                className="mx-1 w-[8rem]"
-                type="range"
-                min="3"
-                max="16"
-                value={masterSteps}
-                onChange={(e) => {
-                  setMasterSteps(e.target.value);
-                  let updated = [];
-                  for (let i = 0; i < playheads.length; i++) {
-                    const cur = playheads[i]
-                    updated.push(updateEuclid({ ...cur, steps: parseInt(e.target.value) }))
-                  }
-                  setPlayheads(updated)
-                }}
-                step="1"
-                aria-label="master steps slider"
-              />
+            <div className="hidden">
+              <p className="mt-3 mb-1">lock / unlock parameters</p>
             </div>
           </div>
-          <div className="flex mx-2">
-            <button
-              className="bg-[#ddd] py-2 mr-1 w-[7rem] hover:bg-[#bbb]"
-              onClick={() =>
-                setNoteOffset(Math.floor(Math.random() * 12 - 6))
+          <p className="ml-3 w-[6rem]">Steps: {masterSteps}</p>
+          <SwitchButton
+            leftOnClick={() => {
+              if (masterSteps > 3) {
+                let updated = [];
+                for (let i = 0; i < playheads.length; i++) {
+                  const cur = playheads[i];
+                  updated.push(
+                    updateEuclid({ ...cur, steps: masterSteps - 1 })
+                  );
+                }
+                setPlayheads(updated);
+                setMasterSteps(masterSteps - 1);
               }
-            >
-              KEY: {noteOffset}
-            </button>
-          </div>
+            }}
+            rightOnClick={() => {
+              if (masterSteps < 16) {
+                let updated = [];
+                for (let i = 0; i < playheads.length; i++) {
+                  const cur = playheads[i];
+                  updated.push(
+                    updateEuclid({ ...cur, steps: masterSteps + 1 })
+                  );
+                }
+                setPlayheads(updated);
+                setMasterSteps(masterSteps + 1);
+              }
+            }}
+            leftStyle={{
+              opacity: masterSteps > 3 ? 1 : 0.3,
+              fontWeight: "bold",
+            }}
+            rightStyle={{
+              opacity: masterSteps < 16 ? 1 : 0.3,
+              fontWeight: "bold",
+            }}
+            leftText={"<"}
+            rightText={">"}
+          />
+          <p className="ml-4 w-[5rem]">Key: {noteOffset}</p>
+          <SwitchButton
+            leftOnClick={() => setNoteOffset(noteOffset - 1)}
+            rightOnClick={() => setNoteOffset(noteOffset + 1)}
+            leftText={"-1"}
+            rightText={"+1"}
+          />
         </div>
         <div className="">
-          <div className="mt-[1rem]">
+          <div className="mt-[1rem] hidden">
             <p>Additional sequences:</p>
             <div>
               {loadedSequences.map((seq) => {
                 return (
                   <button
                     key={seq.sequence}
-                    className="bg-[#ddd] text-[1rem] p-2 mr-1 mb-1"
+                    className="bg-[#777] text-[1rem] p-2 mr-1 mb-1 rounded-[0.25rem]"
                     onClick={() => {
                       //generatePattern();
                       setUserInputSequence(seq.sequence);
                       setZoom(mapN(seq.sequence.length, 1, 900, 5, 1));
-                      setShowAnimations(seq.sequence.length < 200)
-                      setEmojiEnabled(false)
                     }}
                   >
                     {seq.name}
@@ -660,120 +657,100 @@ function App() {
               })}
             </div>
           </div>
-          <div className="my-2">
+          <div className="my-2 mt-[2rem]">
             <div className="flex">
-              <p
-                style={{
-                  textDecoration: showGrid ? 'none' : 'line-through',
-                  cursor: 'pointer'
-                }}
-                onClick={() => { setShowGrid(!showGrid) }}
-              >
-                Grid
-              </p>
-              <p
-                style={{
-                  textDecoration: showAnimations ? 'none' : 'line-through',
-                  cursor: 'pointer'
-                }}
-                className="ml-2"
-                onClick={() => { setShowAnimations(!showAnimations) }}
-              >
-                Animations
-              </p>
-              <p
-                className="ml-2"
-                style={{
-                  textDecoration: emojiEnabled ? 'none' : 'line-through',
-                  cursor: 'pointer'
-                }}
-                onClick={() => { setEmojiEnabled(!emojiEnabled) }}
-              >
-                Emojis!
-              </p>
-              {
-                emojiEnabled &&
-                <div className="flex">
-                  {emojiPalettes[emojiMap].emojis.map((emoji, i) => {
-                    return <p key={i} className="ml-2 align-middle">{numberMapping[i]}:{emoji} </p>
-                  })}
-                  <p
-                    className="ml-2 flex align-middle"
-                    onClick={() => {
-                      setEmojiMap(Math.floor(Math.random() * emojiPalettes.length));
+              <p className="">zoom: {((zoom / 5) * 100).toFixed(1)}%</p>
+              <div className="mx-[1rem]">
+                <div>
+                  <input
+                    className="w-[6rem]"
+                    type="range"
+                    min="0.5"
+                    max="5"
+                    value={zoom}
+                    onChange={(e) => {
+                      setZoom(e.target.value);
                     }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    re-roll
-                  </p>
+                    step="0.25"
+                    aria-label="scale amount slider"
+                  />
                 </div>
-              }
-              <div>
               </div>
-            </div>
-          </div>
-          <div className="mt-1">
-            <p>MIDI Settings:</p>
-            <div className="flex">
-              <button
-                className="p-2 w-[5rem]"
-                style={{
-                  backgroundColor: midiEnabled ? '#ddd' : '#bbb',
-                  textDecoration: midiEnabled ? 'none' : 'line-through'
-                }}
-                onClick={() => {
-                  setMidiEnabled(!midiEnabled)
-                }}
-              >
-                MIDI
-              </button>
-              <div className="p-2">
-                MIDI {midiEnabled ? 'enabled' : 'disabled'} {'[coming soon]'}
-              </div>
-            </div>
-            <div className="mt-[0.5rem]">
-              {
-                midiEnabled && WebMidi._outputs.map((midi, index) => {
-                  return <button
-                    key={midi._midiOutput.name}
-                    className="mr-2 mt-2 p-1 w-[8rem]"
-                    style={{
-                      backgroundColor: index === midiOutputDevice.index ? '#ddd' : '#bbb',
-                    }}
-                    onClick={() => {
-                      setMidiOutputDevice({
-                        name: midi._midiOutput.name,
-                        index
-                      })
-                    }}
-                  >
-                    {midi._midiOutput.name}
-                  </button>
-                })
-              }
             </div>
           </div>
         </div>
-        {/* <div>
-        Mappings:
-        <pre>{JSON.stringify(noteMappings, null, 4)}</pre>
-      </div> */}
-        {/* {loaded?.presets.map((preset, i) => (
-          <button
-            key={i}
-            className={`p-2 text-s rounded-md mb-1 mr-1 ${
-              presetIndex === i ? "bg-[#aaa]" : "bg-[#eee]"
-            }`}
-            onClick={() => {
-              setPresetIndex(i);
-              console.log("select preset", preset);
-              const stopHandle = startPresetNote(audioContext, preset, 48);
-              setTimeout(() => stopHandle(), 300);
-            }}
-          >
-            {i + ": " + preset.header.name}
-          </button>
-        ))} */}
+      </div>
+      <div className="py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
+        <div className="mt-1">
+          <div className="flex">
+            <button
+              className="p-2 w-[5rem] rounded-[0.25rem]"
+              style={{
+                backgroundColor: midiEnabled ? "#666" : "#888",
+                textDecoration: midiEnabled ? "none" : "line-through",
+              }}
+              onClick={() => {
+                setMidiEnabled(!midiEnabled);
+              }}
+            >
+              MIDI
+            </button>
+            <div className="p-2">{midiEnabled ? "enabled" : "disabled"}</div>
+          </div>
+          <div className="mt-[0.5rem]">
+            {midiEnabled && (
+              <div>
+                {WebMidi._outputs.map((midi, index) => {
+                  return (
+                    <button
+                      key={midi._midiOutput.name}
+                      className="mr-2 mt-2 p-1"
+                      style={{
+                        backgroundColor:
+                          index === midiOutputDevice.index ? "#666" : "#888",
+                      }}
+                      onClick={() => {
+                        setMidiOutputDevice({
+                          name: midi._midiOutput.name,
+                          index,
+                        });
+                      }}
+                    >
+                      {midi._midiOutput.name}
+                    </button>
+                  );
+                })}
+                <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
+              </div>
+            )}
+          </div>
+        </div>
+        <p className="mt-3">{`DNA Sequence (edit):`}</p>
+        <div className="flex mt-2">
+          <textarea
+            className="p-2 max-w-[30rem] w-[80%] min-w-[10rem] bg-[#666]"
+            value={userInputSequence}
+            onChange={(e) => setUserInputSequence(e.target.value)}
+          />
+        </div>
+        <div className="flex">
+          <div>
+            <ul className="mt-3">
+              <li>Keyboard commands:</li>
+              <li>{`- [ spacebar ] = play/pause`}</li>
+              <li>{`- [ 1 ] = playhead 1 play/pause`}</li>
+              <li>{`- [ 2 ] = playhead 2 play/pause`}</li>
+              <li>{`- [ 3 ] = playhead 3 play/pause`}</li>
+              <li>{`- [ 4 ] = playhead 4 play/pause`}</li>
+              <li>{`- [ 5 ] = playhead 5 play/pause`}</li>
+            </ul>
+          </div>
+          <div className="ml-[4rem]">
+            <p className="mt-3">{`DNA Amino Acid note mappings`}
+            <pre>{JSON.stringify(noteMappings, null, 2)}</pre>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -12,18 +12,21 @@ export class Playhead {
     color = "#ffff00",
     steps = 8,
     events = 3,
+    instrumentName = '',
+    rotation = 0,
   }) {
     this.playing = playing
     this.interval = interval
     this.pattern = pattern
     this.instrument = instrument
+    this.instrumentName = instrumentName
     this.offset = offset
     this.legato = legato
     this.color = color
     this.steps = steps
     this.events = events
     this.followSteps = true
-    this.rotation = 0 // rotate used for euclidian rhythms
+    this.rotation = rotation
     this.midiEnabled = false
   }
 
