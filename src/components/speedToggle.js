@@ -5,15 +5,15 @@ import { SwitchButton } from "./switchButton";
 export const SpeedToggle = ({leftOnClick, rightOnClick}) => {
   return <SwitchButton
     leftOnClick={leftOnClick}
-    leftText="/2"
+    leftText="x2"
     rightOnClick={rightOnClick}
-    rightText="x2"
+    rightText="/2"
     leftStyle={{
-        width: "3rem",
+        width: "2rem",
       fontWeight: "bold",
     }}
     rightStyle={{
-        width: "3rem",
+        width: "2rem",
       fontWeight: "bold",
     }}
   />;
