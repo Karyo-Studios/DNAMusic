@@ -1,6 +1,6 @@
 import React from "react";
 
-import { SwitchButton } from "./switchButton";
+import { SwitchButtonCenterText } from "./switchButtonCenterText";
 
 export const HitsToggle = ({
   p,
@@ -9,7 +9,7 @@ export const HitsToggle = ({
   rightOnClick,
 }) => {
   return (
-    <SwitchButton
+    <SwitchButtonCenterText
       leftOnClick={leftOnClick}
       leftText="-"
       rightOnClick={rightOnClick}
@@ -18,12 +18,15 @@ export const HitsToggle = ({
         opacity: p.events > 1 ? 1 : 0.3,
         color: p.color,
         fontWeight: "bold",
+        cursor: p.events > 1 ? 'pointer' : 'initial',
       }}
       rightStyle={{
         opacity: p.events < masterSteps ? 1 : 0.3,
         color: p.color,
         fontWeight: "bold",
+        cursor:  p.events < masterSteps ? 'pointer' : 'initial',
       }}
+      value={p.events}
     />
   );
 };

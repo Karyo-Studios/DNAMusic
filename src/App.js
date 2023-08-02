@@ -141,16 +141,50 @@ function App() {
   const [count4, setCount4] = useState(0);
   const [count5, setCount5] = useState(0);
 
+  const [noteActive1, setNoteActive1] = useState(false);
+  const [noteActive2, setNoteActive2] = useState(false);
+  const [noteActive3, setNoteActive3] = useState(false);
+  const [noteActive4, setNoteActive4] = useState(false);
+  const [noteActive5, setNoteActive5] = useState(false);
+
   const countRef1 = useRef(0);
   const countRef2 = useRef(0);
   const countRef3 = useRef(0);
   const countRef4 = useRef(0);
   const countRef5 = useRef(0);
 
+  const noteActiveRef1 = useRef(0);
+  const noteActiveRef2 = useRef(0);
+  const noteActiveRef3 = useRef(0);
+  const noteActiveRef4 = useRef(0);
+  const noteActiveRef5 = useRef(0);
+
   const counters = [count1, count2, count3, count4, count5];
   const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
 
+  const activeNotes = [
+    noteActive1,
+    noteActive2,
+    noteActive3,
+    noteActive4,
+    noteActive5,
+  ];
+  const activeNoteRefs = [
+    noteActiveRef1,
+    noteActiveRef2,
+    noteActiveRef3,
+    noteActiveRef4,
+    noteActiveRef5,
+  ];
+
   const setCounters = [setCount1, setCount2, setCount3, setCount4, setCount5];
+  const setActiveNotes = [
+    setNoteActive1,
+    setNoteActive2,
+    setNoteActive3,
+    setNoteActive4,
+    setNoteActive5,
+  ];
 
   // playhead pos refs
   useEffect(() => {
@@ -168,6 +202,23 @@ function App() {
   useEffect(() => {
     countRef5.current = count5;
   }, [count5]);
+
+  // note active refs
+  useEffect(() => {
+    noteActiveRef1.current = noteActive1;
+  }, [noteActive1]);
+  useEffect(() => {
+    noteActiveRef2.current = noteActive2;
+  }, [noteActive2]);
+  useEffect(() => {
+    noteActiveRef3.current = noteActive3;
+  }, [noteActive3]);
+  useEffect(() => {
+    noteActiveRef4.current = noteActive4;
+  }, [noteActive4]);
+  useEffect(() => {
+    noteActiveRef5.current = noteActive5;
+  }, [noteActive5]);
 
   const initPlayheads = (ps) => {
     let initialized = [];
@@ -285,6 +336,10 @@ function App() {
                       active.legato * 1000
                     );
                   }
+                  setActiveNotes[i](true);
+                  setTimeout(() => {
+                    setActiveNotes[i](false);
+                  }, active.legato * 1000);
                 }
               }, timeWindow * (hap - counter));
             });
@@ -366,6 +421,11 @@ function App() {
           </div>
         </div>
         <p className="mt-2">Current sequence: [initial] {sequence.length}bps</p>
+        {/* {noteActiveRef1.current ? '1 on' : '1 off' }
+          {noteActiveRef2.current ? '2 on' : '2 off' }
+          {noteActiveRef3.current ? '3 on' : '3 off' }
+          {noteActiveRef4.current ? '4 on' : '4 off' }
+          {noteActiveRef5.current ? '5 on' : '5 off' } */}
         <div className="flex flex-wrap my-3 tracking-[0.5rem] max-h-[20rem] overflow-scroll">
           {/* <div> */}
           {sequence.map((letter, index) => {
@@ -410,9 +470,9 @@ function App() {
           {/* </div> */}
         </div>
         <div className="flex mt-[1rem] text-center text-[#aaa] select-none">
-          <p className="w-[9rem]">playheads</p>
-          <p className="w-[7.5rem]">hits</p>
-          <p className="w-[5rem]">offset</p>
+          <p className="w-[7rem]">playhead</p>
+          <p className="w-[6.5rem]">hits</p>
+          <p className="w-[5rem]"></p>
           <p className="w-[21rem]"></p>
           {showAdvanced && (
             <div className="flex">
@@ -434,7 +494,7 @@ function App() {
                 }}
               >
                 <button
-                  className="p-2 mr-2 w-[8rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
+                  className="p-2 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
                   onClick={() =>
                     updatePlayhead(index, { ...p, playing: !p.playing })
                   }
@@ -490,36 +550,7 @@ function App() {
                     p={p}
                     masterSteps={masterSteps}
                   />
-                  <p className="p-1 w-[1.6rem] underline underline-offset-[0.2rem]">
-                    {p.events}
-                  </p>
                 </div>
-
-                <RotationToggle
-                  leftOnClick={() => {
-                    if (p.rotation > 0) {
-                      updatePlayhead(
-                        index,
-                        updateEuclid({ ...p, rotation: p.rotation - 1 })
-                      );
-                    }
-                  }}
-                  rightOnClick={() => {
-                    if (p.rotation < masterSteps - 1) {
-                      updatePlayhead(
-                        index,
-                        updateEuclid({ ...p, rotation: p.rotation + 1 })
-                      );
-                    }
-                  }}
-                  p={p}
-                  masterSteps={masterSteps}
-                />
-                {
-                  <p className="p-1 w-[1.6rem] underline underline-offset-[0.2rem]">
-                    {p.rotation}
-                  </p>
-                }
                 <PlayheadView
                   p={p}
                   playing={playing}
@@ -527,14 +558,34 @@ function App() {
                   masterSteps={masterSteps}
                   index={index}
                 />
-                {
-                  showAdvanced && <div className="flex items-center">
+                <RotationToggle
+                  onClick={() => {
+                    updatePlayhead(
+                      index,
+                      updateEuclid({
+                        ...p,
+                        rotation:
+                          p.rotation + 1 >= masterSteps ? 0 : p.rotation + 1,
+                      })
+                    );
+                  }}
+                  p={p}
+                  masterSteps={masterSteps}
+                />
+                {showAdvanced && (
+                  <div className="flex items-center">
                     <SpeedToggle
                       leftOnClick={() => {
-                        updatePlayhead(index, { ...p, interval: p.interval * 2 });
+                        updatePlayhead(index, {
+                          ...p,
+                          interval: p.interval * 2,
+                        });
                       }}
                       rightOnClick={() => {
-                        updatePlayhead(index, { ...p, interval: p.interval / 2 });
+                        updatePlayhead(index, {
+                          ...p,
+                          interval: p.interval / 2,
+                        });
                       }}
                     />
                     <div className="w-[2rem] underline underline-offset-[0.25rem]">
@@ -566,7 +617,7 @@ function App() {
                       aria-label="bpm slider"
                     />
                   </div>
-                }
+                )}
               </div>
             ))}
           </div>
