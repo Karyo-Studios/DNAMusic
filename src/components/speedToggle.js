@@ -1,13 +1,13 @@
 import React from "react";
 
-import { SwitchButton } from "./switchButton";
+import { SwitchButtonCenterText } from "./switchButtonCenterText";
 
-export const SpeedToggle = ({leftOnClick, rightOnClick}) => {
-  return <SwitchButton
+export const SpeedToggle = ({leftOnClick, rightOnClick, value}) => {
+  return <SwitchButtonCenterText
     leftOnClick={leftOnClick}
-    leftText="x2"
+    leftText="-"
     rightOnClick={rightOnClick}
-    rightText="/2"
+    rightText="+"
     leftStyle={{
         width: "2rem",
       fontWeight: "bold",
@@ -16,5 +16,6 @@ export const SpeedToggle = ({leftOnClick, rightOnClick}) => {
         width: "2rem",
       fontWeight: "bold",
     }}
+    value={value}
   />;
 };

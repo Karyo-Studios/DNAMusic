@@ -12,28 +12,33 @@ import { RotationToggle } from "./components/rotationToggle";
 import { PlayheadView } from "./components/playheadView";
 import { HitsToggle } from "./components/hitsToggle";
 import { SwitchButton } from "./components/switchButton";
+
+import {DnaVisualizer} from "./components/dnaVisualizer";
+
 import {
   noteMappings,
   dnaMapping,
   numberMapping,
   emojiPalettes,
 } from "./mappings";
-import { loadedSequences } from "./loadedSequences";
+import { loadedSequences, savedSequences } from "./loadedSequences";
 
 import "./App.css";
 import { SpeedToggle } from "./components/speedToggle";
+import { SwitchButtonCenterText } from "./components/switchButtonCenterText";
 
 function App() {
-  const [userInputSequence, setUserInputSequence] = useState(
-    "ACTCACCCTGAAGTTCTCAGGATCCACGTGCAGCTTGTCACAGTGCAGCTCACTCAGTGT"
-  );
   const [bpm, setBpm] = useState(150);
   const [masterSteps, setMasterSteps] = useState(8);
   const [cps, setCps] = useState(60 / bpm);
   const [nodes, setNodes] = useState([]);
   const [sequence, setSequence] = useState([]);
+  const [sequenceIndex, setSequenceIndex] = useState(0);
+  const [userInputSequence, setUserInputSequence] = useState(
+    savedSequences[sequenceIndex].sequence
+  );
   const [fullscreen, setFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(3);
+  const [zoom, setZoom] = useState(.8);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -65,7 +70,7 @@ function App() {
   });
 
   window.examplePattern = [0, 3 / 8, 3 / 4];
-  window.queryPattern = queryPattern;
+  window.queryPattern = queryPattern; 
 
   // loading sounds
   const fonts = [
@@ -229,6 +234,7 @@ function App() {
   };
 
   const [playheads, setPlayheads] = useState(
+    // initPlayheads([p1, p2])
     initPlayheads([p1, p2, p3, p4, p5])
   );
   const playheadsRef = useRef(null);
@@ -267,13 +273,17 @@ function App() {
     let updated = [];
     for (let i = 0; i < playheads.length; i++) {
       const events = tempo > 140 ? randRange(1, 5) : randRange(2, steps);
+      let playing = i === 0 ? true : Math.random() > 0.3;
+      if (!showAdvanced && i > 1) {
+        playing = false;
+      }
       const p = {
         ...playheads[i],
         steps,
         interval: 4,
         events: i === 3 ? randRange(1, 2) : events,
         rotation: Math.random() > 0.5 ? normalRotation : randRange(0, steps),
-        playing: i === 0 ? true : Math.random() > 0.3,
+        playing: playing,
       };
       updated.push(updateEuclid(p));
     }
@@ -291,7 +301,7 @@ function App() {
     if (playing && nodes.length) {
       interval = setInterval(() => {
         clicks++;
-        const timeWindow = cps * 1000; // convert fraction to time
+        const timeWindow = cps * 1000; // convert fraction to time}
         if (clicks === clicksPerCycle) {
           setCounter(counter + 1);
           clicks = 0;
@@ -301,6 +311,9 @@ function App() {
             }, timeWindow * (j / masterSteps));
           }
           for (let i = 0; i < playheads.length; i++) {
+            if (!showAdvanced && i > 1) {
+              continue;
+            }
             const active = playheads[i];
             const activeRef = playheadsRef.current;
             const haps = queryPattern(
@@ -382,7 +395,9 @@ function App() {
   useMemo(() => {
     const { nodes, sequence } = parseSequence(userInputSequence);
     setNodes(nodes);
+    // setZoom(mapN(sequence.length, 1, 400, 5, 1));
     setSequence(sequence);
+    stop();
   }, [userInputSequence]);
 
   return (
@@ -420,206 +435,230 @@ function App() {
             </div>
           </div>
         </div>
-        <p className="mt-2">Current sequence: [initial] {sequence.length}bps</p>
+        <div className="mt-2 flex items-start">
+          <div>
+            <p className="">
+              Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
+            </p>
+            <p className="mb-2">
+              <u>learn more!</u>
+            </p>
+            <SwitchButton
+              leftOnClick={() => {
+                const newSequenceIndex =
+                  sequenceIndex - 1 < 0
+                    ? savedSequences.length - 1
+                    : sequenceIndex - 1;
+                setUserInputSequence(savedSequences[newSequenceIndex].sequence);
+                setSequenceIndex(newSequenceIndex);
+              }}
+              rightOnClick={() => {
+                const newSequenceIndex =
+                  sequenceIndex + 1 >= savedSequences.length
+                    ? 0
+                    : sequenceIndex + 1;
+                setUserInputSequence(savedSequences[newSequenceIndex].sequence);
+                setSequenceIndex(newSequenceIndex);
+              }}
+              leftText={"<"}
+              rightText={">"}
+            />
+          </div>
+          <div className="ml-[2rem]">
+            <p className="">
+              Genomic sequence:{" "}
+              <strong>{savedSequences[sequenceIndex].length} basepairs</strong>
+            </p>
+            <p className="">
+              Viewing window:{" "}
+              <strong>
+                {sequence.length} basepairs (
+                {(
+                  (sequence.length / savedSequences[sequenceIndex].length) *
+                  100
+                ).toFixed(4)}
+                %)
+              </strong>
+            </p>
+            <p className="">
+              Description:{" "}
+              <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
+            </p>
+          </div>
+        </div>
+
         {/* {noteActiveRef1.current ? '1 on' : '1 off' }
           {noteActiveRef2.current ? '2 on' : '2 off' }
           {noteActiveRef3.current ? '3 on' : '3 off' }
           {noteActiveRef4.current ? '4 on' : '4 off' }
           {noteActiveRef5.current ? '5 on' : '5 off' } */}
-        <div className="flex flex-wrap my-3 tracking-[0.5rem] max-h-[20rem] overflow-scroll">
-          {/* <div> */}
-          {sequence.map((letter, index) => {
-            return (
-              <div
-                className={`
-                    relative
-                    border-box
-                    `}
-                key={letter + index}
-                style={{
-                  fontSize: `${zoom * 0.6}rem`,
-                  width: `${zoom}rem`,
-                  height: `${zoom}rem`,
-                  backgroundColor: "#eee",
-                }}
-              >
-                <div className="text-center text-[#000]">{letter}</div>
-                <div className="absolute top-0 left-0 z-[0]">
-                  {playheads.map((p, i) => {
-                    const active =
-                      index >= counters[i] * 3 && index < (counters[i] + 1) * 3;
-                    // const active = index === counters[i] * 3
-                    return (
-                      <div
-                        key={p + i}
-                        className="absolute top-0 left-0 z-[0]"
-                        style={{
-                          backgroundColor: `${p.color}`,
-                          opacity: active ? 0.6 : 0,
-                          width: `${zoom}rem`,
-                          height: active && p.playing ? `${zoom}rem` : "0rem",
-                          top: active && p.playing ? "0rem" : `${zoom / 2}rem`,
-                        }}
-                      ></div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-          {/* </div> */}
-        </div>
-        <div className="flex mt-[1rem] text-center text-[#aaa] select-none">
+        <DnaVisualizer 
+          sequence={sequence}
+          counters={counters}
+          playheads={playheads}
+          zoom={zoom}
+        />
+        <div className="flex mt-[1rem] text-center text-[#aaa] select-none min-w-[1000px]">
           <p className="w-[7rem]">playhead</p>
           <p className="w-[6.5rem]">hits</p>
           <p className="w-[5rem]"></p>
-          <p className="w-[21rem]"></p>
+          <p className="w-[17.6rem]"></p>
           {showAdvanced && (
             <div className="flex">
-              <p className="w-[7.5rem]">speed</p>
-              <p className="w-[6.2rem]">octave</p>
-              <p className="w-[5rem]">length</p>
+              <p className="w-[7.5rem]">period</p>
+              <p className="w-[6rem]">octave</p>
+              <p className="w-[3rem]">length</p>
             </div>
           )}
         </div>
         <div className="flex">
           <div className="">
-            {playheads.map((p, index) => (
-              <div
-                key={"playheads" + index}
-                className="border-l-[0.5rem] relative mb-3 px-2 flex items-center"
-                style={{
-                  borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
-                  opacity: p.playing ? 1 : 0.6,
-                }}
-              >
-                <button
-                  className="p-2 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
-                  onClick={() =>
-                    updatePlayhead(index, { ...p, playing: !p.playing })
-                  }
+            {playheads.map((p, index) => {
+              if (!showAdvanced && index > 1) {
+                return <div key={"playheads" + index}></div>;
+              }
+              return (
+                <div
+                  key={"playheads" + index}
+                  className="border-l-[0.5rem] relative mb-3 px-2 flex items-center"
+                  style={{
+                    borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
+                    opacity: p.playing ? 1 : 0.6,
+                  }}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="pl-2">{p.instrumentName}</p>
-                    <div className="w-[1.2rem] h-[1.2rem] mx-[0.25rem]">
-                      {p.playing ? (
-                        <svg
-                          className="button"
-                          viewBox="0 0 60 60"
-                          style={{ fill: p.color }}
-                        >
-                          <polygon points="0,0 15,0 15,60 0,60" />
-                          <polygon points="25,0 40,0 40,60 25,60" />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="button"
-                          viewBox="0 0 60 60"
-                          style={{ fill: p.color }}
-                        >
-                          <polygon points="0,0 50,30 0,60" />
-                        </svg>
-                      )}
+                  <button
+                    className="p-2 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
+                    onClick={() =>
+                      updatePlayhead(index, { ...p, playing: !p.playing })
+                    }
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="pl-2">{p.instrumentName}</p>
+                      <div className="w-[1.2rem] h-[1.2rem] mx-[0.25rem]">
+                        {p.playing ? (
+                          <svg
+                            className="button"
+                            viewBox="0 0 60 60"
+                            style={{ fill: p.color }}
+                          >
+                            <polygon points="0,0 15,0 15,60 0,60" />
+                            <polygon points="25,0 40,0 40,60 25,60" />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="button"
+                            viewBox="0 0 60 60"
+                            style={{ fill: p.color }}
+                          >
+                            <polygon points="0,0 50,30 0,60" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                  <div className="flex hidden">
+                    <div className="px-3 w-[7rem] leading-[2.7rem]">
+                      Pos: {counters[index]}
                     </div>
                   </div>
-                </button>
-                <div className="flex hidden">
-                  <div className="px-3 w-[7rem] leading-[2.7rem]">
-                    Pos: {counters[index]}
+                  <div className="flex items-center">
+                    <p>|</p>
+                    <HitsToggle
+                      leftOnClick={() => {
+                        if (p.events > 1) {
+                          updatePlayhead(
+                            index,
+                            updateEuclid({ ...p, events: p.events - 1 })
+                          );
+                        }
+                      }}
+                      rightOnClick={() => {
+                        if (p.events < masterSteps) {
+                          updatePlayhead(
+                            index,
+                            updateEuclid({ ...p, events: p.events + 1 })
+                          );
+                        }
+                      }}
+                      p={p}
+                      masterSteps={masterSteps}
+                    />
                   </div>
-                </div>
-                <div className="flex items-center">
-                  <p>|</p>
-                  <HitsToggle
-                    leftOnClick={() => {
-                      if (p.events > 1) {
-                        updatePlayhead(
-                          index,
-                          updateEuclid({ ...p, events: p.events - 1 })
-                        );
-                      }
-                    }}
-                    rightOnClick={() => {
-                      if (p.events < masterSteps) {
-                        updatePlayhead(
-                          index,
-                          updateEuclid({ ...p, events: p.events + 1 })
-                        );
-                      }
+                  <PlayheadView
+                    p={p}
+                    playing={playing}
+                    ticker={ticker}
+                    masterSteps={masterSteps}
+                    index={index}
+                  />
+                  <RotationToggle
+                    onClick={() => {
+                      updatePlayhead(
+                        index,
+                        updateEuclid({
+                          ...p,
+                          rotation:
+                            p.rotation + 1 >= masterSteps ? 0 : p.rotation + 1,
+                        })
+                      );
                     }}
                     p={p}
                     masterSteps={masterSteps}
                   />
+                  {showAdvanced && (
+                    <div className="flex items-center">
+                      <SpeedToggle
+                        leftOnClick={() => {
+                          updatePlayhead(index, {
+                            ...p,
+                            interval: p.interval * 2,
+                          });
+                        }}
+                        rightOnClick={() => {
+                          updatePlayhead(index, {
+                            ...p,
+                            interval: p.interval / 2,
+                          });
+                        }}
+                        value={`${p.interval}`}
+                      />
+                      <SwitchButtonCenterText
+                        leftOnClick={() => {
+                          updatePlayhead(index, {
+                            ...p,
+                            offset: p.offset - 12,
+                          });
+                        }}
+                        rightOnClick={() => {
+                          updatePlayhead(index, {
+                            ...p,
+                            offset: p.offset + 12,
+                          });
+                        }}
+                        leftText={"-"}
+                        rightText={"+"}
+                        value={p.offset / 12}
+                      />
+                      <input
+                        type="range"
+                        className="w-[4rem]"
+                        min="0.1"
+                        max="1"
+                        value={p.legato}
+                        onChange={(e) => {
+                          updatePlayhead(index, {
+                            ...p,
+                            legato: e.target.value,
+                          });
+                        }}
+                        step="0.1"
+                        aria-label="bpm slider"
+                      />
+                    </div>
+                  )}
                 </div>
-                <PlayheadView
-                  p={p}
-                  playing={playing}
-                  ticker={ticker}
-                  masterSteps={masterSteps}
-                  index={index}
-                />
-                <RotationToggle
-                  onClick={() => {
-                    updatePlayhead(
-                      index,
-                      updateEuclid({
-                        ...p,
-                        rotation:
-                          p.rotation + 1 >= masterSteps ? 0 : p.rotation + 1,
-                      })
-                    );
-                  }}
-                  p={p}
-                  masterSteps={masterSteps}
-                />
-                {showAdvanced && (
-                  <div className="flex items-center">
-                    <SpeedToggle
-                      leftOnClick={() => {
-                        updatePlayhead(index, {
-                          ...p,
-                          interval: p.interval * 2,
-                        });
-                      }}
-                      rightOnClick={() => {
-                        updatePlayhead(index, {
-                          ...p,
-                          interval: p.interval / 2,
-                        });
-                      }}
-                    />
-                    <div className="w-[2rem] underline underline-offset-[0.25rem]">
-                      /{p.interval / 4}
-                    </div>
-                    <SwitchButton
-                      leftOnClick={() => {
-                        updatePlayhead(index, { ...p, offset: p.offset - 12 });
-                      }}
-                      rightOnClick={() => {
-                        updatePlayhead(index, { ...p, offset: p.offset + 12 });
-                      }}
-                      leftText={"-"}
-                      rightText={"+"}
-                    />
-                    <div className="w-[2rem] underline underline-offset-[0.25rem]">
-                      {p.offset / 12}
-                    </div>
-                    <input
-                      type="range"
-                      className="w-[4rem]"
-                      min="0.1"
-                      max="1"
-                      value={p.legato}
-                      onChange={(e) => {
-                        updatePlayhead(index, { ...p, legato: e.target.value });
-                      }}
-                      step="0.1"
-                      aria-label="bpm slider"
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex items-center mx-auto"></div>
         </div>
@@ -735,7 +774,7 @@ function App() {
                     onClick={() => {
                       //generatePattern();
                       setUserInputSequence(seq.sequence);
-                      setZoom(mapN(seq.sequence.length, 1, 900, 5, 1));
+                      // setZoom(mapN(seq.sequence.length, 1, 2000, 5, 1));
                     }}
                   >
                     {seq.name}
@@ -746,19 +785,19 @@ function App() {
           </div>
           <div className="my-2 mt-[2rem]">
             <div className="flex items-center">
-              <p className="">zoom: {((zoom / 5) * 100).toFixed(1)}%</p>
+              <p className="">zoom: {((zoom) * 100).toFixed(1)}%</p>
               <div className="mx-[1rem]">
                 <div>
                   <input
                     className="w-[6rem]"
                     type="range"
                     min="0.5"
-                    max="5"
+                    max="1"
                     value={zoom}
                     onChange={(e) => {
                       setZoom(e.target.value);
                     }}
-                    step="0.25"
+                    step="0.125"
                     aria-label="scale amount slider"
                   />
                 </div>
@@ -770,7 +809,7 @@ function App() {
                   setShowAdvanced(!showAdvanced);
                 }}
                 type="checkbox"
-                class="checked:bg-blue-500 ml-2"
+                className="checked:bg-blue-500 ml-2"
               />
             </div>
           </div>

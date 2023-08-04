@@ -12,7 +12,7 @@ export const SwitchButton = ({
     <div className="flex items-center">
       <button
         className={`font-bold bg-[#666] hover:bg-[#888] 
-      p-2 ml-2 border-r-[0.05rem]
+      p-2 border-r-[0.05rem]
       border-[#444] w-[2rem] rounded-l-[0.25rem]`}
         style={leftStyle}
         onClick={leftOnClick}

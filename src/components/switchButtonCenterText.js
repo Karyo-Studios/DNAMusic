@@ -24,7 +24,7 @@ export const SwitchButtonCenterText = ({
         {value}
       </p>
       <button
-        className="font-bold bg-[#666] hover:bg-[#888] p-2 mr-1 w-[2rem] rounded-r-[0.25rem]"
+        className="font-bold bg-[#666] hover:bg-[#888] p-2 mr-1 min-w-[2rem] rounded-r-[0.25rem]"
         style={rightStyle}
         onClick={rightOnClick}
       >
