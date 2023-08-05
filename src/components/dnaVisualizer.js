@@ -1,14 +1,30 @@
-import React, { useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
-import { TextStyle, AlphaFilter } from "pixi.js";
-import { Stage, Container, Sprite, Graphics, render } from "@pixi/react";
+import { TextStyle, AlphaFilter, Point } from "pixi.js";
+import {
+  Stage,
+  Container,
+  Sprite,
+  Graphics,
+  SimpleRope,
+  Text,
+} from "@pixi/react";
+
+import { aminoAcidColors } from "../mappings";
 
 const Tile = (props) => {
   const draw = useCallback(
     (g) => {
       g.clear();
       g.beginFill(props.color);
-      g.drawRect(0, 0, props.boxSide, props.boxSide);
+      //   g.drawRect(0, 0, props.boxSide, props.boxSide);
+      g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
       g.endFill();
     },
     [props]
@@ -16,17 +32,44 @@ const Tile = (props) => {
   return <Graphics draw={draw} />;
 };
 
-export const DnaVisualizer = ({ playheads, counters, sequence, zoom }) => {
-  const width = 800;
-  const height = 400;
+export const DnaVisualizer = ({
+  playing,
+  counter,
+  playheads,
+  counters,
+  sequence,
+  nodes,
+  zoom,
+  param1,
+  param2,
+}) => {
+  // boxSide x amount =
+
+  const lastCounter = useRef(counter);
+  const width = 1152;
+  const height = 1000;
+  const spacing = 30;
   const boxSide = 30 * zoom;
-  const perRow = Math.floor(height / boxSide);
-  const alphaFilter = useMemo(() => new AlphaFilter(0.5), []);
+  const perRow = Math.floor(Math.floor((height - spacing) / boxSide) / 3) * 3;
+  const alphaFilterPlayhead = useMemo(() => new AlphaFilter(0.7), []);
+  const alphaFilter = useMemo(() => new AlphaFilter(0.3), []);
+
+  const [showLettersColors, setShowLettersColors] = useState(true);
+  const [showAminoAcids, setShowAminoAcids] = useState(true);
+
+  useEffect(() => {
+    lastCounter.current = playing ? counter : lastCounter.current;
+  }, [counter]);
 
   const getCoord = (i) => {
+    const x = Math.floor(i / perRow) * boxSide;
+    const y = (i % perRow) * boxSide;
+    const offset =
+      Math.sin((i + lastCounter.current / (param2 * 20)) / (param1 * 6)) * 20;
     return {
-      y: (i % perRow) * boxSide,
-      x: Math.floor(i / perRow) * boxSide,
+      //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
+      y: spacing + y,
+      x: spacing + x * 3 + offset,
     };
   };
 
@@ -42,71 +85,129 @@ export const DnaVisualizer = ({ playheads, counters, sequence, zoom }) => {
     }
   };
 
+  const getAcidSprite = (letter) => {
+    const filePath = `/assets/acids/amino_${letter.toLowerCase()}.png`;
+    return filePath;
+  };
+
+  const dnaColors = {
+    A: "#FADADD",
+    C: "#E9F7EF",
+    T: "#F0E68C",
+    G: "#FFFFFF",
+  };
+
+  const getDnaColor = (letter) => {
+    if (!showLettersColors) return 0xffffff;
+    if (showAminoAcids) {
+      return aminoAcidColors[letter];
+    } else {
+      return dnaColors[letter.toUpperCase()];
+    }
+  };
+
   return (
-    <Stage
-      width={width}
-      height={height}
-      options={{ backgroundColor: 0x444444 }}
-    >
-      {sequence.map((letter, index) => {
-        const { x, y } = getCoord(index);
-        const scale = 0.8;
-        return (
-          <Container x={x} y={y} key={index}>
-            <Tile boxSide={boxSide} color={0xffffff} />
-            <Sprite
-              image={getSprite(letter)}
-              x={boxSide * ((1 - scale) / 2)}
-              y={boxSide * ((1 - scale) / 2)}
-              width={boxSide * scale}
-              height={boxSide * scale}
-              anchor={{ x: 0, y: 0 }}
-            />
-            {/* <Text
-              text={letter}
-              style={
-                new TextStyle({
-                  align: "center",
-                  fontFamily: '"ui-monospace", monospace',
-                  fontSize: 25,
-                  fontWeight: "400",
-                  fill: ["#000"], // gradient
-                })
-              }
-            /> */}
-          </Container>
-        );
-      })}
-      {playheads.map((playhead, index) => {
-        const count = counters[index] * 3;
-        const n1 = getCoord(count);
-        const n2 = getCoord(count + 1);
-        const n3 = getCoord(count + 2);
-        if (playhead.playing) {
+    <div>
+      <Stage
+        width={width}
+        height={height}
+        options={{ backgroundColor: 0x444444 }}
+      >
+        {sequence.map((letter, index) => {
+          const { x, y } = getCoord(index);
+          const scale = 0.8;
+          if (nodes[Math.floor(index / 3)] === undefined) {
+            return;
+          }
+          const currentLetter = showAminoAcids
+            ? nodes[Math.floor(index / 3)].aminoacid
+            : letter;
+          const filePath = showAminoAcids
+            ? getAcidSprite(currentLetter)
+            : getSprite(currentLetter);
           return (
-            <Container key={index + n1.x} filters={[alphaFilter]}>
-              <Container x={n1.x} y={n1.y}>
-                <Tile boxSide={boxSide} color={playhead.color} />
-              </Container>
-              <Container x={n2.x} y={n2.y}>
-                <Tile boxSide={boxSide} color={playhead.color} />
-              </Container>
-              <Container x={n3.x} y={n3.y}>
-                <Tile boxSide={boxSide} color={playhead.color} />
-              </Container>
+            <Container x={x} y={y} key={index}>
+              <Tile
+                boxSide={boxSide}
+                color={getDnaColor(currentLetter)}
+                filters={[alphaFilter]}
+              />
+              {showAminoAcids ? (
+                (index - 1) % 3 === 0 && (
+                  <Sprite
+                    image={filePath}
+                    x={boxSide * ((1 - scale) / 2)}
+                    y={boxSide * ((1 - scale) / 2)}
+                    width={boxSide * scale}
+                    height={boxSide * scale}
+                    anchor={{ x: 0, y: 0 }}
+                  />
+                )
+              ) : (
+                <Sprite
+                  image={filePath}
+                  x={boxSide * ((1 - scale) / 2)}
+                  y={boxSide * ((1 - scale) / 2)}
+                  width={boxSide * scale}
+                  height={boxSide * scale}
+                  anchor={{ x: 0, y: 0 }}
+                />
+              )}
             </Container>
           );
-        }
-      })}
-    </Stage>
+        })}
+        {playheads.map((playhead, index) => {
+          const count = counters[index] * 3;
+          const n1 = getCoord(count);
+          const n2 = getCoord(count + 1);
+          const n3 = getCoord(count + 2);
+          const factor = 1.5;
+          if (playhead.playing) {
+            return (
+              <Container key={index + n1.x} filters={[alphaFilterPlayhead]}>
+                <Container
+                  x={n1.x - boxSide / (factor * 2)}
+                  y={n1.y - boxSide / (factor * 2)}
+                >
+                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                </Container>
+                <Container
+                  x={n2.x - boxSide / (factor * 2)}
+                  y={n2.y - boxSide / (factor * 2)}
+                >
+                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                </Container>
+                <Container
+                  x={n3.x - boxSide / (factor * 2)}
+                  y={n3.y - boxSide / (factor * 2)}
+                >
+                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                </Container>
+              </Container>
+            );
+          }
+        })}
+      </Stage>
+      <div className="flex gap-x-[0.5rem]">
+        <input
+          value={showLettersColors}
+          onClick={() => {
+            setShowLettersColors(!showLettersColors);
+          }}
+          type="checkbox"
+          className="checked:bg-blue-500 ml-2"
+        />
+        <p>Colors</p>
+        <input
+          value={showAminoAcids}
+          onClick={() => {
+            setShowAminoAcids(!showAminoAcids);
+          }}
+          type="checkbox"
+          className="checked:bg-blue-500 ml-2"
+        />
+        <p>ACTG / Amino Acids</p>
+      </div>
+    </div>
   );
-  //   const loop = (t) => {
-  //     // rotation += (Math.cos(t / 1000) || 0) * 0.1;
-  //     requestAnimationFrame(loop);
-
-  //     // custom render components into PIXI Container
-  //     render(<Stage />, app.stage);
-  //   };
-
-  //   loop();
 };

@@ -7,7 +7,7 @@ import { p1, p2, p3, p4, p5 } from "./defaults";
 import { parseSequence, toMidi } from "./helpers";
 import { mapN, randRange } from "./utils";
 import { queryPattern } from "./pattern";
-import { updateEuclid } from "./playhead";
+import { updateEuclid, updateRotation } from "./playhead";
 import { RotationToggle } from "./components/rotationToggle";
 import { PlayheadView } from "./components/playheadView";
 import { HitsToggle } from "./components/hitsToggle";
@@ -38,7 +38,9 @@ function App() {
     savedSequences[sequenceIndex].sequence
   );
   const [fullscreen, setFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(.8);
+  const [zoom, setZoom] = useState(.78);
+  const [vizParam1, setVizParam1] = useState(.5);
+  const [vizParam2, setVizParam2] = useState(.5);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -253,7 +255,7 @@ function App() {
     ]);
   };
 
-  const stopAll = () => {
+  const resetCounters = () => {
     for (let i = 0; i < playheads.length; i++) {
       setCounters[i](0);
     }
@@ -365,9 +367,10 @@ function App() {
     return () => clearInterval(interval);
   }, [playing, counter]);
 
+
   const stop = () => {
     setCounter(-1);
-    stopAll();
+    resetCounters();
     setPlaying(false);
   };
 
@@ -397,7 +400,8 @@ function App() {
     setNodes(nodes);
     // setZoom(mapN(sequence.length, 1, 400, 5, 1));
     setSequence(sequence);
-    stop();
+    renderCount.current = 0;
+    resetCounters();
   }, [userInputSequence]);
 
   return (
@@ -416,9 +420,9 @@ function App() {
           </div>
         </div>
       )}
-      <div className="py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
+      <div className="text-[0.9rem] py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
         <div>
-          <div className="">
+          <div>
             <div className="flex justify-between">
               <h1 className="text-[2rem]">
                 DNA Sequencer{" "}
@@ -435,9 +439,9 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="mt-2 flex items-start">
+        <div className="my-2 flex items-start">
           <div>
-            <p className="">
+            <p>
               Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
             </p>
             <p className="mb-2">
@@ -493,10 +497,15 @@ function App() {
           {noteActiveRef4.current ? '4 on' : '4 off' }
           {noteActiveRef5.current ? '5 on' : '5 off' } */}
         <DnaVisualizer 
+          playing={playing}
+          counter={renderCount.current}
           sequence={sequence}
+          nodes={nodes}
           counters={counters}
           playheads={playheads}
           zoom={zoom}
+          param1={vizParam1}
+          param2={vizParam2}
         />
         <div className="flex mt-[1rem] text-center text-[#aaa] select-none min-w-[1000px]">
           <p className="w-[7rem]">playhead</p>
@@ -584,6 +593,21 @@ function App() {
                       masterSteps={masterSteps}
                     />
                   </div>
+                  <div className="px-[0.25rem]"></div>
+                  <RotationToggle
+                    onClick={() => {
+                      updatePlayhead(
+                        index,
+                        updateEuclid({
+                          ...p,
+                          rotation:
+                            p.rotation - 1 < 0 ? masterSteps - 1 : p.rotation - 1,
+                        })
+                      );
+                    }}
+                    p={p}
+                    masterSteps={masterSteps}
+                  >{'<'}</RotationToggle>
                   <PlayheadView
                     p={p}
                     playing={playing}
@@ -604,7 +628,7 @@ function App() {
                     }}
                     p={p}
                     masterSteps={masterSteps}
-                  />
+                  >{'>'}</RotationToggle>
                   {showAdvanced && (
                     <div className="flex items-center">
                       <SpeedToggle
@@ -797,11 +821,47 @@ function App() {
                     onChange={(e) => {
                       setZoom(e.target.value);
                     }}
-                    step="0.125"
+                    step="0.02"
                     aria-label="scale amount slider"
                   />
                 </div>
               </div>
+              <p className="">param 1:</p>
+              <div className="mx-[1rem]">
+                <div>
+                  <input
+                    className="w-[6rem]"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value={vizParam1}
+                    onChange={(e) => {
+                      setVizParam1(e.target.value);
+                    }}
+                    step="0.01"
+                    aria-label="viz param 1 amount slider"
+                  />
+                </div>
+              </div>
+              <p>{vizParam1}</p>
+              <p className="">param 2:</p>
+              <div className="mx-[1rem]">
+                <div>
+                  <input
+                    className="w-[6rem]"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value={vizParam2}
+                    onChange={(e) => {
+                      setVizParam2(e.target.value);
+                    }}
+                    step="0.01"
+                    aria-label="viz param 2 amount slider"
+                  />
+                </div>
+              </div>
+              <p>{vizParam2 + ' '}</p>
               <p className="">advanced options</p>
               <input
                 value={showAdvanced}

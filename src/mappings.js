@@ -137,6 +137,30 @@ export const noteMappings = {
   "*": 'B5'
 }
 
+export const aminoAcidColors = {
+  "I": "#FADADD",
+  "L": "#E9F7EF",
+  "V": "#F2E8E4",
+  "F": "#FFF8E1",
+  "M": "#F4E3E3",
+  "C": "#F0E68C",
+  "A": "#F0EAD6",
+  "G": "#F0F8FF",
+  "P": "#F9EBB2",
+  "T": "#E0FFFF",
+  "S": "#E6E6FA",
+  "Y": "#E0E0E0",
+  "W": "#F5DEB3",
+  "Q": "#E1EDFF",
+  "N": "#FFDAB9",
+  "H": "#F0FFF0",
+  "E": "#FFC0CB",
+  "D": "#F5F5DC",
+  "K": "#E6E6E6",
+  "R": "#FFE4E1",
+  "*": "#FFFFFF",
+};
+
 export const dnaMapping = { 'A': 0, 'C': 1, 'T': 2, 'G': 3 }
 export const numberMapping = { 0: 'A', 1: 'C', 2: 'T', 3: 'G' }
 

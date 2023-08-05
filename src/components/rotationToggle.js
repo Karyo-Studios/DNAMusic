@@ -2,17 +2,16 @@ import React from "react";
 
 import { SingleButton } from "./singleButton";
 
-export const RotationToggle = ({ p, masterSteps, onClick }) => {
+export const RotationToggle = ({ p, onClick, children }) => {
   return (
     <SingleButton
       onClick={onClick}
       buttonStyle={{
-        opacity: p.rotation < masterSteps - 1 ? 1 : 0.3,
         color: p.color,
         fontWeight: "bold",
       }}
     >
-      {">"}
+      {children}
     </SingleButton>
   );
 };

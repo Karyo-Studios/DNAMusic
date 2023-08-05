@@ -1,5 +1,5 @@
 
-import { getPattern, euclidToPattern } from "./euclid"
+import { getPattern, euclidToPattern, rotate } from "./euclid"
 
 export class Playhead {
   constructor({
@@ -64,6 +64,12 @@ export const updateEuclid = (playhead) => {
     playhead.events = playhead.steps
   }
   playhead.euclid = getPattern(playhead.steps, playhead.events, playhead.rotation)
+  playhead.pattern = euclidToPattern(playhead.euclid)
+  return playhead
+}
+
+export const updateRotation = (playhead) => {
+  playhead.euclid = rotate(playhead.euclid, playhead.rotation)
   playhead.pattern = euclidToPattern(playhead.euclid)
   return playhead
 }
