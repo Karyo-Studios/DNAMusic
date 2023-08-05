@@ -21,12 +21,12 @@ export const PlayheadsView = ({
         <p className="w-[7rem]">playhead</p>
         <p className="w-[6.5rem]">hits</p>
         <p className="w-[5rem]"></p>
-        <p className="w-[17.6rem]"></p>
+        <p className="w-[18rem]"></p>
         {showAdvanced && (
           <div className="flex">
-            <p className="w-[7.5rem]">period</p>
-            <p className="w-[6rem]">octave</p>
-            <p className="w-[3rem]">length</p>
+            <p className="w-[9rem]">period</p>
+            <p className="w-[4rem]">octave</p>
+            <p className="w-[7rem]">length</p>
           </div>
         )}
       </div>
@@ -37,14 +37,14 @@ export const PlayheadsView = ({
         return (
           <div
             key={"playheads" + index}
-            className="border-l-[0.5rem] relative mb-3 px-2 flex items-center"
+            className="border-l-[0.5rem] relative mb-1 px-2 flex items-center"
             style={{
               borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
               opacity: p.playing ? 1 : 0.6,
             }}
           >
             <button
-              className="p-2 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
+              className="p-1 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
               onClick={() =>
                 updatePlayhead(index, { ...p, playing: !p.playing })
               }
@@ -74,7 +74,7 @@ export const PlayheadsView = ({
               </div>
             </button>
             <div className="flex hidden">
-              <div className="px-3 w-[7rem] leading-[2.7rem]">
+              <div className="px-3 w-[7rem] leading-[2rem]">
                 Pos: {counters[index]}
               </div>
             </div>
@@ -147,13 +147,13 @@ export const PlayheadsView = ({
                   leftOnClick={() => {
                     updatePlayhead(index, {
                       ...p,
-                      interval: p.interval * 2,
+                      interval: p.interval / 2,
                     });
                   }}
                   rightOnClick={() => {
                     updatePlayhead(index, {
                       ...p,
-                      interval: p.interval / 2,
+                      interval: p.interval * 2,
                     });
                   }}
                   value={`${p.interval}`}

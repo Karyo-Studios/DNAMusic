@@ -12,7 +12,7 @@ export const SwitchButton = ({
     <div className="flex items-center">
       <button
         className={`font-bold bg-[#666] hover:bg-[#888] 
-      p-2 border-r-[0.05rem]
+      p-1 border-r-[0.05rem]
       border-[#444] w-[2rem] rounded-l-[0.25rem]`}
         style={leftStyle}
         onClick={leftOnClick}
@@ -20,7 +20,7 @@ export const SwitchButton = ({
         {leftText}
       </button>
       <button
-        className="font-bold bg-[#666] hover:bg-[#888] p-2 mr-1 w-[2rem] rounded-r-[0.25rem]"
+        className="font-bold bg-[#666] hover:bg-[#888] p-1 mr-1 w-[2rem] rounded-r-[0.25rem]"
         style={rightStyle}
         onClick={rightOnClick}
       >

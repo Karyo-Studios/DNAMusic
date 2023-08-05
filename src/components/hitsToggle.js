@@ -15,13 +15,11 @@ export const HitsToggle = ({
       rightOnClick={rightOnClick}
       rightText="+"
       leftStyle={{
-        opacity: p.events > 1 ? 1 : 0.3,
         color: p.color,
         fontWeight: "bold",
         cursor: p.events > 1 ? 'pointer' : 'initial',
       }}
       rightStyle={{
-        opacity: p.events < masterSteps ? 1 : 0.3,
         color: p.color,
         fontWeight: "bold",
         cursor:  p.events < masterSteps ? 'pointer' : 'initial',

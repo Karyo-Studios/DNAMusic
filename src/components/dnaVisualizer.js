@@ -23,7 +23,7 @@ const Tile = (props) => {
     (g) => {
       g.clear();
       g.beginFill(props.color);
-      //   g.drawRect(0, 0, props.boxSide, props.boxSide);
+        // g.drawRect(0, 0, props.boxSide, props.boxSide);
       g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
       g.endFill();
     },
@@ -56,7 +56,7 @@ export const DnaVisualizer = ({
   const alphaFilter = useMemo(() => new AlphaFilter(0.3), []);
 
   const [showLettersColors, setShowLettersColors] = useState(true);
-  const [showAminoAcids, setShowAminoAcids] = useState(true);
+  const [showAminoAcids, setShowAminoAcids] = useState(false);
 
   useEffect(() => {
     lastCounter.current = playing ? counter : lastCounter.current;
@@ -66,29 +66,33 @@ export const DnaVisualizer = ({
     const x = Math.floor(i / perRow) * boxSide;
     const y = (i % perRow) * boxSide;
     const offset =
-      Math.sin((i + lastCounter.current / (param2 * 20)) / (param1 * 6)) * 20;
+      Math.sin((i + lastCounter.current / (param2 * 20)) / (param1 * 6)) * 10;
     return {
       //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
       y: spacingY + y,
-      x: spacingX + x * 3 + offset,
+      x: spacingX + x * 2.5 + (playing ? offset : 0),
     };
   };
 
   const getSprite = (letter) => {
     if (letter.toUpperCase() === "A") {
+      // return "/assets/a_sequel_white.png";
       return "/assets/a_sequel.png";
     } else if (letter.toUpperCase() === "C") {
+      // return "/assets/c_sequel_white.png";
       return "/assets/c_sequel.png";
     } else if (letter.toUpperCase() === "T") {
+      // return "/assets/t_sequel_white.png";
       return "/assets/t_sequel.png";
     } else if (letter.toUpperCase() === "G") {
+      // return "/assets/g_sequel_white.png";
       return "/assets/g_sequel.png";
     }
   };
 
   const getAcidSprite = (letter) => {
-    const filePath = `/assets/acids/amino_${letter.toLowerCase()}.png`;
-    return filePath;
+    const spritePath = `/assets/acids/amino_${letter.toLowerCase()}.png`;
+    return spritePath;
   };
 
   const dnaColors = {
@@ -110,29 +114,38 @@ export const DnaVisualizer = ({
   const VerticalDisplay = () => {
     return (
       <Container>
-        {sequence.map((letter, index) => {
+      </Container>
+    );
+  };
+
+  return (
+    <div>
+      <Stage
+        width={width}
+        height={height}
+        options={{ backgroundColor: 0x444444 }}
+      >
+          {sequence.map((letter, index) => {
           const { x, y } = getCoord(index);
           const scale = 0.8;
           if (nodes[Math.floor(index / 3)] === undefined) {
             return;
           }
-          const currentLetter = showAminoAcids
-            ? nodes[Math.floor(index / 3)].aminoacid
-            : letter;
-          const filePath = showAminoAcids
-            ? getAcidSprite(currentLetter)
-            : getSprite(currentLetter);
+
+          const currentAcid = nodes[Math.floor(index / 3)].aminoacid
+          const spritePathAcid = getAcidSprite(currentAcid)
+          const spritePath = getSprite(letter);
           return (
             <Container x={x} y={y} key={index}>
               <Tile
                 boxSide={boxSide}
-                color={getDnaColor(currentLetter)}
+                color={getDnaColor(showAminoAcids ? currentAcid : letter)}
                 filters={[alphaFilter]}
               />
               {showAminoAcids ? (
                 (index - 1) % 3 === 0 && (
                   <Sprite
-                    image={filePath}
+                    image={spritePathAcid}
                     x={boxSide * ((1 - scale) / 2)}
                     y={boxSide * ((1 - scale) / 2)}
                     width={boxSide * scale}
@@ -142,7 +155,7 @@ export const DnaVisualizer = ({
                 )
               ) : (
                 <Sprite
-                  image={filePath}
+                  image={spritePath}
                   x={boxSide * ((1 - scale) / 2)}
                   y={boxSide * ((1 - scale) / 2)}
                   width={boxSide * scale}
@@ -159,18 +172,17 @@ export const DnaVisualizer = ({
           const n2 = getCoord(count + 1);
           const n3 = getCoord(count + 2);
           const factor = 1.5;
+          const currentAcid = nodes[count/3].aminoacid
+          const spritePathAcid = getAcidSprite(currentAcid)
+          const scale = 0.8;
           if (playhead.playing) {
             return (
-              <Container key={index + n1.x} filters={[alphaFilterPlayhead]}>
+              <Container key={index + n1.x} 
+              // filters={[alphaFilterPlayhead]}
+              >
                 <Container
                   x={n1.x - boxSide / (factor * 2)}
                   y={n1.y - boxSide / (factor * 2)}
-                >
-                  <Tile boxSide={boxSide * factor} color={playhead.color} />
-                </Container>
-                <Container
-                  x={n2.x - boxSide / (factor * 2)}
-                  y={n2.y - boxSide / (factor * 2)}
                 >
                   <Tile boxSide={boxSide * factor} color={playhead.color} />
                 </Container>
@@ -180,22 +192,24 @@ export const DnaVisualizer = ({
                 >
                   <Tile boxSide={boxSide * factor} color={playhead.color} />
                 </Container>
+                <Container
+                  x={n2.x - boxSide / (factor * 2)}
+                  y={n2.y - boxSide / (factor * 2)}
+                >
+                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                  <Sprite
+                    image={spritePathAcid}
+                    x={boxSide * ((1) / 2)}
+                    y={boxSide * ((1) / 2)}
+                    width={boxSide}
+                    height={boxSide}
+                    anchor={{ x: 0, y: 0 }}
+                  />
+                </Container>
               </Container>
             );
           }
         })}
-      </Container>
-    );
-  };
-
-  return (
-    <div>
-      <Stage
-        width={width}
-        height={height}
-        options={{ backgroundColor: 0x444444 }}
-      >
-        <VerticalDisplay />
 
       </Stage>
       <div className="flex gap-x-[0.5rem]">

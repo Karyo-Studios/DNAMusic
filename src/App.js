@@ -13,6 +13,7 @@ import { SwitchButton } from "./components/switchButton";
 
 import { PlayheadsView } from "./components/playheads";
 import { DnaVisualizer } from "./components/dnaVisualizer";
+import { SequenceVisualizer } from "./components/sequenceVisualizer";
 
 import {
   noteMappings,
@@ -38,10 +39,10 @@ function App() {
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(0.78);
   const [vizParam1, setVizParam1] = useState(0.5);
-  const [vizParam2, setVizParam2] = useState(0.5);
+  const [vizParam2, setVizParam2] = useState(1);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(true);
   const [audioContext, setAudioContext] = useState();
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
@@ -260,7 +261,10 @@ function App() {
   };
 
   const generatePattern = () => {
+    // resetCounters();
     setNoteOffset(randRange(-5, 5));
+    setVizParam1(Math.random()*0.6 + 0.1)
+    setVizParam2(Math.random()*0.5 + 0.5)
     const tempo = randRange(100, 200);
     updateTempo(tempo);
     const special = [5, 7, 15, 10, 7, 7, 13];
@@ -417,7 +421,7 @@ function App() {
           </div>
         </div>
       )}
-      <div className="absolute w-[100%] z-[9999]">
+      <div className="absolute w-[100%] z-[1]">
         <div className="max-w-[1200px] mx-auto p-[1rem]">
           <div className="flex justify-between">
             <h1 className="text-[2rem]">
@@ -493,7 +497,19 @@ function App() {
         </div>
       </div>
       <div className="text-[0.9rem] bg-[#444] max-w-[1200px] mx-auto mb-[1rem] drop-shadow">
-        <DnaVisualizer
+        <SequenceVisualizer
+          playing={playing}
+          counter={renderCount.current}
+          activeNotes={activeNoteRefs}
+          sequence={sequence}
+          nodes={nodes}
+          counters={counters}
+          playheads={playheads}
+          zoom={zoom}
+          param1={vizParam1}
+          param2={vizParam2}
+        />
+        {/* <DnaVisualizer
           playing={playing}
           counter={renderCount.current}
           sequence={sequence}
@@ -503,12 +519,7 @@ function App() {
           zoom={zoom}
           param1={vizParam1}
           param2={vizParam2}
-        />
-        {/* {noteActiveRef1.current ? '1 on' : '1 off' }
-          {noteActiveRef2.current ? '2 on' : '2 off' }
-          {noteActiveRef3.current ? '3 on' : '3 off' }
-          {noteActiveRef4.current ? '4 on' : '4 off' }
-          {noteActiveRef5.current ? '5 on' : '5 off' } */}
+        /> */}
 
         <PlayheadsView
             playheads={playheads}
@@ -525,21 +536,21 @@ function App() {
           </div>
           <div className="flex items-center mx-auto"></div>
         </div>
-        <div className="flex items-center mt-[2rem]">
+        <div className="flex items-center mt-[0.5rem] px-[1rem]">
           <div className="flex items-center">
             <div className="flex">
               <button
-                className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[7rem] rounded-[0.25rem]"
+                className="bg-[#888] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#aaa] text-[1.2rem] w-[7rem] rounded-[0.25rem]"
                 onClick={() => (playing ? pause() : play())}
               >
                 {playing ? "PAUSE" : "PLAY"}
               </button>
-              <button
+              {/* <button
                 className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
                 onClick={stop}
               >
                 STOP
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="hidden">
@@ -549,10 +560,10 @@ function App() {
           <div className="flex flex-col">
             <div>
               <button
-                className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[9rem] rounded-[0.25rem]"
+                className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
                 onClick={() => generatePattern()}
               >
-                Remix 🧬
+                Remix
               </button>
             </div>
             <div className="hidden">
@@ -654,13 +665,13 @@ function App() {
                   <input
                     className="w-[6rem]"
                     type="range"
-                    min="0.5"
+                    min="0.3"
                     max="1"
                     value={zoom}
                     onChange={(e) => {
                       setZoom(e.target.value);
                     }}
-                    step="0.02"
+                    step="0.01"
                     aria-label="scale amount slider"
                   />
                 </div>
@@ -671,7 +682,7 @@ function App() {
                   <input
                     className="w-[6rem]"
                     type="range"
-                    min="0"
+                    min="0.1"
                     max="1"
                     value={vizParam1}
                     onChange={(e) => {
@@ -689,7 +700,7 @@ function App() {
                   <input
                     className="w-[6rem]"
                     type="range"
-                    min="0"
+                    min="0.1"
                     max="1"
                     value={vizParam2}
                     onChange={(e) => {
