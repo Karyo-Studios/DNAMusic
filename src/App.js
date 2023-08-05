@@ -8,12 +8,11 @@ import { parseSequence, toMidi } from "./helpers";
 import { mapN, randRange } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid, updateRotation } from "./playhead";
-import { RotationToggle } from "./components/rotationToggle";
-import { PlayheadView } from "./components/playheadView";
-import { HitsToggle } from "./components/hitsToggle";
+
 import { SwitchButton } from "./components/switchButton";
 
-import {DnaVisualizer} from "./components/dnaVisualizer";
+import { PlayheadsView } from "./components/playheads";
+import { DnaVisualizer } from "./components/dnaVisualizer";
 
 import {
   noteMappings,
@@ -24,8 +23,7 @@ import {
 import { loadedSequences, savedSequences } from "./loadedSequences";
 
 import "./App.css";
-import { SpeedToggle } from "./components/speedToggle";
-import { SwitchButtonCenterText } from "./components/switchButtonCenterText";
+
 
 function App() {
   const [bpm, setBpm] = useState(150);
@@ -38,9 +36,9 @@ function App() {
     savedSequences[sequenceIndex].sequence
   );
   const [fullscreen, setFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(.78);
-  const [vizParam1, setVizParam1] = useState(.5);
-  const [vizParam2, setVizParam2] = useState(.5);
+  const [zoom, setZoom] = useState(0.78);
+  const [vizParam1, setVizParam1] = useState(0.5);
+  const [vizParam2, setVizParam2] = useState(0.5);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -72,7 +70,7 @@ function App() {
   });
 
   window.examplePattern = [0, 3 / 8, 3 / 4];
-  window.queryPattern = queryPattern; 
+  window.queryPattern = queryPattern;
 
   // loading sounds
   const fonts = [
@@ -367,7 +365,6 @@ function App() {
     return () => clearInterval(interval);
   }, [playing, counter]);
 
-
   const stop = () => {
     setCounter(-1);
     resetCounters();
@@ -420,83 +417,83 @@ function App() {
           </div>
         </div>
       )}
-      <div className="text-[0.9rem] py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
-        <div>
-          <div>
-            <div className="flex justify-between">
-              <h1 className="text-[2rem]">
-                DNA Sequencer{" "}
-                {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
-              </h1>
-              {fullscreen && (
-                <button
-                  className="bg-[#666] p-2 mr-1 w-[8rem]"
-                  onClick={() => setFullscreen(!fullscreen)}
-                >
-                  {!fullscreen ? "fullscreen" : "show UI"}
-                </button>
-              )}
+      <div className="absolute w-[100%] z-[9999]">
+        <div className="max-w-[1200px] mx-auto p-[1rem]">
+          <div className="flex justify-between">
+            <h1 className="text-[2rem]">
+              DNA Sequencer{" "}
+              {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
+            </h1>
+            {fullscreen && (
+              <button
+                className="bg-[#666] p-2 mr-1 w-[8rem]"
+                onClick={() => setFullscreen(!fullscreen)}
+              >
+                {!fullscreen ? "fullscreen" : "show UI"}
+              </button>
+            )}
+          </div>
+          <div className="my-2 flex items-start">
+            <div>
+              <p>
+                Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
+              </p>
+              <p className="mb-2">
+                <u>learn more!</u>
+              </p>
+              <SwitchButton
+                leftOnClick={() => {
+                  const newSequenceIndex =
+                    sequenceIndex - 1 < 0
+                      ? savedSequences.length - 1
+                      : sequenceIndex - 1;
+                  setUserInputSequence(
+                    savedSequences[newSequenceIndex].sequence
+                  );
+                  setSequenceIndex(newSequenceIndex);
+                }}
+                rightOnClick={() => {
+                  const newSequenceIndex =
+                    sequenceIndex + 1 >= savedSequences.length
+                      ? 0
+                      : sequenceIndex + 1;
+                  setUserInputSequence(
+                    savedSequences[newSequenceIndex].sequence
+                  );
+                  setSequenceIndex(newSequenceIndex);
+                }}
+                leftText={"<"}
+                rightText={">"}
+              />
+            </div>
+            <div className="ml-[2rem]">
+              <p className="">
+                Genomic sequence:{" "}
+                <strong>
+                  {savedSequences[sequenceIndex].length} basepairs
+                </strong>
+              </p>
+              <p className="">
+                Viewing window:{" "}
+                <strong>
+                  {sequence.length} basepairs (
+                  {(
+                    (sequence.length / savedSequences[sequenceIndex].length) *
+                    100
+                  ).toFixed(4)}
+                  %)
+                </strong>
+              </p>
+              <p className="">
+                Description:{" "}
+                <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
+              </p>
             </div>
           </div>
         </div>
-        <div className="my-2 flex items-start">
-          <div>
-            <p>
-              Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
-            </p>
-            <p className="mb-2">
-              <u>learn more!</u>
-            </p>
-            <SwitchButton
-              leftOnClick={() => {
-                const newSequenceIndex =
-                  sequenceIndex - 1 < 0
-                    ? savedSequences.length - 1
-                    : sequenceIndex - 1;
-                setUserInputSequence(savedSequences[newSequenceIndex].sequence);
-                setSequenceIndex(newSequenceIndex);
-              }}
-              rightOnClick={() => {
-                const newSequenceIndex =
-                  sequenceIndex + 1 >= savedSequences.length
-                    ? 0
-                    : sequenceIndex + 1;
-                setUserInputSequence(savedSequences[newSequenceIndex].sequence);
-                setSequenceIndex(newSequenceIndex);
-              }}
-              leftText={"<"}
-              rightText={">"}
-            />
-          </div>
-          <div className="ml-[2rem]">
-            <p className="">
-              Genomic sequence:{" "}
-              <strong>{savedSequences[sequenceIndex].length} basepairs</strong>
-            </p>
-            <p className="">
-              Viewing window:{" "}
-              <strong>
-                {sequence.length} basepairs (
-                {(
-                  (sequence.length / savedSequences[sequenceIndex].length) *
-                  100
-                ).toFixed(4)}
-                %)
-              </strong>
-            </p>
-            <p className="">
-              Description:{" "}
-              <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
-            </p>
-          </div>
-        </div>
-
-        {/* {noteActiveRef1.current ? '1 on' : '1 off' }
-          {noteActiveRef2.current ? '2 on' : '2 off' }
-          {noteActiveRef3.current ? '3 on' : '3 off' }
-          {noteActiveRef4.current ? '4 on' : '4 off' }
-          {noteActiveRef5.current ? '5 on' : '5 off' } */}
-        <DnaVisualizer 
+      </div>
+      <div className="text-[0.9rem] bg-[#444] max-w-[1200px] mx-auto mb-[1rem] drop-shadow">
+        <DnaVisualizer
           playing={playing}
           counter={renderCount.current}
           sequence={sequence}
@@ -507,182 +504,24 @@ function App() {
           param1={vizParam1}
           param2={vizParam2}
         />
-        <div className="flex mt-[1rem] text-center text-[#aaa] select-none min-w-[1000px]">
-          <p className="w-[7rem]">playhead</p>
-          <p className="w-[6.5rem]">hits</p>
-          <p className="w-[5rem]"></p>
-          <p className="w-[17.6rem]"></p>
-          {showAdvanced && (
-            <div className="flex">
-              <p className="w-[7.5rem]">period</p>
-              <p className="w-[6rem]">octave</p>
-              <p className="w-[3rem]">length</p>
-            </div>
-          )}
-        </div>
+        {/* {noteActiveRef1.current ? '1 on' : '1 off' }
+          {noteActiveRef2.current ? '2 on' : '2 off' }
+          {noteActiveRef3.current ? '3 on' : '3 off' }
+          {noteActiveRef4.current ? '4 on' : '4 off' }
+          {noteActiveRef5.current ? '5 on' : '5 off' } */}
+
+        <PlayheadsView
+            playheads={playheads}
+            showAdvanced={showAdvanced}
+            updatePlayhead={updatePlayhead}
+            playing={playing}
+            ticker={ticker}
+            masterSteps={masterSteps}
+            counters={counters}
+        />
         <div className="flex">
           <div className="">
-            {playheads.map((p, index) => {
-              if (!showAdvanced && index > 1) {
-                return <div key={"playheads" + index}></div>;
-              }
-              return (
-                <div
-                  key={"playheads" + index}
-                  className="border-l-[0.5rem] relative mb-3 px-2 flex items-center"
-                  style={{
-                    borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
-                    opacity: p.playing ? 1 : 0.6,
-                  }}
-                >
-                  <button
-                    className="p-2 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
-                    onClick={() =>
-                      updatePlayhead(index, { ...p, playing: !p.playing })
-                    }
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="pl-2">{p.instrumentName}</p>
-                      <div className="w-[1.2rem] h-[1.2rem] mx-[0.25rem]">
-                        {p.playing ? (
-                          <svg
-                            className="button"
-                            viewBox="0 0 60 60"
-                            style={{ fill: p.color }}
-                          >
-                            <polygon points="0,0 15,0 15,60 0,60" />
-                            <polygon points="25,0 40,0 40,60 25,60" />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="button"
-                            viewBox="0 0 60 60"
-                            style={{ fill: p.color }}
-                          >
-                            <polygon points="0,0 50,30 0,60" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                  <div className="flex hidden">
-                    <div className="px-3 w-[7rem] leading-[2.7rem]">
-                      Pos: {counters[index]}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <p>|</p>
-                    <HitsToggle
-                      leftOnClick={() => {
-                        if (p.events > 1) {
-                          updatePlayhead(
-                            index,
-                            updateEuclid({ ...p, events: p.events - 1 })
-                          );
-                        }
-                      }}
-                      rightOnClick={() => {
-                        if (p.events < masterSteps) {
-                          updatePlayhead(
-                            index,
-                            updateEuclid({ ...p, events: p.events + 1 })
-                          );
-                        }
-                      }}
-                      p={p}
-                      masterSteps={masterSteps}
-                    />
-                  </div>
-                  <div className="px-[0.25rem]"></div>
-                  <RotationToggle
-                    onClick={() => {
-                      updatePlayhead(
-                        index,
-                        updateEuclid({
-                          ...p,
-                          rotation:
-                            p.rotation - 1 < 0 ? masterSteps - 1 : p.rotation - 1,
-                        })
-                      );
-                    }}
-                    p={p}
-                    masterSteps={masterSteps}
-                  >{'<'}</RotationToggle>
-                  <PlayheadView
-                    p={p}
-                    playing={playing}
-                    ticker={ticker}
-                    masterSteps={masterSteps}
-                    index={index}
-                  />
-                  <RotationToggle
-                    onClick={() => {
-                      updatePlayhead(
-                        index,
-                        updateEuclid({
-                          ...p,
-                          rotation:
-                            p.rotation + 1 >= masterSteps ? 0 : p.rotation + 1,
-                        })
-                      );
-                    }}
-                    p={p}
-                    masterSteps={masterSteps}
-                  >{'>'}</RotationToggle>
-                  {showAdvanced && (
-                    <div className="flex items-center">
-                      <SpeedToggle
-                        leftOnClick={() => {
-                          updatePlayhead(index, {
-                            ...p,
-                            interval: p.interval * 2,
-                          });
-                        }}
-                        rightOnClick={() => {
-                          updatePlayhead(index, {
-                            ...p,
-                            interval: p.interval / 2,
-                          });
-                        }}
-                        value={`${p.interval}`}
-                      />
-                      <SwitchButtonCenterText
-                        leftOnClick={() => {
-                          updatePlayhead(index, {
-                            ...p,
-                            offset: p.offset - 12,
-                          });
-                        }}
-                        rightOnClick={() => {
-                          updatePlayhead(index, {
-                            ...p,
-                            offset: p.offset + 12,
-                          });
-                        }}
-                        leftText={"-"}
-                        rightText={"+"}
-                        value={p.offset / 12}
-                      />
-                      <input
-                        type="range"
-                        className="w-[4rem]"
-                        min="0.1"
-                        max="1"
-                        value={p.legato}
-                        onChange={(e) => {
-                          updatePlayhead(index, {
-                            ...p,
-                            legato: e.target.value,
-                          });
-                        }}
-                        step="0.1"
-                        aria-label="bpm slider"
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            
           </div>
           <div className="flex items-center mx-auto"></div>
         </div>
@@ -809,7 +648,7 @@ function App() {
           </div>
           <div className="my-2 mt-[2rem]">
             <div className="flex items-center">
-              <p className="">zoom: {((zoom) * 100).toFixed(1)}%</p>
+              <p className="">zoom: {(zoom * 100).toFixed(1)}%</p>
               <div className="mx-[1rem]">
                 <div>
                   <input
@@ -861,7 +700,7 @@ function App() {
                   />
                 </div>
               </div>
-              <p>{vizParam2 + ' '}</p>
+              <p>{vizParam2 + " "}</p>
               <p className="">advanced options</p>
               <input
                 value={showAdvanced}

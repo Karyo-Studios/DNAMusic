@@ -46,11 +46,12 @@ export const DnaVisualizer = ({
   // boxSide x amount =
 
   const lastCounter = useRef(counter);
-  const width = 1152;
-  const height = 1000;
-  const spacing = 30;
+  const width = 1200;
+  const height = 700;
+  const spacingY = 200;
+  const spacingX = 30;
   const boxSide = 30 * zoom;
-  const perRow = Math.floor(Math.floor((height - spacing) / boxSide) / 3) * 3;
+  const perRow = Math.floor(Math.floor((height - spacingY) / boxSide) / 3) * 3;
   const alphaFilterPlayhead = useMemo(() => new AlphaFilter(0.7), []);
   const alphaFilter = useMemo(() => new AlphaFilter(0.3), []);
 
@@ -68,8 +69,8 @@ export const DnaVisualizer = ({
       Math.sin((i + lastCounter.current / (param2 * 20)) / (param1 * 6)) * 20;
     return {
       //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
-      y: spacing + y,
-      x: spacing + x * 3 + offset,
+      y: spacingY + y,
+      x: spacingX + x * 3 + offset,
     };
   };
 
@@ -106,13 +107,9 @@ export const DnaVisualizer = ({
     }
   };
 
-  return (
-    <div>
-      <Stage
-        width={width}
-        height={height}
-        options={{ backgroundColor: 0x444444 }}
-      >
+  const VerticalDisplay = () => {
+    return (
+      <Container>
         {sequence.map((letter, index) => {
           const { x, y } = getCoord(index);
           const scale = 0.8;
@@ -187,6 +184,19 @@ export const DnaVisualizer = ({
             );
           }
         })}
+      </Container>
+    );
+  };
+
+  return (
+    <div>
+      <Stage
+        width={width}
+        height={height}
+        options={{ backgroundColor: 0x444444 }}
+      >
+        <VerticalDisplay />
+
       </Stage>
       <div className="flex gap-x-[0.5rem]">
         <input
