@@ -37,12 +37,11 @@ function App() {
     savedSequences[sequenceIndex].sequence
   );
   const [fullscreen, setFullscreen] = useState(false);
-  const [zoom, setZoom] = useState(0.78);
+  const [zoom, setZoom] = useState(0.6);
   const [vizParam1, setVizParam1] = useState(0.5);
   const [vizParam2, setVizParam2] = useState(1);
   const [counter, setCounter] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(true);
   const [audioContext, setAudioContext] = useState();
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
@@ -278,9 +277,6 @@ function App() {
     for (let i = 0; i < playheads.length; i++) {
       const events = tempo > 140 ? randRange(1, 5) : randRange(2, steps);
       let playing = i === 0 ? true : Math.random() > 0.3;
-      if (!showAdvanced && i > 1) {
-        playing = false;
-      }
       const p = {
         ...playheads[i],
         steps,
@@ -315,9 +311,6 @@ function App() {
             }, timeWindow * (j / masterSteps));
           }
           for (let i = 0; i < playheads.length; i++) {
-            if (!showAdvanced && i > 1) {
-              continue;
-            }
             const active = playheads[i];
             const activeRef = playheadsRef.current;
             const haps = queryPattern(
@@ -504,6 +497,7 @@ function App() {
           sequence={sequence}
           nodes={nodes}
           counters={counters}
+          countRefs={countRefs}
           playheads={playheads}
           zoom={zoom}
           param1={vizParam1}
@@ -523,7 +517,6 @@ function App() {
 
         <PlayheadsView
             playheads={playheads}
-            showAdvanced={showAdvanced}
             updatePlayhead={updatePlayhead}
             playing={playing}
             ticker={ticker}
@@ -676,51 +669,44 @@ function App() {
                   />
                 </div>
               </div>
-              <p className="">param 1:</p>
-              <div className="mx-[1rem]">
-                <div>
-                  <input
-                    className="w-[6rem]"
-                    type="range"
-                    min="0.1"
-                    max="1"
-                    value={vizParam1}
-                    onChange={(e) => {
-                      setVizParam1(e.target.value);
-                    }}
-                    step="0.01"
-                    aria-label="viz param 1 amount slider"
-                  />
+              <div className="hidden">
+                <p className="">param 1:</p>
+                <div className="mx-[1rem]">
+                  <div>
+                    <input
+                      className="w-[6rem]"
+                      type="range"
+                      min="0.1"
+                      max="1"
+                      value={vizParam1}
+                      onChange={(e) => {
+                        setVizParam1(e.target.value);
+                      }}
+                      step="0.01"
+                      aria-label="viz param 1 amount slider"
+                    />
+                  </div>
                 </div>
-              </div>
-              <p>{vizParam1}</p>
-              <p className="">param 2:</p>
-              <div className="mx-[1rem]">
-                <div>
-                  <input
-                    className="w-[6rem]"
-                    type="range"
-                    min="0.1"
-                    max="1"
-                    value={vizParam2}
-                    onChange={(e) => {
-                      setVizParam2(e.target.value);
-                    }}
-                    step="0.01"
-                    aria-label="viz param 2 amount slider"
-                  />
+                <p>{vizParam1}</p>
+                <p className="">param 2:</p>
+                <div className="mx-[1rem]">
+                  <div>
+                    <input
+                      className="w-[6rem]"
+                      type="range"
+                      min="0.1"
+                      max="1"
+                      value={vizParam2}
+                      onChange={(e) => {
+                        setVizParam2(e.target.value);
+                      }}
+                      step="0.01"
+                      aria-label="viz param 2 amount slider"
+                    />
+                  </div>
                 </div>
+                <p>{vizParam2 + " "}</p>
               </div>
-              <p>{vizParam2 + " "}</p>
-              <p className="">advanced options</p>
-              <input
-                value={showAdvanced}
-                onClick={() => {
-                  setShowAdvanced(!showAdvanced);
-                }}
-                type="checkbox"
-                className="checked:bg-blue-500 ml-2"
-              />
             </div>
           </div>
         </div>

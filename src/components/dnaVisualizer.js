@@ -22,8 +22,22 @@ const Tile = (props) => {
   const draw = useCallback(
     (g) => {
       g.clear();
-      g.beginFill(props.color);
+      // g.beginFill(props.color);
         // g.drawRect(0, 0, props.boxSide, props.boxSide);
+      g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
+      g.endFill();
+    },
+    [props]
+  );
+  return <Graphics draw={draw} />;
+};
+
+const PlayheadTile = (props) => {
+  const draw = useCallback(
+    (g) => {
+      g.clear();
+      g.beginFill(props.color);
+        g.drawRect(0, 0, props.boxSide, props.boxSide);
       g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
       g.endFill();
     },
@@ -76,17 +90,17 @@ export const DnaVisualizer = ({
 
   const getSprite = (letter) => {
     if (letter.toUpperCase() === "A") {
-      // return "/assets/a_sequel_white.png";
-      return "/assets/a_sequel.png";
+      return "/assets/a_sequel_white.png";
+      // return "/assets/a_sequel.png";
     } else if (letter.toUpperCase() === "C") {
-      // return "/assets/c_sequel_white.png";
-      return "/assets/c_sequel.png";
+      return "/assets/c_sequel_white.png";
+      // return "/assets/c_sequel.png";
     } else if (letter.toUpperCase() === "T") {
-      // return "/assets/t_sequel_white.png";
-      return "/assets/t_sequel.png";
+      return "/assets/t_sequel_white.png";
+      // return "/assets/t_sequel.png";
     } else if (letter.toUpperCase() === "G") {
-      // return "/assets/g_sequel_white.png";
-      return "/assets/g_sequel.png";
+      return "/assets/g_sequel_white.png";
+      // return "/assets/g_sequel.png";
     }
   };
 
@@ -178,25 +192,25 @@ export const DnaVisualizer = ({
           if (playhead.playing) {
             return (
               <Container key={index + n1.x} 
-              // filters={[alphaFilterPlayhead]}
+              filters={[alphaFilterPlayhead]}
               >
                 <Container
                   x={n1.x - boxSide / (factor * 2)}
                   y={n1.y - boxSide / (factor * 2)}
                 >
-                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                  <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
                 </Container>
                 <Container
                   x={n3.x - boxSide / (factor * 2)}
                   y={n3.y - boxSide / (factor * 2)}
                 >
-                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                  <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
                 </Container>
                 <Container
                   x={n2.x - boxSide / (factor * 2)}
                   y={n2.y - boxSide / (factor * 2)}
                 >
-                  <Tile boxSide={boxSide * factor} color={playhead.color} />
+                  <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
                   <Sprite
                     image={spritePathAcid}
                     x={boxSide * ((1) / 2)}

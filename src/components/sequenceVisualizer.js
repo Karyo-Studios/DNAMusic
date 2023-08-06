@@ -6,77 +6,24 @@ import React, {
   useRef,
 } from "react";
 
-import { Stage, Container, Sprite, Graphics, withPixiApp } from "@pixi/react";
+import { mapN } from "../utils";
+import { Stage, Container, Sprite } from "@pixi/react";
 
-import { aminoAcidColors } from "../mappings";
+import { toMidi } from "sfumato";
+
+import { aminoAcidColors, noteMappings } from "../mappings";
+
+import { Blob, Tile, PlayheadTile, useAnimationFrame } from "../graphics";
 
 // import { Blob } from "../blobs";
 
-const Blob = (props) => {
-  const draw = useCallback(
-    (g) => {
-      g.clear();
-      g.beginFill(props.color);
-      g.drawCircle(props.x, props.y, props.radius);
-      g.endFill();
-    },
-    [props]
-  );
-  return <Graphics draw={draw} />;
-};
-
-const Tile = (props) => {
-  const draw = useCallback(
-    (g) => {
-      g.clear();
-      g.lineStyle(props.height / 15, props.color, 1);
-      g.drawRoundedRect(2, 0, props.width, props.height, 3);
-    },
-    [props]
-  );
-  return <Graphics draw={draw} />;
-};
-
-const PlayheadTile = (props) => {
-  const draw = useCallback(
-    (g) => {
-      g.clear();
-      g.beginFill(props.color);
-      g.lineStyle(props.height / 15, 0xffffff, 1);
-      g.drawRoundedRect(2, 0, props.width, props.height, 3);
-      g.endFill();
-    },
-    [props]
-  );
-  return <Graphics draw={draw} />;
-};
-
-const useAnimationFrame = (callback) => {
-  // Use useRef for mutable variables that we want to persist
-  // without triggering a re-render on their change
-  const requestRef = React.useRef();
-  const previousTimeRef = React.useRef();
-
-  const animate = (time) => {
-    if (previousTimeRef.current != undefined) {
-      const deltaTime = time - previousTimeRef.current;
-      callback(deltaTime);
-    }
-    previousTimeRef.current = time;
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
-  React.useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(requestRef.current);
-  }, []); // Make sure the effect runs only once
-};
 export const SequenceVisualizer = ({
   playing,
-  counter,
-  playheads,
-  activeNotes,
-  counters,
+  counter, // renderframes
+  playheads, // main playheads
+  activeNotes, // active note refs, for actual gate
+  counters, // separate counts from each playhead
+  countRefs, // count references
   sequence,
   nodes,
   zoom,
@@ -108,6 +55,17 @@ export const SequenceVisualizer = ({
   const [blobs, setBlobs] = useState([]);
 
   const blobsRef = useRef([]);
+
+  const addBlob = (opts) =>
+    setBlobs([
+      ...blobs,
+      {
+        x: opts.x || width / 2,
+        y: opts.y || height,
+        color: opts.color || 0xff0000,
+        radius: opts.radius || 40,
+      },
+    ]);
 
   useEffect(() => {
     blobsRef.current = blobs;
@@ -153,16 +111,67 @@ export const SequenceVisualizer = ({
 
   const [count, setCount] = React.useState(0);
 
-  useAnimationFrame((deltaTime) => {
-    // Pass on a function to the setter of the state
-    // to make sure we always have the latest state
+  const lastNote1 = useRef(-1);
+  const lastNote2 = useRef(-1);
+  const lastNote3 = useRef(-1);
+  const lastNote4 = useRef(-1);
+  const lastNote5 = useRef(-1);
+
+  const lastSpawned1 = useRef(false);
+  const lastSpawned2 = useRef(false);
+  const lastSpawned3 = useRef(false);
+  const lastSpawned4 = useRef(false);
+  const lastSpawned5 = useRef(false);
+
+  //   const lastNotes = [lastNote1,lastNote2,lastNote3,lastNote4,lastNote5]
+  //   const lastSpawned = [lastSpawned1,lastSpawned2,lastSpawned3,lastSpawned4,lastSpawned5]
+
+  let lastNotes = [-1, -1, -1, -1, -1];
+  let lastSpawned = [false, false, false, false, false];
+
+  const animationCallback = (deltaTime) => {
     let updated = [];
+    // blobs update loop
     blobsRef.current.forEach((blob) => {
-      updated.push({ ...blob, y: blob.y - 1 });
+      if (blob.y > 0) {
+        updated.push({ ...blob, y: blob.y - 6 });
+      }
     });
+
+    // check to add new blobs
+    for (let i = 0; i < playheads.length; i++) {
+      if (activeNotes[i].current) {
+        const index = countRefs[i].current;
+        const currentNode = nodes[Math.floor(index / 3)];
+        const note = noteMappings[currentNode.aminoacid];
+        // if (!lastSpawned[i]) {
+        const { x, y } = getCoord(index * 3);
+        const radius = 60*zoom;
+        updated.push({
+          x: x + boxSide*3/2,
+          y: y,
+          color: playheads[i].color,
+          radius: radius / 2,
+        });
+        // }
+        lastSpawned[i] = true;
+      } else {
+        lastSpawned[i] = false;
+      }
+    }
+
     setBlobs(updated);
     setCount((prevCount) => (prevCount + deltaTime * 0.01) % 100);
-  });
+  };
+
+  const animationCallbackRef = useRef(animationCallback);
+
+  useEffect(() => {
+    animationCallbackRef.current = animationCallback;
+  }, [zoom, sequence]);
+
+  // main animation loop
+  useAnimationFrame(animationCallbackRef);
 
   const dnaColors = {
     A: "#FADADD",
@@ -180,17 +189,27 @@ export const SequenceVisualizer = ({
     }
   };
 
-  const VerticalDisplay = () => {
-    return <Container></Container>;
-  };
-
   return (
     <div>
       <Stage
         width={width}
         height={height}
         options={{ backgroundColor: 0x444444, antialias: true }}
+        onClick={() => {
+          setShowAminoAcids(!showAminoAcids);
+        }}
       >
+        {blobs.map((blob, index) => {
+          return (
+            <Blob
+              key={index}
+              x={blob.x}
+              y={blob.y}
+              radius={blob.radius}
+              color={blob.color}
+            />
+          );
+        })}
         {sequence.map((letter, index) => {
           const { x, y } = getCoord(index);
           if (nodes[Math.floor(index / 3)] === undefined) {
@@ -200,6 +219,11 @@ export const SequenceVisualizer = ({
           const currentAcid = nodes[Math.floor(index / 3)].aminoacid;
           const spritePathAcid = getAcidSprite(currentAcid);
           const spritePath = getSprite(letter);
+
+          const note = toMidi(
+            noteMappings[nodes[Math.floor(index / 3)].aminoacid]
+          );
+          const noteColor = mapN(note, 50, 90, 20, 90);
           return (
             <Container x={x} y={y} key={index}>
               {showAminoAcids ? (
@@ -209,6 +233,7 @@ export const SequenceVisualizer = ({
                       width={boxSide * 3}
                       height={boxSide * boxAspect}
                       color={getDnaColor(showAminoAcids ? currentAcid : letter)}
+                      noteColor={noteColor ? noteColor : "100"}
                     />
                     <Sprite
                       image={spritePathAcid}
@@ -226,6 +251,7 @@ export const SequenceVisualizer = ({
                     width={boxSide}
                     height={boxSide * boxAspect}
                     color={getDnaColor(showAminoAcids ? currentAcid : letter)}
+                    noteColor={noteColor ? noteColor : "100"}
                   />
                   <Sprite
                     image={spritePath}
@@ -267,17 +293,8 @@ export const SequenceVisualizer = ({
             );
           }
         })}
-        {blobs.map((blob, index) => {
-          return <Blob
-            key={index}
-            x={blob.x}
-            y={blob.y}
-            radius={blob.radius}
-            color={blob.color}
-          />;
-        })}
       </Stage>
-      <div className="absolute top-0 right-0 flex gap-x-[0.5rem] z-[99999]">
+      <div className="hidden absolute top-0 right-0 flex gap-x-[0.5rem] z-[99999]">
         <div>
           <p className="mb-4">{Math.round(count)}</p>
           {activeNotes.map((active, index) => {
@@ -286,42 +303,8 @@ export const SequenceVisualizer = ({
         </div>
       </div>
       <div>
-        <div className="flex">
-          <input
-            value={showLettersColors}
-            onClick={() => {
-              setShowLettersColors(!showLettersColors);
-            }}
-            type="checkbox"
-            className="checked:bg-blue-500 ml-2"
-          />
-          <p>Colors</p>
-          <input
-            value={showAminoAcids}
-            onClick={() => {
-              setShowAminoAcids(!showAminoAcids);
-            }}
-            type="checkbox"
-            className="checked:bg-blue-500 ml-2"
-          />
-          <p>ACTG / Amino Acids</p>
-          <button
-            className="mx-[1rem]"
-            onClick={() => {
-              setBlobs([
-                ...blobs,
-                {
-                  x: 500,
-                  y: 500,
-                  color: 0xff0000,
-                  radius: 40,
-                },
-              ]);
-            }}
-          >
-            Spawn Blob
-          </button>
-          {blobs.length}
+        <div className="select-none flex px-[1rem]">
+          <p>Click = ACTG / Amino Acids</p>
         </div>
       </div>
     </div>

@@ -8,7 +8,6 @@ import { updateEuclid } from "../playhead";
 
 export const PlayheadsView = ({
   playheads,
-  showAdvanced,
   updatePlayhead,
   playing,
   ticker,
@@ -22,18 +21,11 @@ export const PlayheadsView = ({
         <p className="w-[6.5rem]">hits</p>
         <p className="w-[5rem]"></p>
         <p className="w-[18rem]"></p>
-        {showAdvanced && (
-          <div className="flex">
-            <p className="w-[9rem]">period</p>
-            <p className="w-[4rem]">octave</p>
-            <p className="w-[7rem]">length</p>
-          </div>
-        )}
+        <p className="w-[9rem]">period</p>
+        <p className="w-[4rem]">octave</p>
+        <p className="w-[7rem]">length</p>
       </div>
       {playheads.map((p, index) => {
-        if (!showAdvanced && index > 1) {
-          return <div key={"playheads" + index}></div>;
-        }
         return (
           <div
             key={"playheads" + index}
@@ -141,57 +133,55 @@ export const PlayheadsView = ({
             >
               {">"}
             </RotationToggle>
-            {showAdvanced && (
-              <div className="flex items-center">
-                <SpeedToggle
-                  leftOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      interval: p.interval / 2,
-                    });
-                  }}
-                  rightOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      interval: p.interval * 2,
-                    });
-                  }}
-                  value={`${p.interval}`}
-                />
-                <SwitchButtonCenterText
-                  leftOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      offset: p.offset - 12,
-                    });
-                  }}
-                  rightOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      offset: p.offset + 12,
-                    });
-                  }}
-                  leftText={"-"}
-                  rightText={"+"}
-                  value={p.offset / 12}
-                />
-                <input
-                  type="range"
-                  className="w-[4rem]"
-                  min="0.1"
-                  max="1"
-                  value={p.legato}
-                  onChange={(e) => {
-                    updatePlayhead(index, {
-                      ...p,
-                      legato: e.target.value,
-                    });
-                  }}
-                  step="0.1"
-                  aria-label="bpm slider"
-                />
-              </div>
-            )}
+            <div className="flex items-center">
+              <SpeedToggle
+                leftOnClick={() => {
+                  updatePlayhead(index, {
+                    ...p,
+                    interval: p.interval / 2,
+                  });
+                }}
+                rightOnClick={() => {
+                  updatePlayhead(index, {
+                    ...p,
+                    interval: p.interval * 2,
+                  });
+                }}
+                value={`${p.interval}`}
+              />
+              <SwitchButtonCenterText
+                leftOnClick={() => {
+                  updatePlayhead(index, {
+                    ...p,
+                    offset: p.offset - 12,
+                  });
+                }}
+                rightOnClick={() => {
+                  updatePlayhead(index, {
+                    ...p,
+                    offset: p.offset + 12,
+                  });
+                }}
+                leftText={"-"}
+                rightText={"+"}
+                value={p.offset / 12}
+              />
+              <input
+                type="range"
+                className="w-[4rem]"
+                min="0.1"
+                max="1"
+                value={p.legato}
+                onChange={(e) => {
+                  updatePlayhead(index, {
+                    ...p,
+                    legato: e.target.value,
+                  });
+                }}
+                step="0.1"
+                aria-label="bpm slider"
+              />
+            </div>
           </div>
         );
       })}
