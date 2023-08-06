@@ -10,7 +10,8 @@ export function enableWebMidi(options = {}) {
   const { onReady, onConnected, onDisconnected } = options;
 
   if (!supportsMidi()) {
-    throw new Error('Your Browser does not support WebMIDI.');
+    console.error('Your Browser does not support WebMIDI.');
+    return
   }
   return new Promise((resolve, reject) => {
     if (WebMidi.enabled) {

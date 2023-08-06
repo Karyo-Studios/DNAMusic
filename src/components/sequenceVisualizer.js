@@ -15,8 +15,6 @@ import { aminoAcidColors, noteMappings } from "../mappings";
 
 import { Blob, Tile, PlayheadTile, useAnimationFrame } from "../graphics";
 
-// import { Blob } from "../blobs";
-
 export const SequenceVisualizer = ({
   playing,
   counter, // renderframes
@@ -37,9 +35,9 @@ export const SequenceVisualizer = ({
   const height = 700;
   const spacingX = 16;
   const boxSide = 30 * zoom;
-  const colSpace = boxSide / 3;
-  const rowSpace = boxSide / 2;
-  const boxAspect = 1.4; // w x h 1 : 1.4
+  const colSpace = boxSide / 5;
+  const rowSpace = boxSide / 3;
+  const boxAspect = 1.2; // w x h 1 : 1.4
   const perRow =
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
@@ -123,9 +121,6 @@ export const SequenceVisualizer = ({
   const lastSpawned4 = useRef(false);
   const lastSpawned5 = useRef(false);
 
-  //   const lastNotes = [lastNote1,lastNote2,lastNote3,lastNote4,lastNote5]
-  //   const lastSpawned = [lastSpawned1,lastSpawned2,lastSpawned3,lastSpawned4,lastSpawned5]
-
   let lastNotes = [-1, -1, -1, -1, -1];
   let lastSpawned = [false, false, false, false, false];
 
@@ -146,17 +141,18 @@ export const SequenceVisualizer = ({
         const note = noteMappings[currentNode.aminoacid];
         // if (!lastSpawned[i]) {
         const { x, y } = getCoord(index * 3);
-        const radius = 60*zoom;
+        const radius = 60 * zoom;
         updated.push({
-          x: x + boxSide*3/2,
+          x: x + boxSide * 3 / 2,
           y: y,
           color: playheads[i].color,
           radius: radius / 2,
         });
         // }
         lastSpawned[i] = true;
-      } else {
-        lastSpawned[i] = false;
+        // }
+        //  else {
+        //   lastSpawned[i] = false;
       }
     }
 

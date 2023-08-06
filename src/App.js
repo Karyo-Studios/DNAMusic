@@ -262,8 +262,8 @@ function App() {
   const generatePattern = () => {
     // resetCounters();
     setNoteOffset(randRange(-5, 5));
-    setVizParam1(Math.random()*0.6 + 0.1)
-    setVizParam2(Math.random()*0.5 + 0.5)
+    setVizParam1(Math.random() * 0.6 + 0.1)
+    setVizParam2(Math.random() * 0.5 + 0.5)
     const tempo = randRange(100, 200);
     updateTempo(tempo);
     const special = [5, 7, 15, 10, 7, 7, 13];
@@ -322,7 +322,9 @@ function App() {
 
             // midi
             if (midiEnabled) {
-              device = getDevice(midiOutputDevice.name, WebMidi.outputs);
+              if (WebMidi) {
+                device = getDevice(midiOutputDevice.name, WebMidi.outputs);
+              }
             }
 
             haps.forEach((hap) => {
@@ -516,16 +518,16 @@ function App() {
         /> */}
 
         <PlayheadsView
-            playheads={playheads}
-            updatePlayhead={updatePlayhead}
-            playing={playing}
-            ticker={ticker}
-            masterSteps={masterSteps}
-            counters={counters}
+          playheads={playheads}
+          updatePlayhead={updatePlayhead}
+          playing={playing}
+          ticker={ticker}
+          masterSteps={masterSteps}
+          counters={counters}
         />
         <div className="flex">
           <div className="">
-            
+
           </div>
           <div className="flex items-center mx-auto"></div>
         </div>
@@ -731,7 +733,7 @@ function App() {
           <div className="mt-[0.5rem]">
             {midiEnabled && (
               <div>
-                {WebMidi._outputs.map((midi, index) => {
+                {WebMidi && WebMidi._outputs.map((midi, index) => {
                   return (
                     <button
                       key={midi._midiOutput.name}
