@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { loadSoundfont, startPresetNote } from "sfumato";
 
+import FPSStats from "react-fps-stats";
+
 import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
 import { p1, p2, p3, p4, p5 } from "./defaults";
@@ -12,8 +14,9 @@ import { updateEuclid, updateRotation } from "./playhead";
 import { SwitchButton } from "./components/switchButton";
 
 import { PlayheadsView } from "./components/playheads";
-import { DnaVisualizer } from "./components/dnaVisualizer";
-import { SequenceVisualizer } from "./components/sequenceVisualizer";
+import { SequenceVisualizer } from "./components/visualizerSequence";
+import { VisualizerPlayheads} from "./components/visualizerPlayheads";
+import { VisualizerBlobs} from "./components/visualizerBlobs";
 
 import {
   noteMappings,
@@ -45,6 +48,9 @@ function App() {
   const [audioContext, setAudioContext] = useState();
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
+
+  const width = 1200
+  const height = 700
 
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
@@ -338,20 +344,20 @@ function App() {
                   if (midiEnabled && midiOutputDevice !== -1) {
                     // play to midi channel of each playhead
                     device.playNote(note + noteOffsetRef.current, i + 1, {
-                      duration: active.legato * 1000,
+                      duration: active.legato * timeWindow,
                       attack: 0.8,
                     });
                   } else {
                     playNote(
                       active.instrument,
                       note + noteOffsetRef.current,
-                      active.legato * 1000
+                      active.legato * timeWindow
                     );
                   }
                   setActiveNotes[i](true);
                   setTimeout(() => {
                     setActiveNotes[i](false);
-                  }, active.legato * 1000);
+                  }, active.legato * timeWindow);
                 }
               }, timeWindow * (hap - counter));
             });
@@ -406,6 +412,7 @@ function App() {
       tabIndex={-1}
       className="App outline-none text-left max-w-full font-mono"
     >
+       <FPSStats />
       {!audioContext && (
         <div
           onClick={getAudioContext}
@@ -492,19 +499,64 @@ function App() {
         </div>
       </div>
       <div className="text-[0.9rem] bg-[#444] max-w-[1200px] mx-auto mb-[1rem] drop-shadow">
-        <SequenceVisualizer
-          playing={playing}
-          counter={renderCount.current}
-          activeNotes={activeNoteRefs}
-          sequence={sequence}
-          nodes={nodes}
-          counters={counters}
-          countRefs={countRefs}
-          playheads={playheads}
-          zoom={zoom}
-          param1={vizParam1}
-          param2={vizParam2}
-        />
+        <div className="relative"
+          style={{
+            width: width,
+            height: height
+          }}
+        >
+          <svg
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          className="svg"
+        ></svg>
+          <VisualizerBlobs
+            playing={playing}
+            counter={renderCount.current}
+            activeNotes={activeNoteRefs}
+            sequence={sequence}
+            nodes={nodes}
+            counters={counters}
+            countRefs={countRefs}
+            playheads={playheads}
+            zoom={zoom}
+            param1={vizParam1}
+            param2={vizParam2}
+            height={height}
+            width={width}
+            cps={cps}
+          />
+          <SequenceVisualizer
+            playing={playing}
+            counter={renderCount.current}
+            activeNotes={activeNoteRefs}
+            sequence={sequence}
+            nodes={nodes}
+            counters={counters}
+            countRefs={countRefs}
+            playheads={playheads}
+            zoom={zoom}
+            param1={vizParam1}
+            param2={vizParam2}
+            height={height}
+            width={width}
+          />
+          <VisualizerPlayheads
+            playing={playing}
+            counter={renderCount.current}
+            activeNotes={activeNoteRefs}
+            sequence={sequence}
+            nodes={nodes}
+            counters={counters}
+            countRefs={countRefs}
+            playheads={playheads}
+            zoom={zoom}
+            param1={vizParam1}
+            param2={vizParam2}
+            height={height}
+            width={width}
+          />        
+        </div>
         {/* <DnaVisualizer
           playing={playing}
           counter={renderCount.current}
@@ -664,6 +716,7 @@ function App() {
                     max="1"
                     value={zoom}
                     onChange={(e) => {
+                      setPlaying(false);
                       setZoom(e.target.value);
                     }}
                     step="0.01"

@@ -2,3 +2,66 @@ body {
     color: #fff;
     background-color: #222222
 }
+
+path,
+line {
+  fill: none;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.svg {
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  width:100%;
+}
+
+.animatingEnd {
+  animation: linePulseEnd var(--timeout2) linear forwards;
+}
+
+@keyframes linePulseEnd {
+    0% {
+      stroke: hsla(var(--h), var(--s), var(--l), 1);
+      stroke-dashoffset: var(--offset);
+      stroke-width: var(--stroke-width);
+      stroke-dasharray: var(--start) var(--initial) var(--segment_length);
+    }
+    49% {
+      stroke: rgba(255,255,255,1);
+      stroke-width: var(--stroke-width);
+    }
+    50% {
+      stroke: rgba(255,255,255,0);
+      stroke-width: var(--stroke-width);
+      stroke-dashoffset: var(--offset);
+      stroke-dasharray: var(--start_midway) var(--initial) 0;
+    }
+    100% {
+      stroke: rgba(255,255,255,0);
+      stroke-dashoffset: var(--offset);
+      stroke-dasharray: var(--end) var(--initial) var(--segment_length);
+    }
+}
+
+
+.animating {
+  animation: linePulse var(--timeout) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes linePulse {
+    0% {
+      stroke: hsla(var(--h), var(--s), var(--l), 1);
+      stroke-width: var(--stroke-width);
+      stroke-dashoffset: var(--offset);
+      stroke-dasharray: var(--start) var(--initial) var(--segment_length);
+    }
+    100% {
+      stroke: hsla(var(--h), var(--s), var(--l), 1);
+      stroke-width: var(--stroke-width);
+      stroke-dashoffset: var(--offset);
+      stroke-dasharray: var(--end) var(--initial) var(--segment_length);
+    }
+}

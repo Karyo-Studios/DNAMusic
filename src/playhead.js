@@ -1,6 +1,8 @@
 
 import { getPattern, euclidToPattern, rotate } from "./euclid"
 
+import { hexToHSL } from "./helpers"
+
 export class Playhead {
   constructor({
     playing = false,
@@ -23,6 +25,7 @@ export class Playhead {
     this.offset = offset
     this.legato = legato
     this.color = color
+    this.hsl = hexToHSL(color)
     this.steps = steps
     this.events = events
     this.followSteps = true

@@ -138,13 +138,13 @@ export const PlayheadsView = ({
                 leftOnClick={() => {
                   updatePlayhead(index, {
                     ...p,
-                    interval: p.interval / 2,
+                    interval: p.interval - 1,
                   });
                 }}
                 rightOnClick={() => {
                   updatePlayhead(index, {
                     ...p,
-                    interval: p.interval * 2,
+                    interval: p.interval + 1,
                   });
                 }}
                 value={`${p.interval}`}
