@@ -15,8 +15,8 @@ import { SwitchButton } from "./components/switchButton";
 
 import { PlayheadsView } from "./components/playheads";
 import { SequenceVisualizer } from "./components/visualizerSequence";
-import { VisualizerPlayheads} from "./components/visualizerPlayheads";
-import { VisualizerBlobs} from "./components/visualizerBlobs";
+import { VisualizerPlayheads } from "./components/visualizerPlayheads";
+import { VisualizerBlobs } from "./components/visualizerBlobs";
 
 import {
   noteMappings,
@@ -49,7 +49,7 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
-  const width = 1200
+  const width = 700
   const height = 700
 
   useEffect(() => {
@@ -410,9 +410,9 @@ function App() {
     <div
       onKeyDown={captureKeyboardEvent}
       tabIndex={-1}
-      className="App outline-none text-left max-w-full font-mono"
+      className="App outline-none text-left max-w-full"
     >
-       <FPSStats />
+      <FPSStats />
       {!audioContext && (
         <div
           onClick={getAudioContext}
@@ -473,16 +473,16 @@ function App() {
               />
             </div>
             <div className="ml-[2rem]">
-              <p className="">
-                Genomic sequence:{" "}
+              <p className="uppercase">
+                length{" "}
                 <strong>
-                  {savedSequences[sequenceIndex].length} basepairs
+                  {savedSequences[sequenceIndex].length}
                 </strong>
               </p>
-              <p className="">
-                Viewing window:{" "}
+              <p className="uppercase">
+                viewing:{" "}
                 <strong>
-                  {sequence.length} basepairs (
+                  {sequence.length} (
                   {(
                     (sequence.length / savedSequences[sequenceIndex].length) *
                     100
@@ -506,10 +506,10 @@ function App() {
           }}
         >
           <svg
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-          className="svg"
-        ></svg>
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            className="svg"
+          ></svg>
           <VisualizerBlobs
             playing={playing}
             counter={renderCount.current}
@@ -555,7 +555,7 @@ function App() {
             param2={vizParam2}
             height={height}
             width={width}
-          />        
+          />
         </div>
         {/* <DnaVisualizer
           playing={playing}

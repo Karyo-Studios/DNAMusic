@@ -20,12 +20,12 @@ export const VisualizerPlayheads = ({
   zoom,
   param1,
   param2,
+  width,
+  height,
 }) => {
   // boxSide x amount =
 
   const lastCounter = useRef(counter);
-  const width = 1200;
-  const height = 700;
   const spacingX = 16;
   const boxSide = 30 * zoom;
   const colSpace = boxSide / 5;
@@ -101,7 +101,7 @@ export const VisualizerPlayheads = ({
       }}
     >
       <div
-      className="relative"
+        className="relative"
         style={{
           width: width,
           height: height,
@@ -124,12 +124,12 @@ export const VisualizerPlayheads = ({
                 >
                   <div
                     style={{
-                        width:boxSide * 3,
-                        height:boxSide * boxAspect,
-                        borderRadius: '0.25rem',
-                        backgroundColor: playhead.color,
-                        lineHeight: `${boxSide * boxAspect}px`,
-                        fontSize: `${20 * zoom}px`
+                      width: boxSide * 3,
+                      height: boxSide * boxAspect,
+                      borderRadius: '0.25rem',
+                      backgroundColor: playhead.color,
+                      lineHeight: `${boxSide * boxAspect}px`,
+                      fontSize: `${20 * zoom}px`
                     }}
                   >
                     <div>{currentAcid}</div>

@@ -1,7 +1,19 @@
 body {
-    color: #fff;
-    background-color: #222222
+  color: #fff;
+  background-color: #222222;
+  font-family: 'Din', monospace;
 }
+
+@font-face {
+  font-family: 'Din';
+  src: local('Din'), url(./assets/fonts/din-reg.ttf) format('ttf');
+}
+
+@font-face {
+  font-family: 'Din Medium';
+  src: local('Din'), url(./assets/fonts/din.ttf) format('ttf');
+}
+
 
 path,
 line {
@@ -11,11 +23,11 @@ line {
 }
 
 .svg {
-  position:absolute;
-  top:0;
-  left:0;
-  height:100%;
-  width:100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 
 .animatingEnd {
@@ -23,27 +35,30 @@ line {
 }
 
 @keyframes linePulseEnd {
-    0% {
-      stroke: hsla(var(--h), var(--s), var(--l), 1);
-      stroke-dashoffset: var(--offset);
-      stroke-width: var(--stroke-width);
-      stroke-dasharray: var(--start) var(--initial) var(--segment_length);
-    }
-    49% {
-      stroke: rgba(255,255,255,1);
-      stroke-width: var(--stroke-width);
-    }
-    50% {
-      stroke: rgba(255,255,255,0);
-      stroke-width: var(--stroke-width);
-      stroke-dashoffset: var(--offset);
-      stroke-dasharray: var(--start_midway) var(--initial) 0;
-    }
-    100% {
-      stroke: rgba(255,255,255,0);
-      stroke-dashoffset: var(--offset);
-      stroke-dasharray: var(--end) var(--initial) var(--segment_length);
-    }
+  0% {
+    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke-dashoffset: var(--offset);
+    stroke-width: var(--stroke-width);
+    stroke-dasharray: var(--start) var(--initial) var(--segment_length);
+  }
+
+  49% {
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: var(--stroke-width);
+  }
+
+  50% {
+    stroke: rgba(255, 255, 255, 0);
+    stroke-width: var(--stroke-width);
+    stroke-dashoffset: var(--offset);
+    stroke-dasharray: var(--start_midway) var(--initial) 0;
+  }
+
+  100% {
+    stroke: rgba(255, 255, 255, 0);
+    stroke-dashoffset: var(--offset);
+    stroke-dasharray: var(--end) var(--initial) var(--segment_length);
+  }
 }
 
 
@@ -52,16 +67,17 @@ line {
 }
 
 @keyframes linePulse {
-    0% {
-      stroke: hsla(var(--h), var(--s), var(--l), 1);
-      stroke-width: var(--stroke-width);
-      stroke-dashoffset: var(--offset);
-      stroke-dasharray: var(--start) var(--initial) var(--segment_length);
-    }
-    100% {
-      stroke: hsla(var(--h), var(--s), var(--l), 1);
-      stroke-width: var(--stroke-width);
-      stroke-dashoffset: var(--offset);
-      stroke-dasharray: var(--end) var(--initial) var(--segment_length);
-    }
+  0% {
+    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke-width: var(--stroke-width);
+    stroke-dashoffset: var(--offset);
+    stroke-dasharray: var(--start) var(--initial) var(--segment_length);
+  }
+
+  100% {
+    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke-width: var(--stroke-width);
+    stroke-dashoffset: var(--offset);
+    stroke-dasharray: var(--end) var(--initial) var(--segment_length);
+  }
 }

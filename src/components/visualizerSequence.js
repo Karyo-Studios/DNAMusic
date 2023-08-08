@@ -94,19 +94,19 @@ export const SequenceVisualizer = ({
                     <div
                       className="absolute box-border text-center"
                       style={{
-                        left: boxScale * ((1 - boxScale)/2),
+                        left: boxScale * ((1 - boxScale) / 2),
                         width: boxSide * boxScale,
                         height: boxSide * boxAspect,
                         // border: "1px solid white",
                         borderRadius: "0.25rem",
                         lineHeight: `${boxSide * boxAspect}px`,
-                        backgroundColor: 'rgba(255,255,255,0.5)'
+                        backgroundColor: 'rgba(255,255,255,0.4)'
                       }}
                     ></div>
                     <div
-                      className="absolute box-border text-center"
+                      className="absolute box-border text-center uppercase"
                       style={{
-                        left: boxScale * ((1 - boxScale)/2),
+                        left: boxScale * ((1 - boxScale) / 2),
                         width: boxSide * boxScale,
                         height: boxSide * boxAspect,
                         lineHeight: `${boxSide * boxAspect}px`,
