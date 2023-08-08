@@ -12,7 +12,7 @@ export const p1 = new Playhead({
   instrumentName: '1',
   // instrumentName: 'E-Piano',
   // instrument: 96,
-  color: "#0000ff",
+  color: "#0000E8",
 });
 
 export const p2 = new Playhead({
@@ -50,7 +50,7 @@ export const p4 = new Playhead({
   legato: 1,
   instrumentName: '4',
   // instrumentName: 'Bass',
-  color: "#33ff74",
+  color: "#11CA3A",
 });
 
 export const p5 = new Playhead({

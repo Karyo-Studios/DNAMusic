@@ -170,7 +170,7 @@ export const VisualizerBlobs = ({
   // main animation loop
   // useAnimationFrame(animationCallbackRef);
 
-  var paramSet = 1;
+  var paramSet = 0;
   var params = [
     {
       x: 0.05227467811158796,

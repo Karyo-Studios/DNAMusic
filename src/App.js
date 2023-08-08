@@ -59,7 +59,7 @@ function App() {
   const [activeSequence, setActiveSequence] = useState(sequence);
   const [activeNodes, setActiveNodes] = useState(nodes);
 
-  const width = 1200;
+  const width = 1000;
   const height = 700;
 
   useEffect(() => {
@@ -458,90 +458,194 @@ function App() {
         </div>
       )}
       <div className="absolute w-[100%] z-[1]">
-        <div className="max-w-[1200px] mx-auto p-[1rem]">
-          <div className="flex justify-between">
-            <h1 className="text-[2rem]">
-              DNA Sequencer{" "}
-              {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
-            </h1>
-            {fullscreen && (
+      <div className="flex items-center mt-[0.5rem] px-[1rem]">
+          <div className="flex items-center">
+            <div className="flex">
               <button
-                className="bg-[#666] p-2 mr-1 w-[8rem]"
-                onClick={() => setFullscreen(!fullscreen)}
+                className="bg-[#888] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#aaa] text-[1.2rem] w-[7rem] rounded-[0.25rem]"
+                onClick={() => (playing ? pause() : play())}
               >
-                {!fullscreen ? "fullscreen" : "show UI"}
+                {playing ? "PAUSE" : "PLAY"}
               </button>
-            )}
-          </div>
-          <div className="my-2 flex items-start">
-            <div>
-              <p>
-                Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
-              </p>
-              <p className="mb-2">
-                <u>learn more!</u>
-              </p>
-              <div className="flex">
-                <SwitchButton
-                  leftOnClick={() => {
-                    const newSequenceIndex =
-                      sequenceIndex - 1 < 0
-                        ? savedSequences.length - 1
-                        : sequenceIndex - 1;
-                    setUserInputSequence(
-                      savedSequences[newSequenceIndex].sequence
-                    );
-                    setSequenceIndex(newSequenceIndex);
-                  }}
-                  rightOnClick={() => {
-                    const newSequenceIndex =
-                      sequenceIndex + 1 >= savedSequences.length
-                        ? 0
-                        : sequenceIndex + 1;
-                    setUserInputSequence(
-                      savedSequences[newSequenceIndex].sequence
-                    );
-                    setSequenceIndex(newSequenceIndex);
-                  }}
-                  leftText={"<"}
-                  rightText={">"}
-                />
-                <p className="ml-3">Viz:</p>
-                <SingleButton
-                  onClick={() => setShowSequence(!showSequence)}
-                  buttonStyle={{
-                    width: "2rem",
-                    fontWeight: 100,
-                  }}
-                >
-                  {showSequence ? "||" : "="}
-                </SingleButton>
-              </div>
+              {/* <button
+                className="bg-[#555] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
+                onClick={stop}
+              >
+                STOP
+              </button> */}
             </div>
-            <div className="ml-[2rem]">
-              <p className="uppercase">
-                length <strong>{savedSequences[sequenceIndex].length}</strong>
-              </p>
-              <p className="uppercase">
-                viewing:{" "}
-                <strong>
-                  {sequence.length} (
-                  {(
-                    (sequence.length / savedSequences[sequenceIndex].length) *
-                    100
-                  ).toFixed(4)}
-                  %)
-                </strong>
-              </p>
-              <p className="">
-                Description:{" "}
-                <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
-              </p>
+          </div>
+          <div className="hidden">
+            <p>RENDERFRAME: {renderCount.current}</p>
+            <p>COUNTER: {counter}</p>
+          </div>
+          <div className="flex flex-col">
+            <div>
+              <button
+                className="bg-[#555] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
+                onClick={() => generatePattern()}
+              >
+                Remix
+              </button>
+            </div>
+            <div className="hidden">
+              <p className="mt-3">lock / unlock parameters</p>
+            </div>
+          </div>
+          <div className="mx-[1rem]">
+            <p>
+              tempo: {bpm}bpm {/* {counter} */}
+            </p>
+            <div>
+              <input
+                type="range"
+                className="w-[10rem]"
+                min="20"
+                max="260"
+                value={bpm}
+                onChange={(e) => {
+                  updateTempo(e.target.value);
+                }}
+                step="1"
+                aria-label="bpm slider"
+              />
+            </div>
+          </div>
+          <p className="ml-3 w-[6rem]">Steps: {masterSteps}</p>
+          <SwitchButton
+            leftOnClick={() => {
+              if (masterSteps > 3) {
+                let updated = [];
+                for (let i = 0; i < playheads.length; i++) {
+                  const cur = playheads[i];
+                  updated.push(
+                    updateEuclid({ ...cur, steps: masterSteps - 1 })
+                  );
+                }
+                setPlayheads(updated);
+                setMasterSteps(masterSteps - 1);
+              }
+            }}
+            rightOnClick={() => {
+              if (masterSteps < 16) {
+                let updated = [];
+                for (let i = 0; i < playheads.length; i++) {
+                  const cur = playheads[i];
+                  updated.push(
+                    updateEuclid({ ...cur, steps: masterSteps + 1 })
+                  );
+                }
+                setPlayheads(updated);
+                setMasterSteps(masterSteps + 1);
+              }
+            }}
+            leftStyle={{
+              opacity: masterSteps > 3 ? 1 : 0.3,
+              fontWeight: "bold",
+            }}
+            rightStyle={{
+              opacity: masterSteps < 16 ? 1 : 0.3,
+              fontWeight: "bold",
+            }}
+            leftText={"<"}
+            rightText={">"}
+          />
+          <p className="ml-4 w-[5rem]">Key: {noteOffset}</p>
+          <SwitchButton
+            leftOnClick={() => setNoteOffset(noteOffset - 1)}
+            rightOnClick={() => setNoteOffset(noteOffset + 1)}
+            leftText={"-1"}
+            rightText={"+1"}
+          />
+        </div>
+      </div>
+      <div className="absolute w-[100%] z-[1]">
+        <div className="max-w-[1200px] mx-auto p-[1rem]">
+          <div className="hidden">
+            <div className="flex justify-between">
+              <h1 className="text-[2rem]">
+                DNA Sequencer{" "}
+                {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
+              </h1>
+              {fullscreen && (
+                <button
+                  className="bg-[#555] p-2 mr-1 w-[8rem]"
+                  onClick={() => setFullscreen(!fullscreen)}
+                >
+                  {!fullscreen ? "fullscreen" : "show UI"}
+                </button>
+              )}
+            </div>
+            <div className="my-2 flex items-start">
+              <div>
+                <p>
+                  Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
+                </p>
+                <p className="mb-2">
+                  <u>learn more!</u>
+                </p>
+                <div className="flex">
+                  <SwitchButton
+                    leftOnClick={() => {
+                      const newSequenceIndex =
+                        sequenceIndex - 1 < 0
+                          ? savedSequences.length - 1
+                          : sequenceIndex - 1;
+                      setUserInputSequence(
+                        savedSequences[newSequenceIndex].sequence
+                      );
+                      setSequenceIndex(newSequenceIndex);
+                    }}
+                    rightOnClick={() => {
+                      const newSequenceIndex =
+                        sequenceIndex + 1 >= savedSequences.length
+                          ? 0
+                          : sequenceIndex + 1;
+                      setUserInputSequence(
+                        savedSequences[newSequenceIndex].sequence
+                      );
+                      setSequenceIndex(newSequenceIndex);
+                    }}
+                    leftText={"<"}
+                    rightText={">"}
+                  />
+                  <p className="ml-3">Viz:</p>
+                  <SingleButton
+                    onClick={() => setShowSequence(!showSequence)}
+                    buttonStyle={{
+                      width: "2rem",
+                      fontWeight: 100,
+                    }}
+                  >
+                    {showSequence ? "||" : "="}
+                  </SingleButton>
+                </div>
+              </div>
+              <div className="ml-[2rem]">
+                <p className="uppercase">
+                  length <strong>{savedSequences[sequenceIndex].length}</strong>
+                </p>
+                <p className="uppercase">
+                  viewing:{" "}
+                  <strong>
+                    {sequence.length} (
+                    {(
+                      (sequence.length / savedSequences[sequenceIndex].length) *
+                      100
+                    ).toFixed(4)}
+                    %)
+                  </strong>
+                </p>
+                <p className="">
+                  Description:{" "}
+                  <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="text-[0.9rem] bg-[#444] max-w-[1200px] mx-auto mb-[1rem] drop-shadow">
+      <div className="text-[0.9rem] bg-[#222] max-w-[1200px] mx-auto mb-[1rem]">
         {showSequence ? (
           <div
             className="relative"
@@ -625,7 +729,8 @@ function App() {
         )}
         <div>
           <div
-          className="w-[100%] relative"
+          className="relative"
+          style={{width: width}}
           >
             <div className="absolute left-[1rem] top-[-0.5rem]">
               <p>{initialBounds[0]}</p>
@@ -633,31 +738,33 @@ function App() {
             <div className="absolute right-[1rem] top-[-0.5rem]">
               <p>{initialBounds[1]}</p>
             </div>
-            <ReactSlider
-              className="horizontal-slider"
-              thumbClassName="example-thumb"
-              trackClassName="example-track"
-              defaultValue={sequenceBounds}
-              ariaLabel={["Lower thumb", "Upper thumb"]}
-              ariaValuetext={(state) => `Thumb value ${state.valueNow}`}
-              // orientation="vertical"
-              renderThumb={(props, state) => {
-                return (
-                  <div {...props} 
-                  />
-                );
-              }}
-              minDistance={18}
-              min={0}
-              max={sequence.length}
-              pearling
-              onAfterChange={(value, index) => {
-                setSequenceBounds(value);
-              }}
-              onChange={(value) => {
-                setInitialBounds(value)
-              }}
-            />
+            <div>
+              <ReactSlider
+                className="horizontal-slider"
+                thumbClassName="example-thumb"
+                trackClassName="example-track"
+                defaultValue={sequenceBounds}
+                ariaLabel={["Lower thumb", "Upper thumb"]}
+                ariaValuetext={(state) => `Thumb value ${state.valueNow}`}
+                // orientation="vertical"
+                renderThumb={(props, state) => {
+                  return (
+                    <div {...props} 
+                    />
+                  );
+                }}
+                minDistance={18}
+                min={0}
+                max={sequence.length}
+                pearling
+                onAfterChange={(value, index) => {
+                  setSequenceBounds(value);
+                }}
+                onChange={(value) => {
+                  setInitialBounds(value)
+                }}
+              />
+            </div>
           </div>
         </div>
         <PlayheadsView
@@ -668,110 +775,6 @@ function App() {
           masterSteps={masterSteps}
           counters={counters}
         />
-        <div className="flex">
-          <div className=""></div>
-          <div className="flex items-center mx-auto"></div>
-        </div>
-        <div className="flex items-center mt-[0.5rem] px-[1rem]">
-          <div className="flex items-center">
-            <div className="flex">
-              <button
-                className="bg-[#888] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#aaa] text-[1.2rem] w-[7rem] rounded-[0.25rem]"
-                onClick={() => (playing ? pause() : play())}
-              >
-                {playing ? "PAUSE" : "PLAY"}
-              </button>
-              {/* <button
-                className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
-                onClick={stop}
-              >
-                STOP
-              </button> */}
-            </div>
-          </div>
-          <div className="hidden">
-            <p>RENDERFRAME: {renderCount.current}</p>
-            <p>COUNTER: {counter}</p>
-          </div>
-          <div className="flex flex-col">
-            <div>
-              <button
-                className="bg-[#666] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
-                onClick={() => generatePattern()}
-              >
-                Remix
-              </button>
-            </div>
-            <div className="hidden">
-              <p className="mt-3">lock / unlock parameters</p>
-            </div>
-          </div>
-          <div className="mx-[1rem]">
-            <p>
-              tempo: {bpm}bpm {/* {counter} */}
-            </p>
-            <div>
-              <input
-                type="range"
-                className="w-[10rem]"
-                min="20"
-                max="260"
-                value={bpm}
-                onChange={(e) => {
-                  updateTempo(e.target.value);
-                }}
-                step="1"
-                aria-label="bpm slider"
-              />
-            </div>
-          </div>
-          <p className="ml-3 w-[6rem]">Steps: {masterSteps}</p>
-          <SwitchButton
-            leftOnClick={() => {
-              if (masterSteps > 3) {
-                let updated = [];
-                for (let i = 0; i < playheads.length; i++) {
-                  const cur = playheads[i];
-                  updated.push(
-                    updateEuclid({ ...cur, steps: masterSteps - 1 })
-                  );
-                }
-                setPlayheads(updated);
-                setMasterSteps(masterSteps - 1);
-              }
-            }}
-            rightOnClick={() => {
-              if (masterSteps < 16) {
-                let updated = [];
-                for (let i = 0; i < playheads.length; i++) {
-                  const cur = playheads[i];
-                  updated.push(
-                    updateEuclid({ ...cur, steps: masterSteps + 1 })
-                  );
-                }
-                setPlayheads(updated);
-                setMasterSteps(masterSteps + 1);
-              }
-            }}
-            leftStyle={{
-              opacity: masterSteps > 3 ? 1 : 0.3,
-              fontWeight: "bold",
-            }}
-            rightStyle={{
-              opacity: masterSteps < 16 ? 1 : 0.3,
-              fontWeight: "bold",
-            }}
-            leftText={"<"}
-            rightText={">"}
-          />
-          <p className="ml-4 w-[5rem]">Key: {noteOffset}</p>
-          <SwitchButton
-            leftOnClick={() => setNoteOffset(noteOffset - 1)}
-            rightOnClick={() => setNoteOffset(noteOffset + 1)}
-            leftText={"-1"}
-            rightText={"+1"}
-          />
-        </div>
         <div className="">
           <div className="mt-[1rem] hidden">
             <p>Additional sequences:</p>
@@ -855,13 +858,13 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="py-[1rem] px-[1.5rem] bg-[#444] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
+      <div className="py-[1rem] px-[1.5rem] bg-[#222] max-w-[1200px] mx-auto my-[1rem] drop-shadow">
         <div className="mt-1">
           <div className="flex">
             <button
               className="p-2 w-[5rem] rounded-[0.25rem]"
               style={{
-                backgroundColor: midiEnabled ? "#666" : "#888",
+                backgroundColor: midiEnabled ? "#555" : "#888",
                 textDecoration: midiEnabled ? "none" : "line-through",
               }}
               onClick={() => {
@@ -875,27 +878,26 @@ function App() {
           <div className="mt-[0.5rem]">
             {midiEnabled && (
               <div>
-                {WebMidi &&
-                  WebMidi._outputs.map((midi, index) => {
-                    return (
-                      <button
-                        key={midi._midiOutput.name}
-                        className="mr-2 mt-2 p-1"
-                        style={{
-                          backgroundColor:
-                            index === midiOutputDevice.index ? "#666" : "#888",
-                        }}
-                        onClick={() => {
-                          setMidiOutputDevice({
-                            name: midi._midiOutput.name,
-                            index,
-                          });
-                        }}
-                      >
-                        {midi._midiOutput.name}
-                      </button>
-                    );
-                  })}
+                {WebMidi && WebMidi._outputs.map((midi, index) => {
+                  return (
+                    <button
+                      key={midi._midiOutput.name}
+                      className="mr-2 mt-2 p-1"
+                      style={{
+                        backgroundColor:
+                          index === midiOutputDevice.index ? "#555" : "#888",
+                      }}
+                      onClick={() => {
+                        setMidiOutputDevice({
+                          name: midi._midiOutput.name,
+                          index,
+                        });
+                      }}
+                    >
+                      {midi._midiOutput.name}
+                    </button>
+                  );
+                })}
                 <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
               </div>
             )}
@@ -904,7 +906,7 @@ function App() {
         <p className="mt-3">{`DNA Sequence (edit):`}</p>
         <div className="flex mt-2">
           <textarea
-            className="p-2 max-w-[30rem] w-[80%] min-w-[10rem] bg-[#666]"
+            className="p-2 max-w-[30rem] w-[80%] min-w-[10rem] bg-[#555]"
             value={userInputSequence}
             onChange={(e) => setUserInputSequence(e.target.value)}
           />

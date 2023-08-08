@@ -2,7 +2,7 @@ export const PlayheadView = ({ p, masterSteps, playing, ticker, index }) => {
   return (
     <div className="flex items-center">
       <div
-        className="flex mx-[0.25rem] w-[20rem] bg-[#666] h-[1.9rem] rounded-[0.25rem]"
+        className="flex mx-[0.25rem] w-[20rem] bg-[#555] h-[1.9rem] rounded-[0.25rem]"
         style={{ opacity: p.playing ? 1 : 0.3 }}
       >
         {p.euclid.map((hap, i) => {

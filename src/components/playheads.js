@@ -36,7 +36,7 @@ export const PlayheadsView = ({
             }}
           >
             <button
-              className="p-1 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#666] hover:bg-[#aaa]"
+              className="p-1 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#555] hover:bg-[#aaa]"
               onClick={() =>
                 updatePlayhead(index, { ...p, playing: !p.playing })
               }
