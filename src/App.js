@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { loadSoundfont, startPresetNote } from "sfumato";
+import ReactSlider from "react-slider";
 
 import FPSStats from "react-fps-stats";
 
@@ -12,11 +13,13 @@ import { queryPattern } from "./pattern";
 import { updateEuclid, updateRotation } from "./playhead";
 
 import { SwitchButton } from "./components/switchButton";
+import { SingleButton } from "./components/singleButton";
 
 import { PlayheadsView } from "./components/playheads";
-import { SequenceVisualizer } from "./components/visualizerSequence";
+import { VisualizerSequence } from "./components/visualizerSequence";
 import { VisualizerPlayheads } from "./components/visualizerPlayheads";
 import { VisualizerBlobs } from "./components/visualizerBlobs";
+import { DnaVisualizer } from "./components/dnaVisualizer";
 
 import {
   noteMappings,
@@ -27,7 +30,6 @@ import {
 import { loadedSequences, savedSequences } from "./loadedSequences";
 
 import "./App.css";
-
 
 function App() {
   const [bpm, setBpm] = useState(150);
@@ -49,8 +51,16 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
-  const width = 700
-  const height = 700
+  const [sequenceBounds, setSequenceBounds] = useState([0, savedSequences[sequenceIndex].sequence.length]);
+  const [initialBounds, setInitialBounds] = useState([0, savedSequences[sequenceIndex].sequence.length]);
+
+  const [showSequence, setShowSequence] = useState(true);
+
+  const [activeSequence, setActiveSequence] = useState(sequence);
+  const [activeNodes, setActiveNodes] = useState(nodes);
+
+  const width = 1200;
+  const height = 700;
 
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
@@ -65,6 +75,8 @@ function App() {
     setBpm(tempo);
     setCps(60 / tempo);
   };
+
+  // useEffect(() => {}, [sequenceBounds]);
 
   // midi settings
   const [midiEnabled, setMidiEnabled] = useState(false);
@@ -95,8 +107,8 @@ function App() {
 
   const getNote = (index) => {
     // make this prettier at some point
-    if (nodes.length && nodes[index] !== undefined) {
-      return toMidi(noteMappings[nodes[index].aminoacid]);
+    if (activeNodes.length && activeNodes[index] !== undefined) {
+      return toMidi(noteMappings[activeNodes[index].aminoacid]);
     }
   };
 
@@ -268,8 +280,8 @@ function App() {
   const generatePattern = () => {
     // resetCounters();
     setNoteOffset(randRange(-5, 5));
-    setVizParam1(Math.random() * 0.6 + 0.1)
-    setVizParam2(Math.random() * 0.5 + 0.5)
+    setVizParam1(Math.random() * 0.6 + 0.1);
+    setVizParam2(Math.random() * 0.5 + 0.5);
     const tempo = randRange(100, 200);
     updateTempo(tempo);
     const special = [5, 7, 15, 10, 7, 7, 13];
@@ -339,8 +351,8 @@ function App() {
                   const pos = countRefs[i].current; // make sure to use ref
                   // for some reason the note is begin rendered one behind the note, TODO investigate this
                   const note =
-                    getNote((pos + 1) % nodes.length) + active.offset;
-                  setCounters[i]((pos + 1) % nodes.length);
+                    getNote((pos + 1) % activeNodes.length) + active.offset;
+                  setCounters[i]((pos + 1) % activeNodes.length);
                   if (midiEnabled && midiOutputDevice !== -1) {
                     // play to midi channel of each playhead
                     device.playNote(note + noteOffsetRef.current, i + 1, {
@@ -400,11 +412,33 @@ function App() {
   useMemo(() => {
     const { nodes, sequence } = parseSequence(userInputSequence);
     setNodes(nodes);
-    // setZoom(mapN(sequence.length, 1, 400, 5, 1));
     setSequence(sequence);
     renderCount.current = 0;
+    setActiveNodes(nodes);
+    setActiveSequence(sequence);
     resetCounters();
   }, [userInputSequence]);
+
+  useMemo(() => {
+    setActiveNodes(nodes);
+    setActiveSequence(sequence);
+  }, [sequence]);
+
+  useMemo(() => {
+    const length = sequenceBounds[1] - sequenceBounds[0];
+    // console.log(nodes.length, sequence.length)
+    const snippet = sequence.slice(Math.floor(sequenceBounds[0]/3)*3, sequenceBounds[1]);
+    // console.log(sequenceBounds[0]/3, sequenceBounds[1]/3)
+    const nodeSnippet = nodes.slice(
+      Math.floor(sequenceBounds[0] / 3),
+      Math.floor(sequenceBounds[1] / 3)
+    );
+    // console.log(snippet, nodeSnippet)
+    setActiveSequence(snippet);
+    setActiveNodes(nodeSnippet);
+    const newZoom = mapN(length, 18, 300, 1, 0.5);
+    setZoom(newZoom < 0.4 ? 0.4 : newZoom);
+  }, [sequenceBounds]);
 
   return (
     <div
@@ -447,37 +481,46 @@ function App() {
               <p className="mb-2">
                 <u>learn more!</u>
               </p>
-              <SwitchButton
-                leftOnClick={() => {
-                  const newSequenceIndex =
-                    sequenceIndex - 1 < 0
-                      ? savedSequences.length - 1
-                      : sequenceIndex - 1;
-                  setUserInputSequence(
-                    savedSequences[newSequenceIndex].sequence
-                  );
-                  setSequenceIndex(newSequenceIndex);
-                }}
-                rightOnClick={() => {
-                  const newSequenceIndex =
-                    sequenceIndex + 1 >= savedSequences.length
-                      ? 0
-                      : sequenceIndex + 1;
-                  setUserInputSequence(
-                    savedSequences[newSequenceIndex].sequence
-                  );
-                  setSequenceIndex(newSequenceIndex);
-                }}
-                leftText={"<"}
-                rightText={">"}
-              />
+              <div className="flex">
+                <SwitchButton
+                  leftOnClick={() => {
+                    const newSequenceIndex =
+                      sequenceIndex - 1 < 0
+                        ? savedSequences.length - 1
+                        : sequenceIndex - 1;
+                    setUserInputSequence(
+                      savedSequences[newSequenceIndex].sequence
+                    );
+                    setSequenceIndex(newSequenceIndex);
+                  }}
+                  rightOnClick={() => {
+                    const newSequenceIndex =
+                      sequenceIndex + 1 >= savedSequences.length
+                        ? 0
+                        : sequenceIndex + 1;
+                    setUserInputSequence(
+                      savedSequences[newSequenceIndex].sequence
+                    );
+                    setSequenceIndex(newSequenceIndex);
+                  }}
+                  leftText={"<"}
+                  rightText={">"}
+                />
+                <p className="ml-3">Viz:</p>
+                <SingleButton
+                  onClick={() => setShowSequence(!showSequence)}
+                  buttonStyle={{
+                    width: "2rem",
+                    fontWeight: 100,
+                  }}
+                >
+                  {showSequence ? "||" : "="}
+                </SingleButton>
+              </div>
             </div>
             <div className="ml-[2rem]">
               <p className="uppercase">
-                length{" "}
-                <strong>
-                  {savedSequences[sequenceIndex].length}
-                </strong>
+                length <strong>{savedSequences[sequenceIndex].length}</strong>
               </p>
               <p className="uppercase">
                 viewing:{" "}
@@ -499,76 +542,124 @@ function App() {
         </div>
       </div>
       <div className="text-[0.9rem] bg-[#444] max-w-[1200px] mx-auto mb-[1rem] drop-shadow">
-        <div className="relative"
-          style={{
-            width: width,
-            height: height
-          }}
-        >
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            className="svg"
-          ></svg>
-          <VisualizerBlobs
-            playing={playing}
-            counter={renderCount.current}
-            activeNotes={activeNoteRefs}
-            sequence={sequence}
-            nodes={nodes}
-            counters={counters}
-            countRefs={countRefs}
-            playheads={playheads}
-            zoom={zoom}
-            param1={vizParam1}
-            param2={vizParam2}
-            height={height}
-            width={width}
-            cps={cps}
-          />
-          <SequenceVisualizer
-            playing={playing}
-            counter={renderCount.current}
-            activeNotes={activeNoteRefs}
-            sequence={sequence}
-            nodes={nodes}
-            counters={counters}
-            countRefs={countRefs}
-            playheads={playheads}
-            zoom={zoom}
-            param1={vizParam1}
-            param2={vizParam2}
-            height={height}
-            width={width}
-          />
-          <VisualizerPlayheads
-            playing={playing}
-            counter={renderCount.current}
-            activeNotes={activeNoteRefs}
-            sequence={sequence}
-            nodes={nodes}
-            counters={counters}
-            countRefs={countRefs}
-            playheads={playheads}
-            zoom={zoom}
-            param1={vizParam1}
-            param2={vizParam2}
-            height={height}
-            width={width}
-          />
+        {showSequence ? (
+          <div
+            className="relative"
+            style={{
+              width: width,
+              height: height,
+            }}
+          >
+            <svg
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              className="svg"
+            ></svg>
+            <VisualizerBlobs
+              playing={playing}
+              counter={renderCount.current}
+              activeNotes={activeNoteRefs}
+              sequence={activeSequence}
+              nodes={activeNodes}
+              counters={counters}
+              countRefs={countRefs}
+              playheads={playheads}
+              zoom={zoom}
+              param1={vizParam1}
+              param2={vizParam2}
+              height={height}
+              width={width}
+              cps={cps}
+            />
+            <VisualizerSequence
+              playing={playing}
+              counter={renderCount.current}
+              activeNotes={activeNoteRefs}
+              sequence={activeSequence}
+              nodes={activeNodes}
+              counters={counters}
+              countRefs={countRefs}
+              playheads={playheads}
+              zoom={zoom}
+              param1={vizParam1}
+              param2={vizParam2}
+              height={height}
+              width={width}
+              cps={cps}
+            />
+            <VisualizerPlayheads
+              playing={playing}
+              counter={renderCount.current}
+              activeNotes={activeNoteRefs}
+              sequence={activeSequence}
+              nodes={activeNodes}
+              counters={counters}
+              countRefs={countRefs}
+              playheads={playheads}
+              zoom={zoom}
+              param1={vizParam1}
+              param2={vizParam2}
+              height={height}
+              width={width}
+            />
+          </div>
+        ) : (
+          <div
+            onClick={() => {
+              setVizParam1(Math.random() * 0.6 + 0.1);
+              setVizParam2(Math.random() * 0.5 + 0.5);
+            }}
+          >
+            <DnaVisualizer
+              playing={playing}
+              counter={renderCount.current}
+              sequence={activeSequence}
+              nodes={activeNodes}
+              counters={counters}
+              playheads={playheads}
+              zoom={zoom}
+              param1={vizParam1}
+              param2={vizParam2}
+            />
+          </div>
+        )}
+        <div>
+          <div
+          className="w-[100%] relative"
+          >
+            <div className="absolute left-[1rem] top-[-0.5rem]">
+              <p>{initialBounds[0]}</p>
+            </div>
+            <div className="absolute right-[1rem] top-[-0.5rem]">
+              <p>{initialBounds[1]}</p>
+            </div>
+            <ReactSlider
+              className="horizontal-slider"
+              thumbClassName="example-thumb"
+              trackClassName="example-track"
+              defaultValue={sequenceBounds}
+              ariaLabel={["Lower thumb", "Upper thumb"]}
+              ariaValuetext={(state) => `Thumb value ${state.valueNow}`}
+              // orientation="vertical"
+              renderThumb={(props, state) => {
+                return (
+                  <div {...props} 
+                  />
+                );
+              }}
+              minDistance={18}
+              min={0}
+              max={sequence.length}
+              pearling
+              onAfterChange={(value, index) => {
+                setSequenceBounds(value);
+              }}
+              onChange={(value) => {
+                setInitialBounds(value)
+              }}
+            />
+          </div>
         </div>
-        {/* <DnaVisualizer
-          playing={playing}
-          counter={renderCount.current}
-          sequence={sequence}
-          nodes={nodes}
-          counters={counters}
-          playheads={playheads}
-          zoom={zoom}
-          param1={vizParam1}
-          param2={vizParam2}
-        /> */}
-
         <PlayheadsView
           playheads={playheads}
           updatePlayhead={updatePlayhead}
@@ -578,9 +669,7 @@ function App() {
           counters={counters}
         />
         <div className="flex">
-          <div className="">
-
-          </div>
+          <div className=""></div>
           <div className="flex items-center mx-auto"></div>
         </div>
         <div className="flex items-center mt-[0.5rem] px-[1rem]">
@@ -716,7 +805,7 @@ function App() {
                     max="1"
                     value={zoom}
                     onChange={(e) => {
-                      setPlaying(false);
+                      // setPlaying(false);
                       setZoom(e.target.value);
                     }}
                     step="0.01"
@@ -786,26 +875,27 @@ function App() {
           <div className="mt-[0.5rem]">
             {midiEnabled && (
               <div>
-                {WebMidi && WebMidi._outputs.map((midi, index) => {
-                  return (
-                    <button
-                      key={midi._midiOutput.name}
-                      className="mr-2 mt-2 p-1"
-                      style={{
-                        backgroundColor:
-                          index === midiOutputDevice.index ? "#666" : "#888",
-                      }}
-                      onClick={() => {
-                        setMidiOutputDevice({
-                          name: midi._midiOutput.name,
-                          index,
-                        });
-                      }}
-                    >
-                      {midi._midiOutput.name}
-                    </button>
-                  );
-                })}
+                {WebMidi &&
+                  WebMidi._outputs.map((midi, index) => {
+                    return (
+                      <button
+                        key={midi._midiOutput.name}
+                        className="mr-2 mt-2 p-1"
+                        style={{
+                          backgroundColor:
+                            index === midiOutputDevice.index ? "#666" : "#888",
+                        }}
+                        onClick={() => {
+                          setMidiOutputDevice({
+                            name: midi._midiOutput.name,
+                            index,
+                          });
+                        }}
+                      >
+                        {midi._midiOutput.name}
+                      </button>
+                    );
+                  })}
                 <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
               </div>
             )}

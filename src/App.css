@@ -14,6 +14,46 @@ body {
   src: local('Din'), url(./assets/fonts/din.ttf) format('ttf');
 }
 
+/* react slider  */
+
+.horizontal-slider {
+  width: calc(100% - 2rem);
+  height: 2rem;
+  margin: auto;
+}
+.example-thumb {
+  cursor: pointer;
+  position: absolute;
+  z-index: 100;
+  border: 5px solid #eee;
+  background-color: #eee;
+  display: block;
+}
+
+.example-thumb.active {
+  background-color: #eee;
+}
+.example-track {
+  position: relative;
+  background: #333;
+}
+.example-track.example-track-1 {
+  background-color: #eee;
+}
+.horizontal-slider .example-track {
+  top: 20px;
+  height: 4px;
+}
+.horizontal-slider .example-thumb {
+  top: 12px;
+  width: 12px;
+  outline: none;
+  height: 20px;
+  line-height: 38px;
+  border-radius: 4px;
+}
+
+/* blobs */
 
 path,
 line {

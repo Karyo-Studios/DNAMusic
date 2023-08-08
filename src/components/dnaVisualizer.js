@@ -37,8 +37,9 @@ const PlayheadTile = (props) => {
     (g) => {
       g.clear();
       g.beginFill(props.color);
-        g.drawRect(0, 0, props.boxSide, props.boxSide);
-      g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
+        g.drawRoundedRect(0, props.boxSide/6, props.boxSide, props.boxSide*2, 6);
+        
+      // g.drawCircle(props.boxSide / 2, props.boxSide / 2, props.boxSide / 2);
       g.endFill();
     },
     [props]
@@ -145,7 +146,6 @@ export const DnaVisualizer = ({
           if (nodes[Math.floor(index / 3)] === undefined) {
             return;
           }
-
           const currentAcid = nodes[Math.floor(index / 3)].aminoacid
           const spritePathAcid = getAcidSprite(currentAcid)
           const spritePath = getSprite(letter);
@@ -186,38 +186,39 @@ export const DnaVisualizer = ({
           const n2 = getCoord(count + 1);
           const n3 = getCoord(count + 2);
           const factor = 1.5;
+          if (nodes[count/3] === undefined) return
           const currentAcid = nodes[count/3].aminoacid
           const spritePathAcid = getAcidSprite(currentAcid)
           const scale = 0.8;
           if (playhead.playing) {
             return (
               <Container key={index + n1.x} 
-              filters={[alphaFilterPlayhead]}
+              // filters={[alphaFilterPlayhead]}
               >
-                <Container
+                {/* <Container
                   x={n1.x - boxSide / (factor * 2)}
                   y={n1.y - boxSide / (factor * 2)}
                 >
                   <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
-                </Container>
-                <Container
+                </Container> */}
+                {/* <Container
                   x={n3.x - boxSide / (factor * 2)}
                   y={n3.y - boxSide / (factor * 2)}
                 >
                   <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
-                </Container>
+                </Container> */}
                 <Container
                   x={n2.x - boxSide / (factor * 2)}
-                  y={n2.y - boxSide / (factor * 2)}
+                  y={n2.y - boxSide / (factor * 2) - boxSide}
                 >
                   <PlayheadTile boxSide={boxSide * factor} color={playhead.color} />
                   <Sprite
                     image={spritePathAcid}
-                    x={boxSide * ((1) / 2)}
-                    y={boxSide * ((1) / 2)}
+                    x={boxSide * ((0.75))}
+                    y={boxSide * ((1.2))}
                     width={boxSide}
                     height={boxSide}
-                    anchor={{ x: 0, y: 0 }}
+                    anchor={{ x: 0.5, y: 0 }}
                   />
                 </Container>
               </Container>
@@ -226,26 +227,6 @@ export const DnaVisualizer = ({
         })}
 
       </Stage>
-      <div className="flex gap-x-[0.5rem]">
-        <input
-          value={showLettersColors}
-          onClick={() => {
-            setShowLettersColors(!showLettersColors);
-          }}
-          type="checkbox"
-          className="checked:bg-blue-500 ml-2"
-        />
-        <p>Colors</p>
-        <input
-          value={showAminoAcids}
-          onClick={() => {
-            setShowAminoAcids(!showAminoAcids);
-          }}
-          type="checkbox"
-          className="checked:bg-blue-500 ml-2"
-        />
-        <p>ACTG / Amino Acids</p>
-      </div>
     </div>
   );
 };

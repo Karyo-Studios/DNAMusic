@@ -6,7 +6,7 @@ import { toMidi } from "sfumato";
 
 import { aminoAcidColors, noteMappings } from "../mappings";
 
-export const SequenceVisualizer = ({
+export const VisualizerSequence = ({
   playing,
   sequence,
   nodes,

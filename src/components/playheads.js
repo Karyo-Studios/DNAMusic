@@ -16,7 +16,7 @@ export const PlayheadsView = ({
 }) => {
   return (
     <div>
-      <div className="flex mt-[1rem] text-center text-[#aaa] select-none min-w-[1000px] uppercase">
+      <div className="flex mt-[0.5rem] text-center text-[#aaa] select-none min-w-[1000px] uppercase">
         <p className="w-[7rem]">playhead</p>
         <p className="w-[6.5rem]">hits</p>
         <p className="w-[5rem]"></p>

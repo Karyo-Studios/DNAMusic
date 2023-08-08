@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
-import { mapN, randRange } from "../utils";
-
-import { toMidi } from "sfumato";
+import { randRange } from "../utils";
 
 import { aminoAcidhsls, noteMappings } from "../mappings";
-
-import { useAnimationFrame } from "../graphics";
 
 export const VisualizerBlobs = ({
   playing,
@@ -57,30 +53,31 @@ export const VisualizerBlobs = ({
       x: spacingX + x,
     };
   };
-  const getAcidSprite = (letter) => {
-    const spritePath = `/assets/acids/amino_${letter.toLowerCase()}.png`;
-    return spritePath;
-  };
 
-  const [count, setCount] = React.useState(0);
+  // let lastTick = [-1, -1, -1, -1, -1];
+  // let lastSpawned = [false, false, false, false, false];
+  // let lastIndex = [-1, -1, -1, -1, -1];
 
-  let lastTick = [-1, -1, -1, -1, -1];
-  let lastSpawned = [false, false, false, false, false];
-  let lastIndex = [-1, -1, -1, -1, -1];
-  let activeBlobs = [];
-  //
-
-  let tick = 0;
+  const [lastTick, setLastTick] = useState([-1, -1, -1, -1, -1]);
+  const [lastSpawned, setLastSpawned] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
+  const [lastIndex, setLastIndex] = useState([-1, -1, -1, -1, -1]);
 
   let blobCount = 0;
 
-  let blobs = [{}, {}, {}, {}, {}];
+  const [ticks, setTicks] = useState(0);
 
-  const animationCallback = () => {
-    const svg = document.querySelector(".svg");
-    tick = tick + 1;
-
+  useEffect(() => {
     const timeWindow = cps * 1000;
+
+    let updatedLastSpawn = [...lastSpawned];
+    let updatedLastIndex = [...lastIndex];
+    let updatedLastTick = [...lastTick];
 
     // check to add new blobs
     for (let i = 0; i < playheads.length; i++) {
@@ -88,68 +85,90 @@ export const VisualizerBlobs = ({
         // note is currently active
         const index = countRefs[i].current;
         const currentNode = nodes[Math.floor(index / 3)];
+        if (currentNode === undefined) return;
         const note = noteMappings[currentNode.aminoacid];
         const { x, y } = getCoord(countRefs[i].current * 3);
         // check if just switched from note active to active
-        if (!lastSpawned[i]) {
-          blobCount += 1;
-          startNoteAnimation(
-            x + boxSide * 1.5,
-            y,
-            `${i}-${tick}`,
-            playheads[i].hsl,
-            svg
-          );
-          lastTick[i] = tick;
-        } else {
-          if (lastIndex[i] !== index) {
-            console.log("||-", blobCount, "despawn", `${i}-${lastTick[i]}`);
-            endNoteAnimation(`${i}-${lastTick[i]}`, playheads[i].hsl, svg);
-            
-            console.log("||+", blobCount, "spawn", `${i}-${tick}`);
+        if (lastIndex[i] !== index) {
+          if (!updatedLastSpawn[i]) {
+            blobCount += 1;
+            console.log(">>> spawning ");
             startNoteAnimation(
               x + boxSide * 1.5,
               y,
-              `${i}-${tick}`,
+              `${i}-${ticks}`,
               playheads[i].hsl,
               svg
             );
-            lastTick[i] = tick;
+            updatedLastTick[i] = ticks;
+          } else {
+            if (updatedLastIndex[i] !== index) {
+              console.log(
+                "||-",
+                blobCount,
+                "despawn",
+                `${i}-${updatedLastTick[i]}`
+              );
+              endNoteAnimation(
+                `${i}-${updatedLastTick[i]}`,
+                playheads[i].hsl,
+                svg
+              );
+
+              console.log("||+", blobCount, "spawn", `${i}-${ticks}`);
+              startNoteAnimation(
+                x + boxSide * 1.5,
+                y,
+                `${i}-${ticks}`,
+                playheads[i].hsl,
+                svg
+              );
+              updatedLastTick[i] = ticks;
+            }
           }
+          updatedLastSpawn[i] = true;
+          updatedLastIndex[i] = index;
         }
-        lastSpawned[i] = true;
-        lastIndex[i] = index;
       } else {
         // check if note has become not active
-        if (lastSpawned[i]) {
+        if (updatedLastSpawn[i]) {
           //   // check if note has just become not active
-          // //   if (lastTick[i] !== tick - 1) {
+          // //   if (updatedLastTick[i] !== tick - 1) {
           blobCount -= 1;
-          console.log("---", blobCount, "despawn", `${i}-${lastTick[i]}`);
-          endNoteAnimation(`${i}-${lastTick[i]}`, playheads[i].hsl, svg);
+          console.log(
+            "---",
+            blobCount,
+            "despawn",
+            `${i}-${updatedLastTick[i]}`
+          );
+          endNoteAnimation(`${i}-${updatedLastTick[i]}`, playheads[i].hsl, svg);
           // //   }
         }
-        lastSpawned[i] = false;
+        updatedLastSpawn[i] = false;
       }
-      //   lastNotes[i] = note
     }
-    /* 
-        we want to remove the notes when
-        1. the note is not the same as the one before
-        2. or when lastSpawned is false 
 
-    */
-  };
+    setLastIndex(updatedLastIndex);
+    setLastSpawned(updatedLastSpawn);
+    setLastTick(updatedLastTick);
+    setTicks(ticks + 1);
+  }, [activeNotes, countRefs, playing, zoom, sequence]);
 
-  const animationCallbackRef = useRef(animationCallback);
+  // const animationCallbackRef = useRef(animationCallback);
 
   useEffect(() => {
     endAllAnimations();
-    animationCallbackRef.current = animationCallback;
-  }, [zoom, sequence]);
+    // animationCallbackRef.current = animationCallback;
+  }, [zoom, sequence, cps]);
+
+  useEffect(() => {
+    if (!playing) {
+      endAllAnimations();
+    }
+  }, [playing]);
 
   // main animation loop
-  useAnimationFrame(animationCallbackRef);
+  // useAnimationFrame(animationCallbackRef);
 
   var paramSet = 1;
   var params = [
@@ -190,8 +209,6 @@ export const VisualizerBlobs = ({
       var dir = Math.random() < 0.5 ? -1 : 1;
       var offsetFactorX = randRange(0, 300) * px;
       var x = initialX + dir * 0.2 * i * offsetFactorX;
-      var offsetY = scaleY * 0.6;
-      //   var y = initialY - (i * scaleY + Math.random() * offsetY);
       var y = initialY - i * scaleY;
       points.push([x, y]);
     }
@@ -246,34 +263,39 @@ export const VisualizerBlobs = ({
     return newPath;
   };
 
-  var keyCounters = {};
-
-  var addKeyCount = (key) => {
-    if (keyCounters.hasOwnProperty(key)) {
-      keyCounters[key] += 1;
-    } else {
-      keyCounters[key] = 1;
-    }
-    return keyCounters[key];
-  };
-
   var startNoteAnimation = (x, y, id, hsl, svg) => {
     var steps = width / 65;
     // where do the notes appear?
     var points = generatePoints(x, y);
     var d = svgPath(points, bezierCommand);
     var path = createSVGPath(d, "animating", id, hsl);
-    svg.appendChild(path);
+    if (svg) {
+      svg.appendChild(path);
+    }
   };
 
   var endAllAnimations = () => {
     const animating = [...document.querySelectorAll(".animating")];
+    let allPaths = animating.length;
+    let removedCount = 0;
     if (animating.length) {
       svg = document.querySelector(".svg");
       animating.forEach((path) => {
-        svg.removeChild(path);
+        var i = path.id.split("-")[0];
+        const playhead = playheads[i];
+        // console.log(playhead)
+        if (playhead) {
+          endNoteAnimation(path.id, playhead.hsl, svg);
+        } else {
+          svg.removeChild(path);
+        }
       });
     }
+
+    const remaining = [...document.querySelectorAll(".animating")];
+    remaining.forEach((path) => {
+      svg.removeChild(path);
+    });
   };
 
   var endNoteAnimation = (id, hsl, svg) => {
@@ -286,7 +308,6 @@ export const VisualizerBlobs = ({
       return;
     }
     var matrix = getComputedStyle(path).getPropertyValue("stroke-dasharray");
-    var velocity = getComputedStyle(path).getPropertyValue("stroke-width");
     var dashArrayStart = parseFloat(matrix.split("px")[0], 10);
 
     var len = path.getTotalLength();
@@ -337,8 +358,6 @@ export const VisualizerBlobs = ({
       angle: Math.atan2(lengthY, lengthX),
     };
   };
-
-  var lineCommand = (point) => `L ${point[0]} ${point[1]}`;
 
   var controlPoint = (current, previous, next, reverse) => {
     var p = previous || current;

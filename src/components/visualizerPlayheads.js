@@ -90,56 +90,62 @@ export const VisualizerPlayheads = ({
     }
   };
 
-  return (
-    <div
-      className="absolute"
-      style={{
-        top: 0,
-        left: 0,
-        width: width,
-        height: height,
-      }}
-    >
+  return <div>
+  {
+    sequence.length ? (
       <div
-        className="relative"
+        className="absolute"
         style={{
+          top: 0,
+          left: 0,
           width: width,
           height: height,
         }}
       >
-        {playheads.map((playhead, index) => {
-          const count = counters[index] * 3;
-          const { x, y } = getCoord(count);
-          const currentAcid = nodes[count / 3].aminoacid;
-          const spritePathAcid = getAcidSprite(currentAcid);
-          if (playhead.playing) {
-            return (
-              <div key={index + x}>
-                <div
-                  className="absolute box-border text-center"
-                  style={{
-                    left: x,
-                    top: y,
-                  }}
-                >
+        <div
+          className="relative"
+          style={{
+            width: width,
+            height: height,
+          }}
+        >
+          {playheads.map((playhead, index) => {
+            const count = counters[index] * 3;
+            const { x, y } = getCoord(count);
+            if (nodes[count / 3] === undefined) return
+            const currentAcid = nodes[count / 3].aminoacid;
+            const spritePathAcid = getAcidSprite(currentAcid);
+            if (playhead.playing) {
+              return (
+                <div key={index + x}>
                   <div
+                    className="absolute box-border text-center"
                     style={{
-                      width: boxSide * 3,
-                      height: boxSide * boxAspect,
-                      borderRadius: '0.25rem',
-                      backgroundColor: playhead.color,
-                      lineHeight: `${boxSide * boxAspect}px`,
-                      fontSize: `${20 * zoom}px`
+                      left: x,
+                      top: y,
                     }}
                   >
-                    <div>{currentAcid}</div>
+                    <div
+                      style={{
+                        width: boxSide * 3,
+                        height: boxSide * boxAspect,
+                        borderRadius: "0.25rem",
+                        backgroundColor: playhead.color,
+                        lineHeight: `${boxSide * boxAspect}px`,
+                        fontSize: `${20 * zoom}px`,
+                      }}
+                    >
+                      <div>{currentAcid}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          }
-        })}
+              );
+            }
+          })}
+        </div>
       </div>
-    </div>
-  );
+    ) : (
+      <div></div>
+    )
+  }</div>
 };
