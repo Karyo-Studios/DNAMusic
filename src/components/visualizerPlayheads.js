@@ -12,14 +12,10 @@ export const VisualizerPlayheads = ({
   playing,
   counter, // renderframes
   playheads, // main playheads
-  activeNotes, // active note refs, for actual gate
   counters, // separate counts from each playhead
-  countRefs, // count references
   sequence,
   nodes,
   zoom,
-  param1,
-  param2,
   width,
   height,
 }) => {

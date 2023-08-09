@@ -23,11 +23,11 @@ export const PlayheadView = ({ p, masterSteps, playing, ticker, index }) => {
               }}
             >
               <div
-                className="bg-[#00f] rounded-[0.25rem] m-auto transition-all"
+                className="bg-[#00f] rounded-[0.1rem] m-auto transition-all"
                 style={{
                   backgroundColor:
                     hap === 0
-                      ? "#555"
+                      ? "#444"
                       : active &&
                         playing &&
                         p.playing

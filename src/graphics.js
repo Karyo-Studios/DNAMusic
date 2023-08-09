@@ -43,6 +43,8 @@ export const PlayheadTile = (props) => {
   return <Graphics draw={draw} />;
 };
 
+let version = 0;
+
 export const useAnimationFrame = (callback) => {
   // Use useRef for mutable variables that we want to persist
   // without triggering a re-render on their change
@@ -52,7 +54,7 @@ export const useAnimationFrame = (callback) => {
   const animate = (time) => {
     if (previousTimeRef.current != undefined) {
       const deltaTime = time - previousTimeRef.current;
-      callback.current(deltaTime);
+      callback.current(deltaTime, version);
     }
     previousTimeRef.current = time;
     requestRef.current = requestAnimationFrame(animate);

@@ -1955,7 +1955,7 @@
 
 "@pixi/text-bitmap@7.2.4":
   version "7.2.4"
-  resolved "https://registry.yarnpkg.com/@pixi/text-bitmap/-/text-bitmap-7.2.4.tgz#444010da3898c35e2cdb01493bdc21706c9356a1"
+  resolved "https://registry.yarnpkg.com/@pixi/text-bitmap/-/text-bitmap-7.2.4.tgz#222010da3898c35e2cdb01493bdc21706c9356a1"
   integrity sha512-3u2CP4VN+muCaq/jtj7gn0hb3DET/X2S04zTBcgc2WVGufJc62yz+UDzS9jC+ellotVdt9c8U74++vpz3zJGfw==
 
 "@pixi/text-html@7.2.4":

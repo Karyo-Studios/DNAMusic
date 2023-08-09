@@ -164,7 +164,7 @@ export const aminoAcidColors = {
 export const dnaMapping = { 'A': 0, 'C': 1, 'T': 2, 'G': 3 }
 export const numberMapping = { 0: 'A', 1: 'C', 2: 'T', 3: 'G' }
 
-const gem = `bg-gradient-to-r from-[#888] via-[#444] to-[#888] 
+const gem = `bg-gradient-to-r from-[#888] via-[#222] to-[#888] 
 bg-clip-text font-bold text-transparent text-[3rem] tracking-[0.5rem]`
 
 export const emojiPalettes = [

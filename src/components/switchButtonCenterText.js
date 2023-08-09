@@ -14,7 +14,7 @@ export const SwitchButtonCenterText = ({
       <button
         className={`font-bold bg-[#555] hover:bg-[#888] 
       p-1 ml-2
-      border-[#444] w-[2rem] rounded-l-[0.25rem]`}
+      border-[#222] w-[2rem] rounded-l-[0.25rem]`}
         style={leftStyle}
         onClick={leftOnClick}
       >

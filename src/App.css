@@ -1,7 +1,7 @@
 body {
   color: #fff;
   background-color: #222222;
-  font-family: 'Din', monospace;
+  font-family: din-2014, sans-serif;
 }
 
 @font-face {
@@ -55,8 +55,8 @@ body {
 
 /* blobs */
 
-path,
-line {
+.blobs path,
+.blobs line {
   fill: none;
   stroke-width: 15;
   stroke-linecap: round;

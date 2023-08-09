@@ -51,16 +51,24 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
-  const [sequenceBounds, setSequenceBounds] = useState([0, savedSequences[sequenceIndex].sequence.length]);
-  const [initialBounds, setInitialBounds] = useState([0, savedSequences[sequenceIndex].sequence.length]);
+  const [menu, setMenu] = useState(0);
+
+  const [sequenceBounds, setSequenceBounds] = useState([
+    0,
+    savedSequences[sequenceIndex].sequence.length,
+  ]);
+  const [initialBounds, setInitialBounds] = useState([
+    0,
+    savedSequences[sequenceIndex].sequence.length,
+  ]);
 
   const [showSequence, setShowSequence] = useState(true);
 
   const [activeSequence, setActiveSequence] = useState(sequence);
   const [activeNodes, setActiveNodes] = useState(nodes);
 
-  const width = 1000;
-  const height = 700;
+  const width = 1200;
+  const height = 650;
 
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
@@ -427,7 +435,10 @@ function App() {
   useMemo(() => {
     const length = sequenceBounds[1] - sequenceBounds[0];
     // console.log(nodes.length, sequence.length)
-    const snippet = sequence.slice(Math.floor(sequenceBounds[0]/3)*3, sequenceBounds[1]);
+    const snippet = sequence.slice(
+      Math.floor(sequenceBounds[0] / 3) * 3,
+      sequenceBounds[1]
+    );
     // console.log(sequenceBounds[0]/3, sequenceBounds[1]/3)
     const nodeSnippet = nodes.slice(
       Math.floor(sequenceBounds[0] / 3),
@@ -436,7 +447,7 @@ function App() {
     // console.log(snippet, nodeSnippet)
     setActiveSequence(snippet);
     setActiveNodes(nodeSnippet);
-    const newZoom = mapN(length, 18, 300, 1, 0.5);
+    const newZoom = mapN(length, 18, 300, 1, 0.7);
     setZoom(newZoom < 0.4 ? 0.4 : newZoom);
   }, [sequenceBounds]);
 
@@ -457,190 +468,16 @@ function App() {
           </div>
         </div>
       )}
-      <div className="absolute w-[100%] z-[1]">
-      <div className="flex items-center mt-[0.5rem] px-[1rem]">
-          <div className="flex items-center">
-            <div className="flex">
-              <button
-                className="bg-[#888] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#aaa] text-[1.2rem] w-[7rem] rounded-[0.25rem]"
-                onClick={() => (playing ? pause() : play())}
-              >
-                {playing ? "PAUSE" : "PLAY"}
-              </button>
-              {/* <button
-                className="bg-[#555] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
-                onClick={stop}
-              >
-                STOP
-              </button> */}
-            </div>
-          </div>
-          <div className="hidden">
-            <p>RENDERFRAME: {renderCount.current}</p>
-            <p>COUNTER: {counter}</p>
-          </div>
-          <div className="flex flex-col">
-            <div>
-              <button
-                className="bg-[#555] mr-[0.5rem] px-[1rem] py-[1.2rem] hover:bg-[#888] text-[1.2rem] w-[6rem] rounded-[0.25rem]"
-                onClick={() => generatePattern()}
-              >
-                Remix
-              </button>
-            </div>
-            <div className="hidden">
-              <p className="mt-3">lock / unlock parameters</p>
-            </div>
-          </div>
-          <div className="mx-[1rem]">
-            <p>
-              tempo: {bpm}bpm {/* {counter} */}
-            </p>
-            <div>
-              <input
-                type="range"
-                className="w-[10rem]"
-                min="20"
-                max="260"
-                value={bpm}
-                onChange={(e) => {
-                  updateTempo(e.target.value);
-                }}
-                step="1"
-                aria-label="bpm slider"
-              />
-            </div>
-          </div>
-          <p className="ml-3 w-[6rem]">Steps: {masterSteps}</p>
-          <SwitchButton
-            leftOnClick={() => {
-              if (masterSteps > 3) {
-                let updated = [];
-                for (let i = 0; i < playheads.length; i++) {
-                  const cur = playheads[i];
-                  updated.push(
-                    updateEuclid({ ...cur, steps: masterSteps - 1 })
-                  );
-                }
-                setPlayheads(updated);
-                setMasterSteps(masterSteps - 1);
-              }
-            }}
-            rightOnClick={() => {
-              if (masterSteps < 16) {
-                let updated = [];
-                for (let i = 0; i < playheads.length; i++) {
-                  const cur = playheads[i];
-                  updated.push(
-                    updateEuclid({ ...cur, steps: masterSteps + 1 })
-                  );
-                }
-                setPlayheads(updated);
-                setMasterSteps(masterSteps + 1);
-              }
-            }}
-            leftStyle={{
-              opacity: masterSteps > 3 ? 1 : 0.3,
-              fontWeight: "bold",
-            }}
-            rightStyle={{
-              opacity: masterSteps < 16 ? 1 : 0.3,
-              fontWeight: "bold",
-            }}
-            leftText={"<"}
-            rightText={">"}
-          />
-          <p className="ml-4 w-[5rem]">Key: {noteOffset}</p>
-          <SwitchButton
-            leftOnClick={() => setNoteOffset(noteOffset - 1)}
-            rightOnClick={() => setNoteOffset(noteOffset + 1)}
-            leftText={"-1"}
-            rightText={"+1"}
-          />
-        </div>
-      </div>
-      <div className="absolute w-[100%] z-[1]">
+      <div className="absolute w-[100%] z-[1]"
+        style={{borderBottom: '1px solid #fff'}}
+      >
         <div className="max-w-[1200px] mx-auto p-[1rem]">
-          <div className="hidden">
-            <div className="flex justify-between">
-              <h1 className="text-[2rem]">
-                DNA Sequencer{" "}
-                {playing && ((counter - 1) / 2) % 1 === 0 ? "*" : ""}{" "}
-              </h1>
-              {fullscreen && (
-                <button
-                  className="bg-[#555] p-2 mr-1 w-[8rem]"
-                  onClick={() => setFullscreen(!fullscreen)}
-                >
-                  {!fullscreen ? "fullscreen" : "show UI"}
-                </button>
-              )}
+          <div className="w-[100%] z-[1] text-[#aaa] flex justify-between">
+            <div>
+              <h3>DNA SEQUENCER</h3>
             </div>
-            <div className="my-2 flex items-start">
-              <div>
-                <p>
-                  Sequence: <strong>{savedSequences[sequenceIndex].name}</strong>{" "}
-                </p>
-                <p className="mb-2">
-                  <u>learn more!</u>
-                </p>
-                <div className="flex">
-                  <SwitchButton
-                    leftOnClick={() => {
-                      const newSequenceIndex =
-                        sequenceIndex - 1 < 0
-                          ? savedSequences.length - 1
-                          : sequenceIndex - 1;
-                      setUserInputSequence(
-                        savedSequences[newSequenceIndex].sequence
-                      );
-                      setSequenceIndex(newSequenceIndex);
-                    }}
-                    rightOnClick={() => {
-                      const newSequenceIndex =
-                        sequenceIndex + 1 >= savedSequences.length
-                          ? 0
-                          : sequenceIndex + 1;
-                      setUserInputSequence(
-                        savedSequences[newSequenceIndex].sequence
-                      );
-                      setSequenceIndex(newSequenceIndex);
-                    }}
-                    leftText={"<"}
-                    rightText={">"}
-                  />
-                  <p className="ml-3">Viz:</p>
-                  <SingleButton
-                    onClick={() => setShowSequence(!showSequence)}
-                    buttonStyle={{
-                      width: "2rem",
-                      fontWeight: 100,
-                    }}
-                  >
-                    {showSequence ? "||" : "="}
-                  </SingleButton>
-                </div>
-              </div>
-              <div className="ml-[2rem]">
-                <p className="uppercase">
-                  length <strong>{savedSequences[sequenceIndex].length}</strong>
-                </p>
-                <p className="uppercase">
-                  viewing:{" "}
-                  <strong>
-                    {sequence.length} (
-                    {(
-                      (sequence.length / savedSequences[sequenceIndex].length) *
-                      100
-                    ).toFixed(4)}
-                    %)
-                  </strong>
-                </p>
-                <p className="">
-                  Description:{" "}
-                  <strong>{savedSequences[sequenceIndex].description}</strong>{" "}
-                </p>
-              </div>
+            <div>
+              <h3>SEQUENCE: <span className="text-[#fff]">SARS-CoV-2</span></h3>
             </div>
           </div>
         </div>
@@ -657,7 +494,7 @@ function App() {
             <svg
               version="1.1"
               xmlns="http://www.w3.org/2000/svg"
-              className="svg"
+              className="svg blobs"
             ></svg>
             <VisualizerBlobs
               playing={playing}
@@ -665,44 +502,28 @@ function App() {
               activeNotes={activeNoteRefs}
               sequence={activeSequence}
               nodes={activeNodes}
-              counters={counters}
               countRefs={countRefs}
               playheads={playheads}
               zoom={zoom}
-              param1={vizParam1}
-              param2={vizParam2}
               height={height}
               width={width}
               cps={cps}
             />
             <VisualizerSequence
-              playing={playing}
-              counter={renderCount.current}
-              activeNotes={activeNoteRefs}
               sequence={activeSequence}
               nodes={activeNodes}
-              counters={counters}
-              countRefs={countRefs}
-              playheads={playheads}
               zoom={zoom}
-              param1={vizParam1}
-              param2={vizParam2}
               height={height}
               width={width}
-              cps={cps}
             />
             <VisualizerPlayheads
               playing={playing}
               counter={renderCount.current}
-              activeNotes={activeNoteRefs}
               sequence={activeSequence}
               nodes={activeNodes}
               counters={counters}
-              countRefs={countRefs}
               playheads={playheads}
               zoom={zoom}
-              param1={vizParam1}
-              param2={vizParam2}
               height={height}
               width={width}
             />
@@ -728,15 +549,16 @@ function App() {
           </div>
         )}
         <div>
-          <div
-          className="relative"
-          style={{width: width}}
-          >
+          <div className="relative text-[#aaa]" style={{ width: width }}>
             <div className="absolute left-[1rem] top-[-0.5rem]">
-              <p>{initialBounds[0]}</p>
+              <p>
+                START – <span className="text-[#fff]">{sequenceBounds[0]}</span>
+              </p>
             </div>
             <div className="absolute right-[1rem] top-[-0.5rem]">
-              <p>{initialBounds[1]}</p>
+              <p>
+                <span className="text-[#fff]">{sequenceBounds[1]}</span> – END
+              </p>
             </div>
             <div>
               <ReactSlider
@@ -748,33 +570,209 @@ function App() {
                 ariaValuetext={(state) => `Thumb value ${state.valueNow}`}
                 // orientation="vertical"
                 renderThumb={(props, state) => {
-                  return (
-                    <div {...props} 
-                    />
-                  );
+                  return <div {...props} />;
                 }}
                 minDistance={18}
                 min={0}
                 max={sequence.length}
                 pearling
-                onAfterChange={(value, index) => {
-                  setSequenceBounds(value);
-                }}
+                onAfterChange={(value, index) => {}}
                 onChange={(value) => {
-                  setInitialBounds(value)
+                  setSequenceBounds(value);
+                  // setInitialBounds(value);
                 }}
               />
             </div>
           </div>
         </div>
-        <PlayheadsView
-          playheads={playheads}
-          updatePlayhead={updatePlayhead}
-          playing={playing}
-          ticker={ticker}
-          masterSteps={masterSteps}
-          counters={counters}
-        />
+        <div>
+          <div className="w-[2.5rem] px-[1rem] my-[0.5rem]">
+            <div className="flex mt-[0.5rem] text-center text-[#aaa] select-none min-w-[1000px] uppercase">
+              <button
+                className="bg-[#888] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
+                onClick={() => (playing ? pause() : play())}
+              >
+                <div className="pl-[0.1rem] w-[1.2rem] h-[1.2rem] m-auto">
+                  {playing ? (
+                    <svg
+                      viewBox="0 0 30 30"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect x="5" width="7" height="30" rx="2" fill="white" />
+                      <rect x="18" width="7" height="30" rx="2" fill="white" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 28 29" fill="#fff">
+                      <path
+                        d="M26.7793 13.1932C27.5007 13.5658 27.5007 14.5975 26.7793 14.9701L1.45812 28.0504C0.792534 28.3942 -0.000834731 27.9111 -0.000834699 27.162L-0.000833555 1.00134C-0.000833522 0.252187 0.792537 -0.23095 1.45812 0.112876L26.7793 13.1932Z"
+                        fill="#fff"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </button>
+              <button
+                className="ml-[0.25rem] bg-[#888] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
+                onClick={stop}
+              >
+                <div className="w-[1rem] h-[1rem] m-auto">
+                  <svg
+                    viewBox="0 0 30 30"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="30" height="30" rx="3" fill="white" />
+                  </svg>
+                </div>
+              </button>
+              <div
+                className="hidden ml-[1rem] bg-[#888] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[2rem]"
+                style={{
+                  backgroundColor:
+                    playing && ((counter - 1) / 2) % 1 === 0 ? "#888" : "#444",
+                }}
+              >
+                *
+              </div>
+              {/* {playheads.map((p, index) => {
+              return <div>
+                <div className="w-[5rem] mr-2 ">
+              <button
+                className="w-[5rem] p-1 rounded-[0.25rem] bg-[#555] box-sizing"
+                style={{
+                  // backgroundColor: `hsl(${p.hsl.h*360},${p.hsl.s*100}%,${p.hsl.l})`
+                  backgroundColor: p.playing
+                    ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
+                        p.hsl.l * 100
+                      }%)`
+                    : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
+                        p.hsl.l * 100
+                      }%, 0.2)`,
+                  // border: `2px solid ${p.color}`,
+                }}
+                onClick={() =>
+                  updatePlayhead(index, { ...p, playing: !p.playing })
+                }
+              >
+                {p.instrumentName}
+              </button>
+            </div>
+                </div> 
+             })} */}
+            </div>
+          </div>
+          <PlayheadsView
+            playheads={playheads}
+            updatePlayhead={updatePlayhead}
+            playing={playing}
+            ticker={ticker}
+            masterSteps={masterSteps}
+            counters={counters}
+          />
+          <div className="flex items-center mt-[1rem]">
+            <div className="flex items-center"></div>
+            <div className="hidden">
+              <p>RENDERFRAME: {renderCount.current}</p>
+              <p>COUNTER: {counter}</p>
+            </div>
+            <div className="px-[1rem] remix">
+              <div
+                className="flex justify-center bg-[#888] h-[2.5rem] w-[4rem] hover:bg-[#aaa] rounded-[0.25rem] cursor-pointer"
+                onClick={() => generatePattern()}
+              >
+                <button className="h-[2.5rem] w-[2.5rem]">
+                    <svg
+                      viewBox="0 0 51 31"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M45.4056 26.8194L40.497 30.219V25.3578C40.497 25.3578 34.9452 25.3578 33.939 25.3578C24.6084 25.3578 15.9456 8.81821 8.943 8.81821H0V4.89301H8.9436C19.8186 4.89301 26.3814 21.483 33.9396 21.483C34.9956 21.483 40.4976 21.483 40.4976 21.483V16.6218L45.4062 20.0214L50.3178 23.4204L45.4056 26.8194Z"
+                        fill="white"
+                      />
+                      <path
+                        d="M25.5292 12.636C25.7542 12.8736 25.9786 13.1124 26.203 13.35C28.8094 10.7376 31.3156 8.736 33.9394 8.736C34.9954 8.736 40.4974 8.736 40.4974 8.736V13.5978L45.406 10.1982L50.3176 6.7986L45.406 3.399L40.4974 0V4.8612C40.4974 4.8612 34.9456 4.8612 33.9394 4.8612C30.3106 4.8612 26.7838 7.3644 23.416 10.4226C24.1366 11.1612 24.841 11.9052 25.5292 12.636Z"
+                        fill="white"
+                      />
+                      <path
+                        d="M17.9502 17.9412C17.5704 17.5656 17.1846 17.1846 16.7964 16.8048C14.007 19.407 11.3742 21.4014 8.9436 21.4014H0V25.326H8.9436C13.131 25.326 16.677 22.8642 19.8894 19.839C19.2324 19.2042 18.585 18.5676 17.9502 17.9412Z"
+                        fill="white"
+                      />
+                    </svg>
+                </button>
+              </div>
+              <div className="hidden">
+                <p className="mt-3">lock / unlock parameters</p>
+              </div>
+            </div>
+            <div className="mx-[1rem] flex">
+              <p>
+                TEMPO {bpm}bpm {/* {counter} */}
+              </p>
+              <div>
+                <input
+                  type="range"
+                  className="w-[10rem] ml-4"
+                  min="20"
+                  max="260"
+                  value={bpm}
+                  onChange={(e) => {
+                    updateTempo(e.target.value);
+                  }}
+                  step="1"
+                  aria-label="bpm slider"
+                />
+              </div>
+            </div>
+            <p className="mx-4 w-[5rem] text-right">STEPS <span>{masterSteps}</span></p>
+            <SwitchButton
+              leftOnClick={() => {
+                if (masterSteps > 3) {
+                  let updated = [];
+                  for (let i = 0; i < playheads.length; i++) {
+                    const cur = playheads[i];
+                    updated.push(
+                      updateEuclid({ ...cur, steps: masterSteps - 1 })
+                    );
+                  }
+                  setPlayheads(updated);
+                  setMasterSteps(masterSteps - 1);
+                }
+              }}
+              rightOnClick={() => {
+                if (masterSteps < 16) {
+                  let updated = [];
+                  for (let i = 0; i < playheads.length; i++) {
+                    const cur = playheads[i];
+                    updated.push(
+                      updateEuclid({ ...cur, steps: masterSteps + 1 })
+                    );
+                  }
+                  setPlayheads(updated);
+                  setMasterSteps(masterSteps + 1);
+                }
+              }}
+              leftStyle={{
+                opacity: masterSteps > 3 ? 1 : 0.3,
+                fontWeight: "bold",
+              }}
+              rightStyle={{
+                opacity: masterSteps < 16 ? 1 : 0.3,
+                fontWeight: "bold",
+              }}
+              leftText={"<"}
+              rightText={">"}
+            />
+            <p className="mx-4 w-[5rem] text-right">KEY {noteOffset}</p>
+            <SwitchButton
+              leftOnClick={() => setNoteOffset(noteOffset - 1)}
+              rightOnClick={() => setNoteOffset(noteOffset + 1)}
+              leftText={"-1"}
+              rightText={"+1"}
+            />
+          </div>
+        </div>
         <div className="">
           <div className="mt-[1rem] hidden">
             <p>Additional sequences:</p>
@@ -878,26 +876,27 @@ function App() {
           <div className="mt-[0.5rem]">
             {midiEnabled && (
               <div>
-                {WebMidi && WebMidi._outputs.map((midi, index) => {
-                  return (
-                    <button
-                      key={midi._midiOutput.name}
-                      className="mr-2 mt-2 p-1"
-                      style={{
-                        backgroundColor:
-                          index === midiOutputDevice.index ? "#555" : "#888",
-                      }}
-                      onClick={() => {
-                        setMidiOutputDevice({
-                          name: midi._midiOutput.name,
-                          index,
-                        });
-                      }}
-                    >
-                      {midi._midiOutput.name}
-                    </button>
-                  );
-                })}
+                {WebMidi &&
+                  WebMidi._outputs.map((midi, index) => {
+                    return (
+                      <button
+                        key={midi._midiOutput.name}
+                        className="mr-2 mt-2 p-1"
+                        style={{
+                          backgroundColor:
+                            index === midiOutputDevice.index ? "#555" : "#888",
+                        }}
+                        onClick={() => {
+                          setMidiOutputDevice({
+                            name: midi._midiOutput.name,
+                            index,
+                          });
+                        }}
+                      >
+                        {midi._midiOutput.name}
+                      </button>
+                    );
+                  })}
                 <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
               </div>
             )}

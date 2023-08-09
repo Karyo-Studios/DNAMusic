@@ -29,42 +29,30 @@ export const PlayheadsView = ({
         return (
           <div
             key={"playheads" + index}
-            className="border-l-[0.5rem] relative mb-1 px-2 flex items-center"
-            style={{
-              borderColor: p.playing ? `${p.color}` : "rgba(0,0,0,0)",
-              opacity: p.playing ? 1 : 0.6,
-            }}
+            className="relative mb-1 px-[1rem] flex items-center"
           >
-            <button
-              className="p-1 mr-2 w-[4.6rem] rounded-[0.25rem] bg-[#555] hover:bg-[#aaa]"
-              onClick={() =>
-                updatePlayhead(index, { ...p, playing: !p.playing })
-              }
-            >
-              <div className="flex items-center justify-between">
-                <p className="pl-2">{p.instrumentName}</p>
-                <div className="w-[1.2rem] h-[1.2rem] mx-[0.25rem]">
-                  {p.playing ? (
-                    <svg
-                      className="button"
-                      viewBox="0 0 60 60"
-                      style={{ fill: p.color }}
-                    >
-                      <polygon points="0,0 15,0 15,60 0,60" />
-                      <polygon points="25,0 40,0 40,60 25,60" />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="button"
-                      viewBox="0 0 60 60"
-                      style={{ fill: p.color }}
-                    >
-                      <polygon points="0,0 50,30 0,60" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-            </button>
+            <div className="w-[5.25rem] mr-2 ">
+              <button
+                className="w-[5.25rem] p-1 rounded-[0.25rem] bg-[#555] box-sizing"
+                style={{
+                  // backgroundColor: `hsl(${p.hsl.h*360},${p.hsl.s*100}%,${p.hsl.l})`
+                  backgroundColor: p.playing
+                    ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
+                        p.hsl.l * 100
+                      }%)`
+                    : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
+                        p.hsl.l * 100
+                      }%, 0.2)`,
+                    opacity: p.playing ? 1 : 0.7,
+                  // border: `2px solid ${p.color}`,
+                }}
+                onClick={() =>
+                  updatePlayhead(index, { ...p, playing: !p.playing })
+                }
+              >
+                {p.playing ? `P${p.instrumentName}` : 'OFF'}
+              </button>
+            </div>
             <div className="flex hidden">
               <div className="px-3 w-[7rem] leading-[2rem]">
                 Pos: {counters[index]}
@@ -138,7 +126,7 @@ export const PlayheadsView = ({
                 leftOnClick={() => {
                   updatePlayhead(index, {
                     ...p,
-                    interval: p.interval - 1,
+                    interval: (p.interval > 1 ?  p.interval - 1 : p.interval),
                   });
                 }}
                 rightOnClick={() => {

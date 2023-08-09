@@ -7,14 +7,11 @@ import { toMidi } from "sfumato";
 import { aminoAcidColors, noteMappings } from "../mappings";
 
 export const VisualizerSequence = ({
-  playing,
   sequence,
   nodes,
   zoom,
   width,
   height,
-  param1,
-  param2,
 }) => {
   // boxSide x amount =
 

@@ -4,20 +4,19 @@ import { randRange } from "../utils";
 
 import { aminoAcidhsls, noteMappings } from "../mappings";
 
+import { useAnimationFrame } from "../graphics";
+
 export const VisualizerBlobs = ({
   playing,
   counter, // renderframes
   playheads, // main playheads
   activeNotes, // active note refs, for actual gate
-  counters, // separate counts from each playhead
   countRefs, // count references
   sequence,
   nodes,
   zoom,
   width,
   height,
-  param1,
-  param2,
   cps,
 }) => {
   // boxSide x amount =
@@ -54,34 +53,48 @@ export const VisualizerBlobs = ({
     };
   };
 
-  // let lastTick = [-1, -1, -1, -1, -1];
-  // let lastSpawned = [false, false, false, false, false];
-  // let lastIndex = [-1, -1, -1, -1, -1];
+  let lastTick = [-1, -1, -1, -1, -1];
+  let lastSpawned = [false, false, false, false, false];
+  let lastIndex = [-1, -1, -1, -1, -1];
+  let ticks = 0;
 
-  const [lastTick, setLastTick] = useState([-1, -1, -1, -1, -1]);
-  const [lastSpawned, setLastSpawned] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
-  const [lastIndex, setLastIndex] = useState([-1, -1, -1, -1, -1]);
+  // const [lastTick, setLastTick] = useState([-1, -1, -1, -1, -1]);
+  // const [lastSpawned, setLastSpawned] = useState([
+  //   false,
+  //   false,
+  //   false,
+  //   false,
+  //   false,
+  // ]);
+  // const [lastIndex, setLastIndex] = useState([-1, -1, -1, -1, -1]);
 
   let blobCount = 0;
 
-  const [ticks, setTicks] = useState(0);
+  // const [ticks, setTicks] = useState(0);
+
+  const [updatedCount, setUpdatedCount] = useState(0);
+
+  const updatedRef = useRef(0);
 
   useEffect(() => {
+    updatedRef.current = updatedCount;
+  }, [updatedCount]);
+
+  const renderDebounce = 100
+  
+  const animationCallback = () => {
+    const svg = document.querySelector(".svg");
+    ticks = ticks + 1;
+
     const timeWindow = cps * 1000;
 
-    let updatedLastSpawn = [...lastSpawned];
-    let updatedLastIndex = [...lastIndex];
-    let updatedLastTick = [...lastTick];
+    // let updatedLastSpawn = [...lastSpawned];
+    // let updatedLastIndex = [...lastIndex];
+    // let updatedLastTick = [...lastTick];
 
     // check to add new blobs
     for (let i = 0; i < playheads.length; i++) {
-      if (activeNotes[i].current) {
+      if (activeNotes[i].current && updatedRef.current > renderDebounce) {
         // note is currently active
         const index = countRefs[i].current;
         const currentNode = nodes[Math.floor(index / 3)];
@@ -90,7 +103,7 @@ export const VisualizerBlobs = ({
         const { x, y } = getCoord(countRefs[i].current * 3);
         // check if just switched from note active to active
         if (lastIndex[i] !== index) {
-          if (!updatedLastSpawn[i]) {
+          if (!lastSpawned[i]) {
             blobCount += 1;
             console.log(">>> spawning ");
             startNoteAnimation(
@@ -100,17 +113,20 @@ export const VisualizerBlobs = ({
               playheads[i].hsl,
               svg
             );
-            updatedLastTick[i] = ticks;
-          } else {
-            if (updatedLastIndex[i] !== index) {
+            lastTick[i] = ticks;
+            lastSpawned[i] = true;
+            lastIndex[i] = index;
+          }
+          else {
+            if (lastIndex[i] !== index) {
               console.log(
                 "||-",
                 blobCount,
                 "despawn",
-                `${i}-${updatedLastTick[i]}`
+                `${i}-${lastTick[i]}`
               );
               endNoteAnimation(
-                `${i}-${updatedLastTick[i]}`,
+                `${i}-${lastTick[i]}`,
                 playheads[i].hsl,
                 svg
               );
@@ -123,52 +139,50 @@ export const VisualizerBlobs = ({
                 playheads[i].hsl,
                 svg
               );
-              updatedLastTick[i] = ticks;
+              lastTick[i] = ticks;
+              lastSpawned[i] = true;
+              lastIndex[i] = index;
             }
           }
-          updatedLastSpawn[i] = true;
-          updatedLastIndex[i] = index;
+          lastSpawned[i] = true;
+          lastIndex[i] = index;
         }
       } else {
         // check if note has become not active
-        if (updatedLastSpawn[i]) {
+        if (lastSpawned[i]) {
           //   // check if note has just become not active
           // //   if (updatedLastTick[i] !== tick - 1) {
           blobCount -= 1;
-          console.log(
-            "---",
-            blobCount,
-            "despawn",
-            `${i}-${updatedLastTick[i]}`
-          );
-          endNoteAnimation(`${i}-${updatedLastTick[i]}`, playheads[i].hsl, svg);
+          console.log("---", blobCount, "despawn", `${i}-${lastTick[i]}`);
+          endNoteAnimation(`${i}-${lastTick[i]}`, playheads[i].hsl, svg);
           // //   }
         }
-        updatedLastSpawn[i] = false;
+        lastSpawned[i] = false;
       }
     }
-
-    setLastIndex(updatedLastIndex);
-    setLastSpawned(updatedLastSpawn);
-    setLastTick(updatedLastTick);
-    setTicks(ticks + 1);
-  }, [activeNotes, countRefs, playing, zoom, sequence]);
-
-  // const animationCallbackRef = useRef(animationCallback);
-
-  useEffect(() => {
-    endAllAnimations();
-    // animationCallbackRef.current = animationCallback;
-  }, [zoom, sequence, cps]);
-
-  useEffect(() => {
-    if (!playing) {
+    if (updatedRef.current <= renderDebounce) {
+      setUpdatedCount(updatedRef.current + 1);
+      console.log(updatedRef.current);
       endAllAnimations();
     }
-  }, [playing]);
+  };
+
+  const animationCallbackRef = useRef(animationCallback);
+
+  useEffect(() => {
+    console.log('updaing and ending')
+    setUpdatedCount(0);
+    endAllAnimations();
+    animationCallbackRef.current = animationCallback;
+  }, [sequence, cps, zoom]);
+
+  useEffect(() => {
+    setUpdatedCount(0);
+    endAllAnimations();
+  }, [playing])
 
   // main animation loop
-  // useAnimationFrame(animationCallbackRef);
+  useAnimationFrame(animationCallbackRef);
 
   var paramSet = 0;
   var params = [
@@ -192,11 +206,6 @@ export const VisualizerBlobs = ({
 
   var px = params[paramSet].x;
   var py = params[paramSet].y;
-
-  var setBezierParams = () => {
-    px = params[paramSet].x;
-    py = params[paramSet].y;
-  };
 
   var svg = document.querySelector(".svg");
 
