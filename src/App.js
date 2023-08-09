@@ -45,6 +45,9 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
+  const [showFPS, setShowFPS] = useState(false)
+  const [showViz, setShowViz] = useState(true)
+
   const sequenceRef = useRef(sequence)
 
   const [sequenceBounds, setSequenceBounds] = useState([
@@ -456,7 +459,7 @@ function App() {
         setClearClick(clearClick + 1)
       }}
     >
-      <FPSStats />
+      {showFPS && <FPSStats />}
       {!audioContext && (
         <div
           onClick={getAudioContext}
@@ -497,24 +500,26 @@ function App() {
             xmlns="http://www.w3.org/2000/svg"
             className="svg blobs"
           ></svg>
-          <VisualizerBlobs
-            playing={playing}
-            counter={renderCount.current}
-            activeNotes={activeNoteRefs}
-            bounds={sequenceBounds}
-            activeSequence={activeSequence}
-            showOnlyActive={showOnlyActive}
-            sequence={sequence}
-            nodes={nodes}
-            activeNodes={activeNodes}
-            countRefs={countRefs}
-            playheads={playheads}
-            zoom={zoom}
-            height={height}
-            width={width}
-            cps={cps}
-            clearClick={clearClick}
-          />
+          {showViz &&
+            <VisualizerBlobs
+              playing={playing}
+              counter={renderCount.current}
+              activeNotes={activeNoteRefs}
+              bounds={sequenceBounds}
+              activeSequence={activeSequence}
+              showOnlyActive={showOnlyActive}
+              sequence={sequence}
+              nodes={nodes}
+              activeNodes={activeNodes}
+              countRefs={countRefs}
+              playheads={playheads}
+              zoom={zoom}
+              height={height}
+              width={width}
+              cps={cps}
+              clearClick={clearClick}
+            />
+          }
           <VisualizerSequence
             bounds={sequenceBounds}
             showOnlyActive={showOnlyActive}
@@ -529,7 +534,7 @@ function App() {
           <VisualizerPlayheads
             playing={playing}
             counter={renderCount.current}
-            bounds={sequenceBounds}
+            bounds={boundsRef.current}
             showOnlyActive={showOnlyActive}
             sequence={sequence}
             nodes={nodes}
@@ -594,7 +599,10 @@ function App() {
               <PlayPauseButton
                 playing={playing}
                 counter={counter}
-                play={play}
+                play={() => {
+                  play()
+                  setMenu(2)
+                }}
                 pause={pause}
                 stop={stop}
               />
@@ -699,7 +707,7 @@ function App() {
                         masterSteps={masterSteps}
                         counters={counters}
                       />
-                      <div className="flex items-center pt-[0.5rem] pb-[0.75rem]">
+                      <div className="flex items-center pt-[0.4rem] pb-[0.75rem]">
                         <div className="flex items-center">
                           <RemixButton
                             generatePattern={() =>
@@ -919,6 +927,16 @@ function App() {
                       <br />
                       Press Play to get started. Use headpones or speakers.
                     </p>
+                    <div>
+                      <button className="mt-4" onClick={() => setShowFPS(!showFPS)}>
+                        FPS {showFPS ? 'hide' : 'show'}
+                      </button>
+                    </div>
+                    <div>
+                      <button className="mt-4" onClick={() => setShowViz(!showViz)}>
+                        Viz {showViz ? 'hide' : 'show'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
