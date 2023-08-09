@@ -17,12 +17,10 @@ export const HitsToggle = ({
       leftStyle={{
         color: p.color,
         fontWeight: "bold",
-        cursor: p.events > 1 ? 'pointer' : 'initial',
       }}
       rightStyle={{
         color: p.color,
         fontWeight: "bold",
-        cursor:  p.events < masterSteps ? 'pointer' : 'initial',
       }}
       value={p.events}
     />

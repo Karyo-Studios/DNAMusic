@@ -20,7 +20,6 @@ import { PlayheadsView } from "./components/playheads";
 import { VisualizerSequence } from "./components/visualizerSequence";
 import { VisualizerPlayheads } from "./components/visualizerPlayheads";
 import { VisualizerBlobs } from "./components/visualizerBlobs";
-import { DnaVisualizer } from "./components/dnaVisualizer";
 
 import { noteMappings } from "./mappings";
 import { loadedSequences, savedSequences } from "./loadedSequences";
@@ -46,18 +45,24 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
+  const sequenceRef = useRef(sequence)
+
   const [sequenceBounds, setSequenceBounds] = useState([
     0,
     savedSequences[sequenceIndex].sequence.length,
   ]);
+
+  const boundsRef = useRef(sequenceBounds);
 
   const [showSequence, setShowSequence] = useState(true);
 
   const [activeSequence, setActiveSequence] = useState(sequence);
   const [activeNodes, setActiveNodes] = useState(nodes);
 
-  const width = 1200;
-  const height = 600;
+  const calculatedHeight = window.innerHeight - 16 * 23;
+
+  const width = 62 * 16;
+  const height = calculatedHeight < 400 ? 400 : calculatedHeight;
 
   const [menu, setMenu] = useState(2);
 
@@ -125,6 +130,25 @@ function App() {
     }
   };
 
+
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
   useEffect(() => {
     new Promise((resolve) => {
       document.addEventListener("click", async function listener() {
@@ -140,6 +164,11 @@ function App() {
         resolve();
         document.removeEventListener("ontouchstart", listener);
       });
+    });
+
+    window.addEventListener("resize", (event) => {
+      console.log('resize')
+      setClearClick(clearClick + 1)
     });
 
     enableWebMidi();
@@ -182,6 +211,10 @@ function App() {
 
   const counters = [count1, count2, count3, count4, count5];
   const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
+
+  const [showOnlyActive, setShowOnlyActive] = useState(false)
+  const [holdLength, setHoldLength] = useState(false)
+  const [clearClick, setClearClick] = useState(0)
 
   const activeNoteRefs = [
     noteActiveRef1,
@@ -373,10 +406,17 @@ function App() {
     setNodes(nodes);
     setSequence(sequence);
     renderCount.current = 0;
+    sequenceRef.current = sequence;
     setActiveNodes(nodes);
     setActiveSequence(sequence);
+    setSequenceBounds([0, sequence.length])
+    boundsRef.current = [0, sequence.length];
     resetCounters();
   }, [userInputSequence]);
+
+  useEffect(() => {
+    boundsRef.current = sequenceBounds
+  }, [sequenceBounds])
 
   useMemo(() => {
     setActiveNodes(nodes);
@@ -387,26 +427,34 @@ function App() {
     const length = sequenceBounds[1] - sequenceBounds[0];
     // console.log(nodes.length, sequence.length)
     const snippet = sequence.slice(
-      Math.floor(sequenceBounds[0] / 3) * 3,
-      Math.floor(sequenceBounds[1] / 3) * 3
+      sequenceBounds[0],
+      sequenceBounds[1]
     );
     // console.log(sequenceBounds[0]/3, sequenceBounds[1]/3)
     const nodeSnippet = nodes.slice(
-      Math.floor(sequenceBounds[0] / 3),
+      Math.ceil(sequenceBounds[0] / 3),
       Math.floor(sequenceBounds[1] / 3)
     );
     // console.log(snippet, nodeSnippet)
     setActiveSequence(snippet);
     setActiveNodes(nodeSnippet);
-    const newZoom = mapN(length, 18, 300, 1.3, 0.7);
-    setZoom(newZoom < 0.4 ? 0.4 : newZoom);
-  }, [sequenceBounds]);
+    if (showOnlyActive) {
+      const newZoom = mapN(length, 18, 300, 1, 0.5);
+      setZoom(newZoom < 0.4 ? 0.4 : newZoom);
+    } else {
+      const newZoom = mapN(sequence.length, 18, 300, 1, 0.5);
+      setZoom(newZoom < 0.4 ? 0.4 : newZoom);
+    }
+  }, [sequenceBounds, showOnlyActive]);
 
   return (
     <div
       onKeyDown={captureKeyboardEvent}
       tabIndex={-1}
-      className="App outline-none text-left max-w-full"
+      className="App outline-none text-left max-w-full select-none"
+      onClick={() => {
+        setClearClick(clearClick + 1)
+      }}
     >
       <FPSStats />
       {!audioContext && (
@@ -423,7 +471,7 @@ function App() {
         className="absolute w-[100%] z-[1]"
         style={{ borderBottom: "1px solid #fff" }}
       >
-        <div className="max-w-[1200px] mx-auto p-[1rem]">
+        <div className="max-w-[62rem] mx-auto p-[1rem]">
           <div className="w-[100%] z-[1] text-[#888] flex justify-between">
             <div>
               <h3>DNA SEQUENCER</h3>
@@ -436,84 +484,76 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="text-[0.9rem] bg-[#222] max-w-[1200px] mx-auto mb-[1rem]">
-        {showSequence ? (
-          <div
-            className="relative"
-            style={{
-              width: width,
-              height: height,
-            }}
-          >
-            <svg
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              className="svg blobs"
-            ></svg>
-            <VisualizerBlobs
-              playing={playing}
-              counter={renderCount.current}
-              activeNotes={activeNoteRefs}
-              sequence={activeSequence}
-              nodes={activeNodes}
-              countRefs={countRefs}
-              playheads={playheads}
-              zoom={zoom}
-              height={height}
-              width={width}
-              cps={cps}
-            />
-            <VisualizerSequence
-              sequence={activeSequence}
-              nodes={activeNodes}
-              zoom={zoom}
-              height={height}
-              width={width}
-            />
-            <VisualizerPlayheads
-              playing={playing}
-              counter={renderCount.current}
-              sequence={activeSequence}
-              nodes={activeNodes}
-              counters={counters}
-              playheads={playheads}
-              zoom={zoom}
-              height={height}
-              width={width}
-            />
-          </div>
-        ) : (
-          <div
-            onClick={() => {
-              setVizParam1(Math.random() * 0.6 + 0.1);
-              setVizParam2(Math.random() * 0.5 + 0.5);
-            }}
-          >
-            <DnaVisualizer
-              playing={playing}
-              counter={renderCount.current}
-              sequence={activeSequence}
-              nodes={activeNodes}
-              counters={counters}
-              playheads={playheads}
-              zoom={zoom}
-              param1={vizParam1}
-              param2={vizParam2}
-            />
-          </div>
-        )}
+      <div className="text-[0.9rem] bg-[#222] max-w-[62rem] mx-auto mb-[1rem]">
+        <div
+          className="relative"
+          style={{
+            width: width,
+            height: height,
+          }}
+        >
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            className="svg blobs"
+          ></svg>
+          <VisualizerBlobs
+            playing={playing}
+            counter={renderCount.current}
+            activeNotes={activeNoteRefs}
+            bounds={sequenceBounds}
+            activeSequence={activeSequence}
+            showOnlyActive={showOnlyActive}
+            sequence={sequence}
+            nodes={nodes}
+            activeNodes={activeNodes}
+            countRefs={countRefs}
+            playheads={playheads}
+            zoom={zoom}
+            height={height}
+            width={width}
+            cps={cps}
+            clearClick={clearClick}
+          />
+          <VisualizerSequence
+            bounds={sequenceBounds}
+            showOnlyActive={showOnlyActive}
+            sequence={sequence}
+            nodes={nodes}
+            activeSequence={activeSequence}
+            activeNodes={activeNodes}
+            zoom={zoom}
+            height={height}
+            width={width}
+          />
+          <VisualizerPlayheads
+            playing={playing}
+            counter={renderCount.current}
+            bounds={sequenceBounds}
+            showOnlyActive={showOnlyActive}
+            sequence={sequence}
+            nodes={nodes}
+            activeSequence={activeSequence}
+            activeNodes={activeNodes}
+            counters={counters}
+            playheads={playheads}
+            zoom={zoom}
+            height={height}
+            width={width}
+          />
+        </div>
         <div>
           <div className="relative text-[#888]" style={{ width: width }}>
             <div className="absolute flex left-[1rem] top-[-1rem]">
               <p className="text-[0.8rem]">
                 START{" "}
-                <span className="text-[#fff] text-[1.2rem]">
+                <span className="text-[#fff] text-[0.8rem]">
                   {sequenceBounds[0]}
                   {"  -"}
                 </span>
               </p>
               <p className="text-[0.8rem]">
-                <span className="text-[#fff] text-[1.2rem]">
+                <span className="text-[#fff] text-[0.8rem]">
                   &nbsp;
                   {`${sequenceBounds[1]}`}
                 </span>{" "}
@@ -522,10 +562,10 @@ function App() {
             </div>
             <div className="absolute flex right-[1rem] top-[-1rem]">
               <p className="text-[0.8rem]">
-                <span className="text-[#fff] text-[1.2rem]">
-                  {sequenceBounds[1] - sequenceBounds[0]}
-                </span>{" "}
-                LENGTH
+                LENGTH{" "}
+                <span className="text-[#fff] text-[0.8rem]">
+                  {sequenceBounds[1] - sequenceBounds[0]}/{sequence.length}
+                </span>
               </p>
             </div>
             <div className="mb-[0.5rem] mt-[0.5rem]">
@@ -534,11 +574,12 @@ function App() {
                 thumbClassName="bounds-thumb"
                 trackClassName="bounds-track"
                 defaultValue={sequenceBounds}
-                minDistance={18}
+                value={boundsRef.current}
+                minDistance={sequenceRef.current.length > 6 ? 6 : sequenceRef.current.length}
                 min={0}
-                max={sequence.length}
+                max={sequenceRef.current.length > 1 ? sequenceRef.current.length : 1}
                 pearling
-                onChange={(value) => {
+                onChange={(value, index) => {
                   setSequenceBounds(value);
                 }}
               />
@@ -546,10 +587,10 @@ function App() {
           </div>
         </div>
         <div
-          className="px-[1rem] pt-2 pb-[1rem]"
+          className="px-[1rem] pt-2"
         >
           <div className="flex">
-            <div className="mt-[0.5rem]">
+            <div className="">
               <PlayPauseButton
                 playing={playing}
                 counter={counter}
@@ -557,7 +598,7 @@ function App() {
                 pause={pause}
                 stop={stop}
               />
-              <div className="mt-[0.5rem]">
+              <div className="">
                 <PlayheadButtons
                   playheads={playheads}
                   updatePlayhead={updatePlayhead}
@@ -566,94 +607,81 @@ function App() {
             </div>
             <div className="flex">
               <div>
-                <div className="flex justify-end mx-[0.5rem] text-[#fff] tracking-[0.1rem]">
-                  <button
-                    onMouseOver={() => setMenu(0)}
-                    onClick={() => setMenu(0)}
-                    className="px-[1.5rem] py-[1rem] rounded-tl-[0.5rem] bg-[#292929]"
-                    style={{
-                      textDecoration: menu === 0 ? "underline" : "none",
-                    }}
-                  >
-                    DNA
-                  </button>
-                  <button
-                    onMouseOver={() => setMenu(1)}
-                    onClick={() => setMenu(1)}
-                    className="px-[1.5rem] py-[1rem] bg-[#292929]"
-                    style={{
-                      textDecoration: menu === 1 ? "underline" : "none",
-                    }}
-                  >
-                    MAPPING
-                  </button>
-                  <button
-                    onMouseOver={() => setMenu(2)}
-                    onClick={() => setMenu(2)}
-                    className="px-[1.5rem] py-[1rem] bg-[#292929]"
-                    style={{
-                      textDecoration: menu === 2 ? "underline" : "none",
-                    }}
-                  >
-                    PATTERN
-                  </button>
-                  <button
-                    onMouseOver={() => setMenu(3)}
-                    onClick={() => setMenu(3)}
-                    className="px-[1.5rem] py-[1rem] rounded-tr-[0.5rem] bg-[#292929]"
-                    style={{
-                      textDecoration: menu === 3 ? "underline" : "none",
-                    }}
-                  >
-                    SOUND
-                  </button>
+                <div className="flex justify-end mx-[0.5rem] items-end">
+                  <div className="flex text-[#ddd] rounded-t-[0.5rem]">
+                    <button
+                      onMouseOver={() => setMenu(0)}
+                      onClick={() => setMenu(0)}
+                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                      style={{
+                        // textDecoration: menu === 0 ? "underline" : "none",
+                        backgroundColor: menu === 0 ? '#292929' : '#222'
+                      }}
+                    >
+                      DNA
+                    </button>
+                    <button
+                      onMouseOver={() => setMenu(1)}
+                      onClick={() => setMenu(1)}
+                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                      style={{
+                        // textDecoration: menu === 1 ? "underline" : "none",
+                        backgroundColor: menu === 1 ? '#292929' : '#222'
+                      }}
+                    >
+                      MAPPING
+                    </button>
+                    <button
+                      onMouseOver={() => setMenu(2)}
+                      onClick={() => setMenu(2)}
+                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                      style={{
+                        // textDecoration: menu === 2 ? "underline" : "none",
+                        backgroundColor: menu === 2 ? '#292929' : '#222'
+                      }}
+                    >
+                      PATTERN
+                    </button>
+                    <button
+                      onMouseOver={() => setMenu(3)}
+                      onClick={() => setMenu(3)}
+                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                      style={{
+                        // textDecoration: menu === 3 ? "underline" : "none",
+                        backgroundColor: menu === 3 ? '#292929' : '#222'
+                      }}
+                    >
+                      SOUND
+                    </button>
+                  </div>
                 </div>
                 <div
                   className={`
                   bg-[#292929] mx-[0.5rem] pr-[0.5rem] 
                   rounded-b-[0.5rem] rounded-tl-[0.5rem] 
-                  w-[48rem] h-[15.5rem]
+                  w-[39rem] h-[15.5rem]
                   `}
+                  style={{
+                    borderTopRightRadius: menu === 3 ? 0 : '0.5rem'
+                  }}
                 >
                   {menu === 0 ? (
-                    <div className="py-[0.5rem] px-[1rem]">
-                      <p className="mt-3 text-[#888] select-none">
+                    <div className="py-[0.5rem] px-[0.5rem] text-[0.8rem]">
+                      <p className="text-[#888] select-none">
                         DNA SEQUENCE
                       </p>
                       <div className="flex mt-2">
                         <textarea
-                          className="p-2 max-w-[30rem] w-[80%] min-w-[10rem] h-[10rem] bg-[#555]"
-                          style={{fontFamily: 'monospace'}}
+                          className="p-2 max-w-[25rem] w-[80%] min-w-[8rem] min-h-[4rem] max-h-[10rem] h-[10rem] bg-[#555] rounded-[0.5rem]"
+                          style={{ fontFamily: 'monospace' }}
                           value={userInputSequence}
                           onChange={(e) => setUserInputSequence(e.target.value)}
                         />
                       </div>
-                      <div className="zoom flex justify-end">
-                  <div className="leading-[1rem] ml-[0.25rem] mr-[0.5rem] text-[#888] text-right">
-                    <p className="text-[0.7rem]">SCALE</p>
-                    <p className="text-[#fff] text-[1rem]">
-                      {(zoom * 100).toFixed(0)}%
-                    </p>
-                  </div>
-                  <div className="rounded-[0.25rem] w-[8rem]">
-                    <ReactSlider
-                      className="tempo-slider"
-                      thumbClassName="tempo-thumb"
-                      trackClassName="tempo-track"
-                      min={0.3}
-                      max={1}
-                      step={0.01}
-                      value={zoom}
-                      onChange={(value) => {
-                        setZoom(value);
-                      }}
-                    ></ReactSlider>
-                  </div>
-                </div>
                     </div>
                   ) : menu === 1 ? (
-                    <div className="py-[0.5rem] px-[1rem]">
-                      <p className="mt-3 text-[#888] select-none">
+                    <div className="p-[0.5rem]">
+                      <p className="text-[#888] text-[0.8rem] select-none">
                         NOTE MAPPINGS
                       </p>
                       <div className="mt-3">
@@ -684,9 +712,9 @@ function App() {
                               })
                             }
                           />
-                          <div className="leading-[1rem] ml-[0.25rem] w-[2rem] mr-[0.5rem] text-[#888] text-center">
+                          <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
                             <p className="text-[0.7rem]">BPM</p>
-                            <p className="text-[#fff] text-[1.1rem]">{bpm}</p>
+                            <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{bpm}</p>
                           </div>
                           <div className=" rounded-[0.25rem] w-[8rem]">
                             <ReactSlider
@@ -703,9 +731,9 @@ function App() {
                             ></ReactSlider>
                           </div>
                         </div>
-                        <div className="leading-[1rem] ml-[0.25rem] w-[2rem] mr-[0.5rem] text-[#888] text-center">
+                        <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
                           <p className="text-[0.7rem]">STEP</p>
-                          <p className="text-[#fff] text-[1.1rem]">
+                          <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
                             {masterSteps}
                           </p>
                         </div>
@@ -753,9 +781,9 @@ function App() {
                           leftText={"<"}
                           rightText={">"}
                         />
-                        <div className="leading-[1rem] ml-[0.5rem] w-[2rem] mr-[0.5rem] text-[#888] text-center">
+                        <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
                           <p className="text-[0.7rem]">KEY</p>
-                          <p className="text-[#fff] text-[1.1rem]">
+                          <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
                             {noteOffset}
                           </p>
                         </div>
@@ -776,8 +804,8 @@ function App() {
                       </div>
                     </div>
                   ) : (
-                    <div className="py-[0.5rem] px-[1rem]">
-                      <p className="mt-3 text-[#888] select-none">
+                    <div className="p-[0.5rem]">
+                      <p className="text-[#888] text-[0.8rem] select-none">
                         SOUND SETTINGS
                       </p>
                       <div className="flex">
@@ -835,24 +863,70 @@ function App() {
                 <div className="bg-[#292929] mx-[0.5rem] pr-[0.5rem] rounded-b-[0.5rem] rounded-tl-[0.5rem]"></div>
               </div>
               <div className="">
-                <div className="w-[300px] ml-[0.5rem] bg-[#292929] h-[100%] rounded-[0.5rem]">
-                  <p className="py-[0.25rem] text-center text-[#888] select-none">
-                    CONSOLE
-                  </p>
-                  <div className="bg-[#444] w-[90%] h-[245px] m-auto p-[0.5rem]">
+                <div className="h-[2.6rem] flex items-center justify-stretch">
+                  <div className="flex h-[100%] items-center justify-end ">
+                    <div className="zoom flex justify-end">
+                      <div className="rounded-[0.25rem] w-[5rem] ml-[0.5rem]">
+                        <ReactSlider
+                          className="tempo-slider"
+                          thumbClassName="tempo-thumb"
+                          trackClassName="tempo-track"
+                          min={0.3}
+                          max={1}
+                          step={0.01}
+                          value={zoom}
+                          onChange={(value) => {
+                            setZoom(value);
+                          }}
+                        ></ReactSlider>
+                      </div>
+                    </div>
+                    {activeSequence.length < sequence.length &&
+                      <div className="flex ml-[0.5rem]">
+                        <button
+                          onClick={() => {
+                            setSequenceBounds([0, sequence.length])
+                            boundsRef.current = [0, sequence.length]
+                          }}
+                          className="uppercase rounded-[0.25rem] mr-2"
+                        >
+                          Reset
+                        </button>
+                        <p className="text-[#888] uppercase">View:&nbsp;</p>
+                        <button
+                          onClick={() => setShowOnlyActive(!showOnlyActive)}
+                          className="uppercase rounded-[0.25rem]"
+                        >
+                          {showOnlyActive ? 'active' : 'all'}
+                        </button>
+                        {/* <p className="ml-2 text-[#888] uppercase">Length:&nbsp;</p>
+                      <button
+                        onClick={() => setHoldLength(!holdLength)}
+                        className="uppercase rounded-[0.25rem]"
+                        style={{
+                          textDecoration: 'underline'
+                        }}>
+                        {holdLength ? 'hold' : 'free'}
+                      </button> */}
+                      </div>
+                    }
+                  </div>
+                </div>
+                <div className="w-[16.5rem] p-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
+                  <div className="bg-[#333] h-[14.5rem] m-auto p-[0.5rem]">
                     <p>
-                      DNA Music sequencer. WIP. 
-                      <br/>
+                      DNA Music sequencer. WIP.
+                      <br />
                       Press Play to get started. Use headpones or speakers.
                     </p>
-                  </div> 
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

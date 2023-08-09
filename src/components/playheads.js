@@ -18,13 +18,13 @@ export const PlayheadsView = ({
 }) => {
   return (
     <div>
-      <div className="flex py-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
-        <p className="w-[6rem]"># hits</p>
+      <div className="flex pt-[0.5rem] pb-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
+        <p className="w-[4.5rem]"># hits</p>
         <p className="w-[2rem]"></p>
-        <p className="w-[22.5rem]"></p>
-        <p className="w-[6rem]">period</p>
-        <p className="w-[6rem]">octave</p>
-        <p className="w-[5rem]">length</p>
+        <p className="w-[19rem]"></p>
+        <p className="w-[4rem]">period</p>
+        <p className="w-[4.2rem]">octave</p>
+        <p className="w-[4rem]">length</p>
       </div>
       {playheads.map((p, index) => {
         return (
@@ -134,7 +134,7 @@ export const PlayheadsView = ({
                   value={p.offset / 12}
                 />
               </div>
-              <div className="ml-1 bg-[#393939] rounded-[0.25rem] w-[5rem]">
+              <div className="ml-1 bg-[#393939] rounded-[0.25rem] w-[4rem]">
                 <ReactSlider
                   className="length-slider"
                   thumbClassName="length-thumb"

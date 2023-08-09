@@ -1,9 +1,9 @@
 export const PlayPauseButton = ({
-    playing,
-    pause,
-    play,
-    stop,
-    counter
+  playing,
+  pause,
+  play,
+  stop,
+  counter
 }) => {
   return (
     <div className="relative">

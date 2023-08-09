@@ -18,8 +18,13 @@ export const VisualizerBlobs = ({
   width,
   height,
   cps,
+  bounds,
+  activeSequence,
+  showOnlyActive,
+  clearClick,
 }) => {
-  // boxSide x amount =
+
+  const currentSequence = showOnlyActive ? activeSequence : sequence
   const fixedLength = false;
   const ANIMATION_TIME = 3.0;
 
@@ -33,12 +38,17 @@ export const VisualizerBlobs = ({
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
     ) * 3;
-  const rows = Math.ceil(sequence.length / perRow);
+  const rows = Math.ceil(currentSequence.length / perRow);
   const spacingY = height - rows * (boxSide * boxAspect + rowSpace * 1.5);
 
   useEffect(() => {
     lastCounter.current = playing ? counter : lastCounter.current;
   }, [counter]);
+
+  useEffect(() => {
+    setUpdatedCount(0)
+    endAllAnimations()
+  }, [clearClick])
 
   const getCoord = (i) => {
     const col = i % perRow;
@@ -69,7 +79,7 @@ export const VisualizerBlobs = ({
   }, [updatedCount]);
 
   const renderDebounce = 600
-  
+
   const animationCallback = (delta) => {
     const svg = document.querySelector(".svg");
     ticks = ticks + 1;
@@ -83,13 +93,13 @@ export const VisualizerBlobs = ({
         const index = countRefs[i].current;
         const currentNode = nodes[Math.floor(index / 3)];
         if (currentNode === undefined) return;
+        const count = showOnlyActive ? countRefs[i].current * 3 : Math.ceil((bounds[0] + countRefs[i].current * 3) / 3) * 3
         const note = noteMappings[currentNode.aminoacid];
-        const { x, y } = getCoord(countRefs[i].current * 3);
+        const { x, y } = getCoord(count);
         // check if just switched from note active to active
         if (lastIndex[i] !== index) {
           if (!lastSpawned[i]) {
             blobCount += 1;
-            console.log(">>> spawning ");
             startNoteAnimation(
               x + boxSide * 1.5,
               y,
@@ -103,19 +113,11 @@ export const VisualizerBlobs = ({
           }
           else {
             if (lastIndex[i] !== index) {
-              console.log(
-                "||-",
-                blobCount,
-                "despawn",
-                `${i}-${lastTick[i]}`
-              );
               endNoteAnimation(
                 `${i}-${lastTick[i]}`,
                 playheads[i].hsl,
                 svg
               );
-
-              console.log("||+", blobCount, "spawn", `${i}-${ticks}`);
               startNoteAnimation(
                 x + boxSide * 1.5,
                 y,
@@ -134,19 +136,14 @@ export const VisualizerBlobs = ({
       } else {
         // check if note has become not active
         if (lastSpawned[i]) {
-          //   // check if note has just become not active
-          // //   if (updatedLastTick[i] !== tick - 1) {
           blobCount -= 1;
-          console.log("---", blobCount, "despawn", `${i}-${lastTick[i]}`);
           endNoteAnimation(`${i}-${lastTick[i]}`, playheads[i].hsl, svg);
-          // //   }
         }
         lastSpawned[i] = false;
       }
     }
     if (updatedRef.current <= renderDebounce) {
       setUpdatedCount(updatedRef.current + delta);
-      console.log(updatedRef.current);
       endAllAnimations();
     }
   };
@@ -154,16 +151,16 @@ export const VisualizerBlobs = ({
   const animationCallbackRef = useRef(animationCallback);
 
   useEffect(() => {
-    console.log('updaing and ending')
     setUpdatedCount(0);
     endAllAnimations();
     animationCallbackRef.current = animationCallback;
-  }, [sequence, cps, zoom]);
+  }, [sequence, cps, zoom, height, bounds]);
 
   useEffect(() => {
     setUpdatedCount(0);
     endAllAnimations();
   }, [playing])
+
 
   // main animation loop
   useAnimationFrame(animationCallbackRef);

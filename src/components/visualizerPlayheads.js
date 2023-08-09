@@ -7,12 +7,18 @@ export const VisualizerPlayheads = ({
   counter, // renderframes
   playheads, // main playheads
   counters, // separate counts from each playhead
+  activeSequence,
   sequence,
   nodes,
   zoom,
   width,
   height,
+  bounds,
+  showOnlyActive
 }) => {
+
+  const currentSequence = showOnlyActive ? activeSequence : sequence;
+
   const lastCounter = useRef(counter);
   const spacingX = 16;
   const boxSide = 30 * zoom;
@@ -23,21 +29,13 @@ export const VisualizerPlayheads = ({
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
     ) * 3;
-  const rows = Math.ceil(sequence.length / perRow);
+  const rows = Math.ceil(currentSequence.length / perRow);
   const spacingY = height - rows * (boxSide * boxAspect + rowSpace * 1.5);
 
   const letterScale = 0.8;
 
   const [showLettersColors, setShowLettersColors] = useState(false);
   const [showAminoAcids, setShowAminoAcids] = useState(false);
-
-  const [blobs, setBlobs] = useState([]);
-
-  const blobsRef = useRef([]);
-
-  useEffect(() => {
-    blobsRef.current = blobs;
-  }, [blobs]);
 
   useEffect(() => {
     lastCounter.current = playing ? counter : lastCounter.current;
@@ -60,8 +58,6 @@ export const VisualizerPlayheads = ({
     return spritePath;
   };
 
-  const [count, setCount] = React.useState(0);
-
   const dnaColors = {
     A: "#FADADD",
     C: "#E9F7EF",
@@ -79,7 +75,7 @@ export const VisualizerPlayheads = ({
   };
 
   return (
-    <div>
+    <div className="pointer-events-none">
       {sequence.length ? (
         <div
           className="absolute"
@@ -98,7 +94,7 @@ export const VisualizerPlayheads = ({
             }}
           >
             {playheads.map((playhead, index) => {
-              const count = counters[index] * 3;
+              const count = showOnlyActive ? counters[index] * 3 : Math.ceil((bounds[0] + counters[index] * 3) / 3) * 3;
               const { x, y } = getCoord(count);
               if (nodes[count / 3] === undefined) return;
               const currentAcid = nodes[count / 3].aminoacid;
