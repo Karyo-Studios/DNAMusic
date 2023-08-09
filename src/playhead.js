@@ -1,7 +1,7 @@
 
 import { getPattern, euclidToPattern, rotate } from "./euclid"
 
-import { hexToHSL } from "./helpers"
+import { hexToHSL } from "./utils"
 
 export class Playhead {
   constructor({

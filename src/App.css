@@ -16,35 +16,38 @@ body {
 
 /* react slider  */
 
-.horizontal-slider {
-  width: calc(100% - 2rem);
+.bounds-slider {
+  width: calc(100% - 1rem);
   height: 2rem;
   margin: auto;
+  margin-left: 1rem;
+  cursor: pointer;
 }
-.example-thumb {
+
+.bounds-thumb {
   cursor: pointer;
   position: absolute;
   z-index: 100;
-  border: 5px solid #eee;
-  background-color: #eee;
+  border: 5px solid #aaa;
+  background-color: #aaa;
   display: block;
 }
 
-.example-thumb.active {
-  background-color: #eee;
+.bounds-thumb.active {
+  background-color: #aaa;
 }
-.example-track {
+.bounds-track {
   position: relative;
   background: #333;
 }
-.example-track.example-track-1 {
-  background-color: #eee;
+.bounds-track.bounds-track-1 {
+  background-color: #aaa;
 }
-.horizontal-slider .example-track {
+.bounds-slider .bounds-track {
   top: 20px;
   height: 4px;
 }
-.horizontal-slider .example-thumb {
+.bounds-slider .bounds-thumb {
   top: 12px;
   width: 12px;
   outline: none;
@@ -52,6 +55,60 @@ body {
   line-height: 38px;
   border-radius: 4px;
 }
+
+.length-slider {
+  cursor: pointer;
+  width: 100%;
+  height: 1.8rem;
+  background-color: #393939;
+  border-radius: 0.25rem;
+  margin: auto;
+}
+
+.length-slider:hover {
+  background-color: #666666;
+}
+
+.length-track.length-track-0 {
+  background-color: #000;
+}
+
+.length-thumb {
+  cursor: pointer;
+  width: 10px;
+  height: 1.8rem;
+  border-radius: 0.25rem;
+  /* top: -0.45rem; */
+  background-color: #aaa;
+}
+
+.tempo-slider {
+  cursor: pointer;
+  width: 100%;
+  height: 1.8rem;
+  background-color: #393939;
+  border-radius: 0.25rem;
+  margin: auto;
+}
+
+.tempo-slider:hover {
+  background-color: #666666;
+}
+
+.tempo-track.tempo-track-0 {
+  background-color: #000;
+}
+
+.tempo-thumb {
+  cursor: pointer;
+  width: 10px;
+  height: 1.8rem;
+  border-radius: 0.25rem;
+  /* top: -0.45rem; */
+  background-color: #aaa;
+}
+
+
 
 /* blobs */
 

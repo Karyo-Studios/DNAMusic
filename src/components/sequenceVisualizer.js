@@ -25,8 +25,6 @@ export const SequenceVisualizer = ({
   sequence,
   nodes,
   zoom,
-  param1,
-  param2,
 }) => {
   // boxSide x amount =
 
@@ -109,19 +107,6 @@ export const SequenceVisualizer = ({
 
   const [count, setCount] = React.useState(0);
 
-  const lastNote1 = useRef(-1);
-  const lastNote2 = useRef(-1);
-  const lastNote3 = useRef(-1);
-  const lastNote4 = useRef(-1);
-  const lastNote5 = useRef(-1);
-
-  const lastSpawned1 = useRef(false);
-  const lastSpawned2 = useRef(false);
-  const lastSpawned3 = useRef(false);
-  const lastSpawned4 = useRef(false);
-  const lastSpawned5 = useRef(false);
-
-  let lastNotes = [-1, -1, -1, -1, -1];
   let lastSpawned = [false, false, false, false, false];
 
   const animationCallback = (deltaTime) => {

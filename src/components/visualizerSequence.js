@@ -71,7 +71,7 @@ export const VisualizerSequence = ({
             const note = toMidi(
               noteMappings[nodes[Math.floor(index / 3)].aminoacid]
             );
-            const noteColor = mapN(note, 50, 90, 20, 90);
+            const noteColor = mapN(note, 50, 90, 30, 90);
             return (
               <div
                 key={index}
@@ -94,10 +94,11 @@ export const VisualizerSequence = ({
                         left: boxScale * ((1 - boxScale) / 2),
                         width: boxSide * boxScale,
                         height: boxSide * boxAspect,
-                        // border: "1px solid white",
+                        // border: "1px solid #888",
                         borderRadius: "0.25rem",
                         lineHeight: `${boxSide * boxAspect}px`,
-                        backgroundColor: 'rgba(255,255,255,0.4)'
+                        // backgroundColor: 'rgba(255,255,255,0.4)'
+                        backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`
                       }}
                     ></div>
                     <div
@@ -108,7 +109,7 @@ export const VisualizerSequence = ({
                         height: boxSide * boxAspect,
                         lineHeight: `${boxSide * boxAspect}px`,
                         fontSize: `${20 * zoom}px`,
-                        color: '#000'
+                        color: '#ddd'
                       }}
                     >
                       <div>{letter}</div>

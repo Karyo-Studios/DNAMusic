@@ -1,12 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-import { mapN } from "../utils";
-
-import { toMidi } from "sfumato";
-
-import { aminoAcidColors, noteMappings } from "../mappings";
-
-import { useAnimationFrame } from "../graphics";
+import { aminoAcidColors } from "../mappings";
 
 export const VisualizerPlayheads = ({
   playing,
@@ -19,14 +13,12 @@ export const VisualizerPlayheads = ({
   width,
   height,
 }) => {
-  // boxSide x amount =
-
   const lastCounter = useRef(counter);
   const spacingX = 16;
   const boxSide = 30 * zoom;
   const colSpace = boxSide / 5;
   const rowSpace = boxSide / 3;
-  const boxAspect = 1.2; // w x h 1 : 1.4
+  const boxAspect = 1.2;
   const perRow =
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
@@ -86,62 +78,71 @@ export const VisualizerPlayheads = ({
     }
   };
 
-  return <div>
-  {
-    sequence.length ? (
-      <div
-        className="absolute"
-        style={{
-          top: 0,
-          left: 0,
-          width: width,
-          height: height,
-        }}
-      >
+  return (
+    <div>
+      {sequence.length ? (
         <div
-          className="relative"
+          className="absolute"
           style={{
+            top: 0,
+            left: 0,
             width: width,
             height: height,
           }}
         >
-          {playheads.map((playhead, index) => {
-            const count = counters[index] * 3;
-            const { x, y } = getCoord(count);
-            if (nodes[count / 3] === undefined) return
-            const currentAcid = nodes[count / 3].aminoacid;
-            const spritePathAcid = getAcidSprite(currentAcid);
-            if (playhead.playing) {
+          <div
+            className="relative"
+            style={{
+              width: width,
+              height: height,
+            }}
+          >
+            {playheads.map((playhead, index) => {
+              const count = counters[index] * 3;
+              const { x, y } = getCoord(count);
+              if (nodes[count / 3] === undefined) return;
+              const currentAcid = nodes[count / 3].aminoacid;
+              const spritePathAcid = getAcidSprite(currentAcid);
               return (
                 <div key={index + x}>
                   <div
                     className="absolute box-border text-center"
                     style={{
                       left: x,
-                      top: y,
+                      top: playhead.playing ? y : y + boxSide * boxAspect,
+                      // transition: "top 100ms linear",
                     }}
                   >
                     <div
                       style={{
-                        width: boxSide * 3,
-                        height: boxSide * boxAspect,
-                        borderRadius: "0.25rem",
-                        backgroundColor: playhead.color,
+                        width: boxSide * 2.95,
+                        height: playhead.playing ? boxSide * boxAspect : "3px",
+                        borderRadius: playhead.playing ? "0.25rem" : 0,
+                        backgroundColor: playhead.playing
+                          ? playhead.color
+                          : "rgba(0,0,0,0)",
+                        // backgroundColor: playhead.color,
+                        opacity: playhead.playing ? 1 : 0.5,
+                        borderBottom: `2px solid ${playhead.color}`,
                         lineHeight: `${boxSide * boxAspect}px`,
+                        // transition: playhead.playing
+                        //   ? "height 100ms linear, color 200ms linear"
+                        //   : "height 100ms linear",
                         fontSize: `${20 * zoom}px`,
+                        color: playhead.playing ? "#fff" : "rgba(0,0,0,0)",
                       }}
                     >
-                      <div>{currentAcid}</div>
+                      <div>{playhead.playing ? currentAcid : ""}</div>
                     </div>
                   </div>
                 </div>
               );
-            }
-          })}
+            })}
+          </div>
         </div>
-      </div>
-    ) : (
-      <div></div>
-    )
-  }</div>
+      ) : (
+        <div></div>
+      )}
+    </div>
+  );
 };

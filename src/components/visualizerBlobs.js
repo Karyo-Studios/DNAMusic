@@ -58,19 +58,7 @@ export const VisualizerBlobs = ({
   let lastIndex = [-1, -1, -1, -1, -1];
   let ticks = 0;
 
-  // const [lastTick, setLastTick] = useState([-1, -1, -1, -1, -1]);
-  // const [lastSpawned, setLastSpawned] = useState([
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  // ]);
-  // const [lastIndex, setLastIndex] = useState([-1, -1, -1, -1, -1]);
-
   let blobCount = 0;
-
-  // const [ticks, setTicks] = useState(0);
 
   const [updatedCount, setUpdatedCount] = useState(0);
 
@@ -80,17 +68,13 @@ export const VisualizerBlobs = ({
     updatedRef.current = updatedCount;
   }, [updatedCount]);
 
-  const renderDebounce = 100
+  const renderDebounce = 600
   
-  const animationCallback = () => {
+  const animationCallback = (delta) => {
     const svg = document.querySelector(".svg");
     ticks = ticks + 1;
 
     const timeWindow = cps * 1000;
-
-    // let updatedLastSpawn = [...lastSpawned];
-    // let updatedLastIndex = [...lastIndex];
-    // let updatedLastTick = [...lastTick];
 
     // check to add new blobs
     for (let i = 0; i < playheads.length; i++) {
@@ -161,7 +145,7 @@ export const VisualizerBlobs = ({
       }
     }
     if (updatedRef.current <= renderDebounce) {
-      setUpdatedCount(updatedRef.current + 1);
+      setUpdatedCount(updatedRef.current + delta);
       console.log(updatedRef.current);
       endAllAnimations();
     }
