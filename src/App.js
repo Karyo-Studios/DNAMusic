@@ -17,6 +17,7 @@ import { PlayPauseButton } from "./components/playPauseButton";
 import { RemixButton } from "./components/remixButton";
 import { PlayheadButtons } from "./components/playheadButtons";
 import { PlayheadsView } from "./components/playheads";
+import { SequenceInput } from "./components/sequenceInput";
 import { VisualizerSequence } from "./components/visualizerSequence";
 import { VisualizerPlayheads } from "./components/visualizerPlayheads";
 import { VisualizerBlobs } from "./components/visualizerBlobs";
@@ -68,7 +69,7 @@ function App() {
 
   const calculatedHeight = window.innerHeight - 20 * 22;
 
-  const width = 62 * 20;
+  const width = window.innerWidth < 1300 ? 1000 : 1200;
   const height = calculatedHeight < 400 ? 400 : calculatedHeight;
 
   const [menu, setMenu] = useState(2);
@@ -423,9 +424,9 @@ function App() {
   }, [userInputSequence]);
 
   useMemo(() => {
-      const seq = interpretSequence(userSequence)
-      setUserInputSequence(seq)
-  }, [userSequence])
+    const seq = interpretSequence(userSequence);
+    setUserInputSequence(seq);
+  }, [userSequence]);
 
   useEffect(() => {
     boundsRef.current = sequenceBounds;
@@ -479,19 +480,33 @@ function App() {
       )}
       <div
         className="absolute w-[100%] z-[1]"
-        style={{ borderBottom: "1px solid #fff" }}
       >
-        <div className="max-w-[62rem] mx-auto p-[1rem]">
-          <div className="w-[100%] z-[1] text-[#888] flex justify-between">
-            <div>
-              <h3>DNA SEQUENCER</h3>
-            </div>
-            <div>
-              <h3>
-                SEQUENCE: <span className="text-[#fff]">SARS-CoV-2</span>
-              </h3>
+        <div style={{ borderBottom: "1px solid #fff" }}>
+          <div className="mx-auto p-[1rem]" style={{ width: width }}>
+            <div
+              className="z-[1] text-[#888] flex justify-between"
+              style={{
+                width: width,
+              }}
+            >
+              <div>
+                <h3>DNA SEQUENCER</h3>
+              </div>
+              <div>
+                <h3>
+                  SEQUENCE: <span className="text-[#fff]">SARS-CoV-2</span>
+                </h3>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="w-[100%] text-center mx-auto" style={{ width: width }}>
+          <SequenceInput
+            userSequence={userSequence}
+            setUserSequence={setUserSequence}
+            userInputSequence={userInputSequence}
+            setUserInputSequence={setUserInputSequence}
+          />
         </div>
       </div>
       <div className="text-[0.9rem] bg-[#181818] max-w-[62rem] mx-auto mb-[0rem]">
@@ -635,61 +650,35 @@ function App() {
               <div>
                 <div className="flex justify-start mx-[0.5rem] items-end">
                   <div className="flex text-[#ddd] rounded-t-[0.5rem]">
-                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
-                                          onClick={() => setMenu(0)}
-                      style={{
-                        // textDecoration: menu === 0 ? "underline" : "none",
-                        backgroundColor: menu === 0 ? "#292929" : "#181818",
-                      }}
-                    >
-                      <button
-                      onMouseOver={() => setMenu(0)}
-                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
-                    >
-                      DNA
-                    </button>
-                    </div>
-                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
-                                          onClick={() => setMenu(1)}
-                      style={{
-                        // textDecoration: menu === 1 ? "underline" : "none",
-                        backgroundColor: menu === 1 ? "#292929" : "#181818",
-                      }}
-                    >
-                      <button
-                      onMouseOver={() => setMenu(1)}
-                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
-                    >
-                      MAPPING
-                    </button>
-                    </div>
-                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
-                                          onClick={() => setMenu(2)}
+                    <div
+                      className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                      onClick={() => setMenu(2)}
                       style={{
                         // textDecoration: menu === 2 ? "underline" : "none",
                         backgroundColor: menu === 2 ? "#292929" : "#181818",
                       }}
                     >
                       <button
-                      onMouseOver={() => setMenu(2)}
-                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
-                    >
-                      PATTERN
-                    </button>
+                        onMouseOver={() => setMenu(2)}
+                        className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
+                      >
+                        PATTERN
+                      </button>
                     </div>
-                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
-                                          onClick={() => setMenu(3)}
+                    <div
+                      className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                      onClick={() => setMenu(3)}
                       style={{
                         // textDecoration: menu === 3 ? "underline" : "none",
                         backgroundColor: menu === 3 ? "#292929" : "#181818",
                       }}
                     >
                       <button
-                      onMouseOver={() => setMenu(3)}
-                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
-                    >
-                      SOUND
-                    </button>
+                        onMouseOver={() => setMenu(3)}
+                        className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
+                      >
+                        SOUND
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center h-[2.6rem] ml-[1.6rem]">
@@ -730,45 +719,12 @@ function App() {
                       <div className="flex mb-[0.25rem] text-[#888] text-[0.8rem] select-none">
                         <p className="text-center w-[6rem]">DNA SEQUENCE</p>
                       </div>
-                      {true ? 
-                        <div>
-                          <div className="flex mt-1">
-                            <input
-                              id="user-input-name"
-                              className={`px-2 text-[1.2rem] 
-                              w-[25rem] h-[1.9rem] bg-[#555] rounded-[0.25rem]`}
-                              style={{ fontFamily: "monospace" }}
-                              value={userSequence}
-                              defaul
-                              onChange={(e) => {
-                                setUserSequence(e.target.value);
-                              }}
-                            />
-                          </div>
-                          <div className="flex mt-[0.25rem]">
-                            <div
-                              className="overflow-y-scroll p-2 w-[25rem] min-h-[4rem] max-h-[6rem] h-[6rem] bg-[#333] rounded-[0.25rem]"
-                              style={{ fontFamily: "monospace" }}
-                            >
-                              <p className="break-all select-text">{userInputSequence}</p>
-                            </div>
-                          </div>
-                        </div>
-                        :
-                        <div className="flex mt-[0.25rem] pointer-events-none">
-                            <textarea
-                              id="user-input-dna"
-                              className="text-wrap p-2 w-[25rem] min-h-[4rem] max-h-[6rem] h-[6rem] bg-[#555] rounded-[0.25rem]"
-                              style={{ fontFamily: "monospace" }}
-                              value={userInputSequence}
-                              onChange={(e) =>
-                                setUserInputSequence(e.target.value)
-                              }
-                            >
-                              {userInputSequence}
-                            </textarea>
-                          </div>
-                      }
+                      <SequenceInput
+                        userSequence={userSequence}
+                        setUserSequence={setUserSequence}
+                        userInputSequence={userInputSequence}
+                        setUserInputSequence={setUserInputSequence}
+                      />
                     </div>
                   ) : menu === 1 ? (
                     <div className="p-[0.5rem]">
@@ -990,7 +946,7 @@ function App() {
                   </div>
                 </div>
                 <div className="w-[16.5rem] p-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
-                  <div className="bg-[#333] h-[14.5rem] m-auto p-[0.5rem]">
+                  <div className="bg-[#333] h-[14.5rem] m-auto p-[0.5rem] hidden">
                     <p>
                       DNA Music sequencer. WIP.
                       <br />
@@ -1012,6 +968,15 @@ function App() {
                         Viz {showViz ? "hide" : "show"}
                       </button>
                     </div>
+                  </div>
+                  <div>
+                  <VisualizerMappings
+                          playheads={playheads}
+                          countRefs={countRefs}
+                          counters={counters}
+                          activeNodes={activeNodes}
+                          playheadCount={playheadCount}
+                        />
                   </div>
                 </div>
               </div>

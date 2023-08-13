@@ -78,7 +78,7 @@ export const VisualizerSequence = ({
             const note = toMidi(
               noteMappings[nodes[Math.floor(index / 3)].aminoacid]
             );
-            const noteColor = mapN(note, 50, 90, 30, 90);
+            const noteColor = mapN(note, 50, 90, 50, 100);
             const isActive = showOnlyActive ? true : index >= bounds[0] && index <= bounds[1]
             return (
               <div
@@ -102,7 +102,7 @@ export const VisualizerSequence = ({
                         left: boxScale * ((1 - boxScale) / 2),
                         width: boxSide * boxScale,
                         height: boxSide * boxAspect,
-                        // border: "1px solid #888",
+                        // border: "1px solid #888", 
                         borderRadius: "0.25rem",
                         lineHeight: `${boxSide * boxAspect}px`,
                         // backgroundColor: 'rgba(255,255,255,0.4)'

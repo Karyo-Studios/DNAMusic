@@ -1,6 +1,16 @@
+html {
+  font-size: 20px!important;
+}
+
+@media all and (max-width: 1300px) {
+  html {
+    font-size: 16px!important;
+  }
+}
+
 body {
   color: #fff;
-  background-color: #222222;
+  background-color: #181818;
   font-family: din-2014, sans-serif;
 }
 

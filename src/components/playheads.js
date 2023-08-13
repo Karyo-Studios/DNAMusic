@@ -15,6 +15,7 @@ export const PlayheadsView = ({
   ticker,
   masterSteps,
   counters,
+  playheadCount,
 }) => {
   return (
     <div>
@@ -27,6 +28,7 @@ export const PlayheadsView = ({
         <p className="w-[4rem]">length</p>
       </div>
       {playheads.map((p, index) => {
+        if (index >= playheadCount) return;
         return (
           <div
             key={"playheads" + index}

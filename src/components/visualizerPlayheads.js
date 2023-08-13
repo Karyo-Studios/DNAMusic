@@ -14,7 +14,8 @@ export const VisualizerPlayheads = ({
   width,
   height,
   bounds,
-  showOnlyActive
+  showOnlyActive,
+  playheadCount,
 }) => {
 
   const currentSequence = showOnlyActive ? activeSequence : sequence;
@@ -94,6 +95,7 @@ export const VisualizerPlayheads = ({
             }}
           >
             {playheads.map((playhead, index) => {
+              if (index >= playheadCount) return;
               const count = showOnlyActive ? counters[index] * 3 : Math.ceil((bounds[0] + counters[index] * 3) / 3) * 3;
               const { x, y } = getCoord(count);
               if (nodes[count / 3] === undefined) return;

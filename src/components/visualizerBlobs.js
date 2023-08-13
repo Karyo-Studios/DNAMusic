@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
-import { randRange } from "../utils";
+import { mapN, randRange, toMidi } from "../utils";
 
 import { aminoAcidhsls, noteMappings } from "../mappings";
 
@@ -22,6 +22,7 @@ export const VisualizerBlobs = ({
   activeSequence,
   showOnlyActive,
   clearClick,
+  playheadCount,
 }) => {
 
   const currentSequence = showOnlyActive ? activeSequence : sequence
@@ -87,21 +88,27 @@ export const VisualizerBlobs = ({
     const timeWindow = cps * 1000;
 
     // check to add new blobs
-    for (let i = 0; i < playheads.length; i++) {
+    for (let i = 0; i < playheadCount; i++) {
       if (activeNotes[i].current && updatedRef.current > renderDebounce) {
         // note is currently active
         const index = countRefs[i].current;
-        const currentNode = nodes[Math.floor(index / 3)];
+        const currentNode = nodes[Math.floor(index)];
         if (currentNode === undefined) return;
         const count = showOnlyActive ? countRefs[i].current * 3 : Math.ceil((bounds[0] + countRefs[i].current * 3) / 3) * 3
         const note = noteMappings[currentNode.aminoacid];
-        const { x, y } = getCoord(count);
+        const midi = toMidi(note);
+        console.log(midi)
+        const noteX = mapN(midi, 45, 90, 0, width)
+        // const { x, y } = getCoord(count);
+        const x = noteX;
+        const y = 400;
         // check if just switched from note active to active
         if (lastIndex[i] !== index) {
           if (!lastSpawned[i]) {
             blobCount += 1;
             startNoteAnimation(
-              x + boxSide * 1.5,
+              // x + boxSide * 1.5,
+              noteX,
               y,
               `${i}-${ticks}`,
               playheads[i].hsl,
@@ -119,7 +126,8 @@ export const VisualizerBlobs = ({
                 svg
               );
               startNoteAnimation(
-                x + boxSide * 1.5,
+                // x + boxSide * 1.5,
+                noteX,
                 y,
                 `${i}-${ticks}`,
                 playheads[i].hsl,
@@ -154,7 +162,7 @@ export const VisualizerBlobs = ({
     setUpdatedCount(0);
     endAllAnimations();
     animationCallbackRef.current = animationCallback;
-  }, [sequence, cps, zoom, height, bounds]);
+  }, [sequence, cps, zoom, height, bounds, playheadCount]);
 
   useEffect(() => {
     setUpdatedCount(0);
