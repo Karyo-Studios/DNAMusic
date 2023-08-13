@@ -7,7 +7,7 @@ import FPSStats from "react-fps-stats";
 import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
 import { p1, p2, p3, p4, p5 } from "./defaults";
-import { parseSequence, generatePattern } from "./helpers";
+import { parseSequence, generatePattern, interpretSequence } from "./helpers";
 import { mapN, randRange, toMidi } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
@@ -20,6 +20,7 @@ import { PlayheadsView } from "./components/playheads";
 import { VisualizerSequence } from "./components/visualizerSequence";
 import { VisualizerPlayheads } from "./components/visualizerPlayheads";
 import { VisualizerBlobs } from "./components/visualizerBlobs";
+import { VisualizerMappings } from "./components/visualizerMappings";
 
 import { noteMappings } from "./mappings";
 import { loadedSequences, savedSequences } from "./loadedSequences";
@@ -36,6 +37,7 @@ function App() {
   const [userInputSequence, setUserInputSequence] = useState(
     savedSequences[sequenceIndex].sequence
   );
+  const [userSequence, setUserSequence] = useState("hello world");
   const [zoom, setZoom] = useState(0.6);
   const [vizParam1, setVizParam1] = useState(0.5);
   const [vizParam2, setVizParam2] = useState(1);
@@ -45,10 +47,10 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
-  const [showFPS, setShowFPS] = useState(false)
-  const [showViz, setShowViz] = useState(true)
+  const [showFPS, setShowFPS] = useState(false);
+  const [showViz, setShowViz] = useState(true);
 
-  const sequenceRef = useRef(sequence)
+  const sequenceRef = useRef(sequence);
 
   const [sequenceBounds, setSequenceBounds] = useState([
     0,
@@ -62,9 +64,11 @@ function App() {
   const [activeSequence, setActiveSequence] = useState(sequence);
   const [activeNodes, setActiveNodes] = useState(nodes);
 
-  const calculatedHeight = window.innerHeight - 16 * 23;
+  const [playheadCount, setPlayheadCount] = useState(2);
 
-  const width = 62 * 16;
+  const calculatedHeight = window.innerHeight - 20 * 22;
+
+  const width = 62 * 20;
   const height = calculatedHeight < 400 ? 400 : calculatedHeight;
 
   const [menu, setMenu] = useState(2);
@@ -119,6 +123,9 @@ function App() {
   };
 
   const captureKeyboardEvent = (event) => {
+    const active = document.activeElement;
+    if (active.id === "user-input-dna" || active.id === "user-input-name")
+      return;
     if (event.keyCode === 32) {
       event.preventDefault();
       getAudioContext();
@@ -132,7 +139,6 @@ function App() {
       });
     }
   };
-
 
   const [windowSize, setWindowSize] = useState({
     width: undefined,
@@ -150,7 +156,6 @@ function App() {
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
 
   useEffect(() => {
     new Promise((resolve) => {
@@ -170,8 +175,8 @@ function App() {
     });
 
     window.addEventListener("resize", (event) => {
-      console.log('resize')
-      setClearClick(clearClick + 1)
+      console.log("resize");
+      setClearClick(clearClick + 1);
     });
 
     enableWebMidi();
@@ -215,9 +220,9 @@ function App() {
   const counters = [count1, count2, count3, count4, count5];
   const countRefs = [countRef1, countRef2, countRef3, countRef4, countRef5];
 
-  const [showOnlyActive, setShowOnlyActive] = useState(false)
-  const [holdLength, setHoldLength] = useState(false)
-  const [clearClick, setClearClick] = useState(0)
+  const [showOnlyActive, setShowOnlyActive] = useState(false);
+  const [holdLength, setHoldLength] = useState(false);
+  const [clearClick, setClearClick] = useState(0);
 
   const activeNoteRefs = [
     noteActiveRef1,
@@ -323,7 +328,7 @@ function App() {
               setTicker(counter * masterSteps + j);
             }, timeWindow * (j / masterSteps));
           }
-          for (let i = 0; i < playheads.length; i++) {
+          for (let i = 0; i < playheadCount; i++) {
             const active = playheads[i];
             const activeRef = playheadsRef.current;
             const haps = queryPattern(
@@ -412,14 +417,19 @@ function App() {
     sequenceRef.current = sequence;
     setActiveNodes(nodes);
     setActiveSequence(sequence);
-    setSequenceBounds([0, sequence.length])
+    setSequenceBounds([0, sequence.length]);
     boundsRef.current = [0, sequence.length];
     resetCounters();
   }, [userInputSequence]);
 
+  useMemo(() => {
+      const seq = interpretSequence(userSequence)
+      setUserInputSequence(seq)
+  }, [userSequence])
+
   useEffect(() => {
-    boundsRef.current = sequenceBounds
-  }, [sequenceBounds])
+    boundsRef.current = sequenceBounds;
+  }, [sequenceBounds]);
 
   useMemo(() => {
     setActiveNodes(nodes);
@@ -429,10 +439,7 @@ function App() {
   useMemo(() => {
     const length = sequenceBounds[1] - sequenceBounds[0];
     // console.log(nodes.length, sequence.length)
-    const snippet = sequence.slice(
-      sequenceBounds[0],
-      sequenceBounds[1]
-    );
+    const snippet = sequence.slice(sequenceBounds[0], sequenceBounds[1]);
     // console.log(sequenceBounds[0]/3, sequenceBounds[1]/3)
     const nodeSnippet = nodes.slice(
       Math.ceil(sequenceBounds[0] / 3),
@@ -442,10 +449,10 @@ function App() {
     setActiveSequence(snippet);
     setActiveNodes(nodeSnippet);
     if (showOnlyActive) {
-      const newZoom = mapN(length, 18, 300, 1, 0.5);
+      const newZoom = mapN(length, 18, 300, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     } else {
-      const newZoom = mapN(sequence.length, 18, 300, 1, 0.5);
+      const newZoom = mapN(sequence.length, 18, 300, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     }
   }, [sequenceBounds, showOnlyActive]);
@@ -456,7 +463,7 @@ function App() {
       tabIndex={-1}
       className="App outline-none text-left max-w-full select-none"
       onClick={() => {
-        setClearClick(clearClick + 1)
+        setClearClick(clearClick + 1);
       }}
     >
       {showFPS && <FPSStats />}
@@ -487,7 +494,7 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="text-[0.9rem] bg-[#222] max-w-[62rem] mx-auto mb-[1rem]">
+      <div className="text-[0.9rem] bg-[#181818] max-w-[62rem] mx-auto mb-[0rem]">
         <div
           className="relative"
           style={{
@@ -500,7 +507,7 @@ function App() {
             xmlns="http://www.w3.org/2000/svg"
             className="svg blobs"
           ></svg>
-          {showViz &&
+          {showViz && (
             <VisualizerBlobs
               playing={playing}
               counter={renderCount.current}
@@ -518,8 +525,9 @@ function App() {
               width={width}
               cps={cps}
               clearClick={clearClick}
+              playheadCount={playheadCount}
             />
-          }
+          )}
           <VisualizerSequence
             bounds={sequenceBounds}
             showOnlyActive={showOnlyActive}
@@ -530,11 +538,12 @@ function App() {
             zoom={zoom}
             height={height}
             width={width}
+            playheadCount={playheadCount}
           />
           <VisualizerPlayheads
             playing={playing}
             counter={renderCount.current}
-            bounds={boundsRef.current}
+            bounds={sequenceBounds}
             showOnlyActive={showOnlyActive}
             sequence={sequence}
             nodes={nodes}
@@ -545,6 +554,7 @@ function App() {
             zoom={zoom}
             height={height}
             width={width}
+            playheadCount={playheadCount}
           />
         </div>
         <div>
@@ -580,9 +590,17 @@ function App() {
                 trackClassName="bounds-track"
                 defaultValue={sequenceBounds}
                 value={boundsRef.current}
-                minDistance={sequenceRef.current.length > 6 ? 6 : sequenceRef.current.length}
+                minDistance={
+                  sequenceRef.current.length > 6
+                    ? 6
+                    : sequenceRef.current.length
+                }
                 min={0}
-                max={sequenceRef.current.length > 1 ? sequenceRef.current.length : 1}
+                max={
+                  sequenceRef.current.length > 1
+                    ? sequenceRef.current.length
+                    : 1
+                }
                 pearling
                 onChange={(value, index) => {
                   setSequenceBounds(value);
@@ -591,17 +609,15 @@ function App() {
             </div>
           </div>
         </div>
-        <div
-          className="px-[1rem] pt-2"
-        >
+        <div className="px-[1rem] pt-2">
           <div className="flex">
             <div className="">
               <PlayPauseButton
                 playing={playing}
                 counter={counter}
                 play={() => {
-                  play()
-                  setMenu(2)
+                  play();
+                  // setMenu(2);
                 }}
                 pause={pause}
                 stop={stop}
@@ -610,91 +626,161 @@ function App() {
                 <PlayheadButtons
                   playheads={playheads}
                   updatePlayhead={updatePlayhead}
+                  playheadCount={playheadCount}
+                  setPlayheadCount={setPlayheadCount}
                 />
               </div>
             </div>
             <div className="flex">
               <div>
-                <div className="flex justify-end mx-[0.5rem] items-end">
+                <div className="flex justify-start mx-[0.5rem] items-end">
                   <div className="flex text-[#ddd] rounded-t-[0.5rem]">
-                    <button
-                      onMouseOver={() => setMenu(0)}
-                      onClick={() => setMenu(0)}
-                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                                          onClick={() => setMenu(0)}
                       style={{
                         // textDecoration: menu === 0 ? "underline" : "none",
-                        backgroundColor: menu === 0 ? '#292929' : '#222'
+                        backgroundColor: menu === 0 ? "#292929" : "#181818",
                       }}
+                    >
+                      <button
+                      onMouseOver={() => setMenu(0)}
+                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
                     >
                       DNA
                     </button>
-                    <button
-                      onMouseOver={() => setMenu(1)}
-                      onClick={() => setMenu(1)}
-                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                    </div>
+                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                                          onClick={() => setMenu(1)}
                       style={{
                         // textDecoration: menu === 1 ? "underline" : "none",
-                        backgroundColor: menu === 1 ? '#292929' : '#222'
+                        backgroundColor: menu === 1 ? "#292929" : "#181818",
                       }}
+                    >
+                      <button
+                      onMouseOver={() => setMenu(1)}
+                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
                     >
                       MAPPING
                     </button>
-                    <button
-                      onMouseOver={() => setMenu(2)}
-                      onClick={() => setMenu(2)}
-                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                    </div>
+                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                                          onClick={() => setMenu(2)}
                       style={{
                         // textDecoration: menu === 2 ? "underline" : "none",
-                        backgroundColor: menu === 2 ? '#292929' : '#222'
+                        backgroundColor: menu === 2 ? "#292929" : "#181818",
                       }}
+                    >
+                      <button
+                      onMouseOver={() => setMenu(2)}
+                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
                     >
                       PATTERN
                     </button>
-                    <button
-                      onMouseOver={() => setMenu(3)}
-                      onClick={() => setMenu(3)}
-                      className="tracking-[0.1rem] px-[1.5rem] pb-[0.5rem] pt-[0.75rem] bg-[#292929] rounded-t-[0.5rem] "
+                    </div>
+                    <div className="bg-[#292929] px-[1.5rem] rounded-t-[0.5rem] cursor-pointer"
+                                          onClick={() => setMenu(3)}
                       style={{
                         // textDecoration: menu === 3 ? "underline" : "none",
-                        backgroundColor: menu === 3 ? '#292929' : '#222'
+                        backgroundColor: menu === 3 ? "#292929" : "#181818",
                       }}
+                    >
+                      <button
+                      onMouseOver={() => setMenu(3)}
+                      className="tracking-[0.1rem] pb-[0.5rem] pt-[0.75rem]"
                     >
                       SOUND
                     </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center h-[2.6rem] ml-[1.6rem]">
+                    <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
+                      <p className="text-[0.7rem]">BPM</p>
+                      <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
+                        {bpm}
+                      </p>
+                    </div>
+                    <div className=" rounded-[0.25rem] w-[8rem]">
+                      <ReactSlider
+                        className="tempo-slider"
+                        thumbClassName="tempo-thumb"
+                        trackClassName="tempo-track"
+                        min={20}
+                        max={260}
+                        step={1}
+                        value={bpm}
+                        onChange={(value) => {
+                          updateTempo(value);
+                        }}
+                      ></ReactSlider>
+                    </div>
                   </div>
                 </div>
                 <div
                   className={`
                   bg-[#292929] mx-[0.5rem] pr-[0.5rem] 
-                  rounded-b-[0.5rem] rounded-tl-[0.5rem] 
+                  rounded-b-[0.5rem] rounded-tr-[0.5rem] 
                   w-[39rem] h-[15.5rem]
                   `}
                   style={{
-                    borderTopRightRadius: menu === 3 ? 0 : '0.5rem'
+                    borderTopLeftRadius: menu === 0 ? 0 : "0.5rem",
                   }}
                 >
                   {menu === 0 ? (
                     <div className="py-[0.5rem] px-[0.5rem] text-[0.8rem]">
-                      <p className="text-[#888] select-none">
-                        DNA SEQUENCE
-                      </p>
-                      <div className="flex mt-2">
-                        <textarea
-                          className="p-2 max-w-[25rem] w-[80%] min-w-[8rem] min-h-[4rem] max-h-[10rem] h-[10rem] bg-[#555] rounded-[0.5rem]"
-                          style={{ fontFamily: 'monospace' }}
-                          value={userInputSequence}
-                          onChange={(e) => setUserInputSequence(e.target.value)}
-                        />
+                      <div className="flex mb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+                        <p className="text-center w-[6rem]">DNA SEQUENCE</p>
                       </div>
+                      {true ? 
+                        <div>
+                          <div className="flex mt-1">
+                            <input
+                              id="user-input-name"
+                              className={`px-2 text-[1.2rem] 
+                              w-[25rem] h-[1.9rem] bg-[#555] rounded-[0.25rem]`}
+                              style={{ fontFamily: "monospace" }}
+                              value={userSequence}
+                              defaul
+                              onChange={(e) => {
+                                setUserSequence(e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="flex mt-[0.25rem]">
+                            <div
+                              className="overflow-y-scroll p-2 w-[25rem] min-h-[4rem] max-h-[6rem] h-[6rem] bg-[#333] rounded-[0.25rem]"
+                              style={{ fontFamily: "monospace" }}
+                            >
+                              <p className="break-all select-text">{userInputSequence}</p>
+                            </div>
+                          </div>
+                        </div>
+                        :
+                        <div className="flex mt-[0.25rem] pointer-events-none">
+                            <textarea
+                              id="user-input-dna"
+                              className="text-wrap p-2 w-[25rem] min-h-[4rem] max-h-[6rem] h-[6rem] bg-[#555] rounded-[0.25rem]"
+                              style={{ fontFamily: "monospace" }}
+                              value={userInputSequence}
+                              onChange={(e) =>
+                                setUserInputSequence(e.target.value)
+                              }
+                            >
+                              {userInputSequence}
+                            </textarea>
+                          </div>
+                      }
                     </div>
                   ) : menu === 1 ? (
                     <div className="p-[0.5rem]">
-                      <p className="text-[#888] text-[0.8rem] select-none">
-                        NOTE MAPPINGS
-                      </p>
-                      <div className="mt-3">
-                        {`DNA Amino Acid note mappings to come.`}
+                      <div className="">
                         {/* <pre>{JSON.stringify(noteMappings, null, 2)}</pre> */}
+                        <VisualizerMappings
+                          playheads={playheads}
+                          countRefs={countRefs}
+                          counters={counters}
+                          activeNodes={activeNodes}
+                          playheadCount={playheadCount}
+                        />
                       </div>
                     </div>
                   ) : menu === 2 ? (
@@ -706,6 +792,7 @@ function App() {
                         ticker={ticker}
                         masterSteps={masterSteps}
                         counters={counters}
+                        playheadCount={playheadCount}
                       />
                       <div className="flex items-center pt-[0.4rem] pb-[0.75rem]">
                         <div className="flex items-center">
@@ -720,24 +807,6 @@ function App() {
                               })
                             }
                           />
-                          <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
-                            <p className="text-[0.7rem]">BPM</p>
-                            <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{bpm}</p>
-                          </div>
-                          <div className=" rounded-[0.25rem] w-[8rem]">
-                            <ReactSlider
-                              className="tempo-slider"
-                              thumbClassName="tempo-thumb"
-                              trackClassName="tempo-track"
-                              min={20}
-                              max={260}
-                              step={1}
-                              value={bpm}
-                              onChange={(value) => {
-                                updateTempo(value);
-                              }}
-                            ></ReactSlider>
-                          </div>
                         </div>
                         <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
                           <p className="text-[0.7rem]">STEP</p>
@@ -889,12 +958,12 @@ function App() {
                         ></ReactSlider>
                       </div>
                     </div>
-                    {activeSequence.length < sequence.length &&
+                    {activeSequence.length < sequence.length && (
                       <div className="flex ml-[0.5rem]">
                         <button
                           onClick={() => {
-                            setSequenceBounds([0, sequence.length])
-                            boundsRef.current = [0, sequence.length]
+                            setSequenceBounds([0, sequence.length]);
+                            boundsRef.current = [0, sequence.length];
                           }}
                           className="uppercase rounded-[0.25rem] mr-2"
                         >
@@ -905,7 +974,7 @@ function App() {
                           onClick={() => setShowOnlyActive(!showOnlyActive)}
                           className="uppercase rounded-[0.25rem]"
                         >
-                          {showOnlyActive ? 'active' : 'all'}
+                          {showOnlyActive ? "active" : "all"}
                         </button>
                         {/* <p className="ml-2 text-[#888] uppercase">Length:&nbsp;</p>
                       <button
@@ -917,7 +986,7 @@ function App() {
                         {holdLength ? 'hold' : 'free'}
                       </button> */}
                       </div>
-                    }
+                    )}
                   </div>
                 </div>
                 <div className="w-[16.5rem] p-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
@@ -928,13 +997,19 @@ function App() {
                       Press Play to get started. Use headpones or speakers.
                     </p>
                     <div>
-                      <button className="mt-4" onClick={() => setShowFPS(!showFPS)}>
-                        FPS {showFPS ? 'hide' : 'show'}
+                      <button
+                        className="mt-4"
+                        onClick={() => setShowFPS(!showFPS)}
+                      >
+                        FPS {showFPS ? "hide" : "show"}
                       </button>
                     </div>
                     <div>
-                      <button className="mt-4" onClick={() => setShowViz(!showViz)}>
-                        Viz {showViz ? 'hide' : 'show'}
+                      <button
+                        className="mt-4"
+                        onClick={() => setShowViz(!showViz)}
+                      >
+                        Viz {showViz ? "hide" : "show"}
                       </button>
                     </div>
                   </div>
@@ -944,7 +1019,7 @@ function App() {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 

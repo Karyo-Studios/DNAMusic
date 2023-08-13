@@ -1,8 +1,23 @@
-import { codonMappings } from "./mappings";
+import { codonMappings, aminoAcidToCodons } from "./mappings";
 
 import { randRange } from "./utils";
 
 import { updateEuclid } from "./playhead";
+
+export const interpretSequence = (seq) => {
+  const splitUp = seq.toUpperCase().split("");
+  let combined = ""
+  for (let i = 0; i < splitUp.length; i++) {
+    const codons = aminoAcidToCodons[splitUp[i]]
+    console.log(codons)
+    if (codons === undefined) {
+      combined += "..."
+    } else {
+      combined += codons[Math.floor(Math.random()*codons.length)] 
+    }
+  }
+  return combined
+}
 
 export const parseSequence = (seq) => {
   const splitUp = seq.split("");

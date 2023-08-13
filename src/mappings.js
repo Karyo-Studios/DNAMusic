@@ -66,28 +66,52 @@ export const codonMappings = {
 };
 
 export const codonNames = {
-  'I': 'Isoleucine',
-  'L': 'Leucine',
-  'V': 'Valine',
-  'F': 'Phenylalanine',
-  'M': 'Methionine',
-  'C': 'Cysteine',
-  'A': 'Alanine',
-  'G': 'Glycine',
-  'P': 'Proline',
-  'T': 'Threonine',
-  'S': 'Serine',
-  'Y': 'Tyrosine',
-  'W': 'Tryptophan',
-  'Q': 'Glutamine',
-  'N': 'Asparagine',
-  'H': 'Histidine',
-  'E': 'Glutamicacid',
-  'D': 'Asparticacid',
-  'K': 'Lysine',
-  'R': 'Arginine',
-  "*": 'Stop'
-}
+  I: "Isoleucine",
+  L: "Leucine",
+  V: "Valine",
+  F: "Phenylalanine",
+  M: "Methionine",
+  C: "Cysteine",
+  A: "Alanine",
+  G: "Glycine",
+  P: "Proline",
+  T: "Threonine",
+  S: "Serine",
+  Y: "Tyrosine",
+  W: "Tryptophan",
+  Q: "Glutamine",
+  N: "Asparagine",
+  H: "Histidine",
+  E: "Glutamicacid",
+  D: "Asparticacid",
+  K: "Lysine",
+  R: "Arginine",
+  "*": "Stop",
+};
+
+export const aminoAcidToCodons = {
+  I: ["ATT", "ATC", "ATA"],
+  L: ["CTT", "CTC", "CTA", "CTG", "TTA", "TTG"],
+  V: ["GTT", "GTC", "GTA", "GTG"],
+  F: ["TTT", "TTC"],
+  M: ["ATG"],
+  C: ["TGT", "TGC"],
+  A: ["GCT", "GCC", "GCA", "GCG"],
+  G: ["GGT", "GGC", "GGA", "GGG"],
+  P: ["CCT", "CCC", "CCA", "CCG"],
+  T: ["ACT", "ACC", "ACA", "ACG"],
+  S: ["TCT", "TCC", "TCA", "TCG", "AGT", "AGC"],
+  Y: ["TAT", "TAC"],
+  W: ["TGG"],
+  Q: ["CAA", "CAG"],
+  N: ["AAT", "AAC"],
+  H: ["CAT", "CAC"],
+  E: ["GAA", "GAG"],
+  D: ["GAT", "GAC"],
+  K: ["AAA", "AAG"],
+  R: ["CGT", "CGC", "CGA", "CGG", "AGA", "AGG"],
+  "*": ["TAA", "TAG", "TGA"],
+};
 
 // export const noteMappings = {
 //     'I': 'A3',
@@ -114,119 +138,142 @@ export const codonNames = {
 // }
 
 export const noteMappings = {
-  'I': 'A3',
-  'L': 'E4',
-  'V': 'G3',
-  'F': 'D5',
-  'M': 'B4',
-  'C': 'G5',
-  'A': 'F5',
-  'G': 'E3',
-  'P': 'D4',
-  'T': 'F4',
-  'S': 'C5',
-  'Y': 'C3',
-  'W': 'B3',
-  'Q': 'A5',
-  'N': 'D3',
-  'H': 'G4',
-  'E': 'A4',
-  'D': 'F3',
-  'K': 'E5',
-  'R': 'C4',
-  "*": 'B5'
-}
+  I: "A3",
+  L: "E4",
+  V: "G3",
+  F: "D5",
+  M: "B4",
+  C: "G5",
+  A: "F5",
+  G: "E3",
+  P: "D4",
+  T: "F4",
+  S: "C5",
+  Y: "C3",
+  W: "B3",
+  Q: "A5",
+  N: "D3",
+  H: "G4",
+  E: "A4",
+  D: "F3",
+  K: "E5",
+  R: "C4",
+  "*": "B5",
+};
+
+export const noteMappingsMinor = {
+  I: "A3",
+  L: "E4",
+  V: "G3",
+  F: "D5",
+  M: "B4",
+  C: "G5",
+  A: "F5",
+  G: "E3",
+  P: "D4",
+  T: "F4",
+  S: "C5",
+  Y: "C3",
+  W: "B3",
+  Q: "A5",
+  N: "D3",
+  H: "G4",
+  E: "A4",
+  D: "F3",
+  K: "E5",
+  R: "C4",
+  "*": "B5",
+};
 
 export const aminoAcidColors = {
-  "I": "#FADADD",
-  "L": "#E9F7EF",
-  "V": "#F2E8E4",
-  "F": "#FFF8E1",
-  "M": "#F4E3E3",
-  "C": "#F0E68C",
-  "A": "#F0EAD6",
-  "G": "#F0F8FF",
-  "P": "#F9EBB2",
-  "T": "#E0FFFF",
-  "S": "#E6E6FA",
-  "Y": "#E0E0E0",
-  "W": "#F5DEB3",
-  "Q": "#E1EDFF",
-  "N": "#FFDAB9",
-  "H": "#F0FFF0",
-  "E": "#FFC0CB",
-  "D": "#F5F5DC",
-  "K": "#E6E6E6",
-  "R": "#FFE4E1",
+  I: "#FADADD",
+  L: "#E9F7EF",
+  V: "#F2E8E4",
+  F: "#FFF8E1",
+  M: "#F4E3E3",
+  C: "#F0E68C",
+  A: "#F0EAD6",
+  G: "#F0F8FF",
+  P: "#F9EBB2",
+  T: "#E0FFFF",
+  S: "#E6E6FA",
+  Y: "#E0E0E0",
+  W: "#F5DEB3",
+  Q: "#E1EDFF",
+  N: "#FFDAB9",
+  H: "#F0FFF0",
+  E: "#FFC0CB",
+  D: "#F5F5DC",
+  K: "#E6E6E6",
+  R: "#FFE4E1",
   "*": "#FFFFFF",
 };
 
-export const dnaMapping = { 'A': 0, 'C': 1, 'T': 2, 'G': 3 }
-export const numberMapping = { 0: 'A', 1: 'C', 2: 'T', 3: 'G' }
+export const dnaMapping = { A: 0, C: 1, T: 2, G: 3 };
+export const numberMapping = { 0: "A", 1: "C", 2: "T", 3: "G" };
 
 const gem = `bg-gradient-to-r from-[#888] via-[#222] to-[#888] 
-bg-clip-text font-bold text-transparent text-[3rem] tracking-[0.5rem]`
+bg-clip-text font-bold text-transparent text-[3rem] tracking-[0.5rem]`;
 
 export const emojiPalettes = [
   {
-    "theme": "Fruits",
-    "emojis": ["🍎", "🍌", "🍊", "🍇"]
+    theme: "Fruits",
+    emojis: ["🍎", "🍌", "🍊", "🍇"],
   },
   {
-    "theme": "Animals",
-    "emojis": ["🐶", "🐱", "🦁", "🐼"]
+    theme: "Animals",
+    emojis: ["🐶", "🐱", "🦁", "🐼"],
   },
   {
-    "theme": "Planets",
-    "emojis": ["🌍", "🌕", "🪐", "🌞"]
+    theme: "Planets",
+    emojis: ["🌍", "🌕", "🪐", "🌞"],
   },
   {
-    "theme": "Music Instruments",
-    "emojis": ["🎵", "🎹", "🥁", "🎸"]
+    theme: "Music Instruments",
+    emojis: ["🎵", "🎹", "🥁", "🎸"],
   },
   {
-    "theme": "Sports Balls",
-    "emojis": ["⚽", "🏀", "🎾", "🏈"]
+    theme: "Sports Balls",
+    emojis: ["⚽", "🏀", "🎾", "🏈"],
   },
   {
-    "theme": "Travel Modes",
-    "emojis": ["✈️", "🚆", "🚗", "🚀"]
+    theme: "Travel Modes",
+    emojis: ["✈️", "🚆", "🚗", "🚀"],
   },
   {
-    "theme": "Food Items",
-    "emojis": ["🍔", "🍕", "🍣", "🍦"]
+    theme: "Food Items",
+    emojis: ["🍔", "🍕", "🍣", "🍦"],
   },
   {
-    "theme": "Holidays",
-    "emojis": ["🎄", "🎃", "🎂", "🎉"]
+    theme: "Holidays",
+    emojis: ["🎄", "🎃", "🎂", "🎉"],
   },
   {
-    "theme": "Art Supplies",
-    "emojis": ["🎨", "✏️", "🖌️", "📐"]
+    theme: "Art Supplies",
+    emojis: ["🎨", "✏️", "🖌️", "📐"],
   },
   {
-    "theme": "Technology",
-    "emojis": ["📱", "💻", "📷", "🎮"]
+    theme: "Technology",
+    emojis: ["📱", "💻", "📷", "🎮"],
   },
   {
-    "theme": "Shapes",
-    "emojis": ["🔺", "🔵", "🔶", "🔘"]
+    theme: "Shapes",
+    emojis: ["🔺", "🔵", "🔶", "🔘"],
   },
   {
-    "theme": "Elements",
-    "emojis": ["🔥", "💧", "🌱", "🌪️"]
+    theme: "Elements",
+    emojis: ["🔥", "💧", "🌱", "🌪️"],
   },
   {
-    "theme": "Transportation",
-    "emojis": ["🚲", "🛴", "🚁", "🚂"]
+    theme: "Transportation",
+    emojis: ["🚲", "🛴", "🚁", "🚂"],
   },
   {
-    "theme": "Timepieces",
-    "emojis": ["⌚", "🕰️", "⏱️", "⏲️"]
+    theme: "Timepieces",
+    emojis: ["⌚", "🕰️", "⏱️", "⏲️"],
   },
   {
-    "theme": "Cute Animals",
-    "emojis": ["🐼", "🐧", "🦊", "🐢"]
+    theme: "Cute Animals",
+    emojis: ["🐼", "🐧", "🦊", "🐢"],
   },
-]
-
+];
