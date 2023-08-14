@@ -11,11 +11,12 @@ export const SequenceInput = ({
           <div className="flex mt-1">
             <input
               id="user-input-name"
-              className={`px-2 text-[1.2rem] w-[100%] h-[1.9rem]`}
-              style={{ fontFamily: "monospace",
-            backgroundColor: 'rgba(0,0,0,0)' }}
+              className={`text-[1.3rem] w-[70%] h-[1.9rem] text-center mx-auto mt-3 border-b-[1px] border-b-[#aaa] hover:border-b-[#fff]`}
+              style={{
+                fontFamily: "monospace",
+                backgroundColor: 'rgba(0,0,0,0)',
+              }}
               value={userSequence}
-              defaul
               onChange={(e) => {
                 setUserSequence(e.target.value);
               }}

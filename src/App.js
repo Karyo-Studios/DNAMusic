@@ -7,7 +7,7 @@ import FPSStats from "react-fps-stats";
 import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
 import { p1, p2, p3, p4, p5 } from "./defaults";
-import { parseSequence, generatePattern, interpretSequence } from "./helpers";
+import { parseSequence, parseAllSequence, generatePattern, interpretSequence } from "./helpers";
 import { mapN, randRange, toMidi } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
@@ -30,9 +30,9 @@ import "./App.css";
 import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
 
 function App() {
-  const [menu, setMenu] = useState(2);
+  const [menu, setMenu] = useState(0);
   const [modal, setModal] = useState(true);
-  
+
   const [bpm, setBpm] = useState(150);
   const [playheadCount, setPlayheadCount] = useState(2);
   const [masterSteps, setMasterSteps] = useState(8);
@@ -41,7 +41,7 @@ function App() {
 
   const [sequenceSelect, setSequenceSelect] = useState({
     category: 'user',
-    value: 'Hello world'
+    value: 'hello'
   })
 
 
@@ -49,19 +49,19 @@ function App() {
   const [userInputSequence, setUserInputSequence] = useState(
     savedSequences[sequenceIndex].sequence
   );
-  
-  const [userSequence, setUserSequence] = useState("hello world");
+
+  const [userSequence, setUserSequence] = useState('');
   const [zoom, setZoom] = useState(0.6);
   const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [playing, setPlaying] = useState(false);
-  
+
   const [cps, setCps] = useState(60 / bpm);
 
   const [nodes, setNodes] = useState([]);
   const [sequence, setSequence] = useState([]);
-  
+
   const [counter, setCounter] = useState(0);
-  
+
   const [audioContext, setAudioContext] = useState();
 
   const [showFPS, setShowFPS] = useState(false);
@@ -79,9 +79,9 @@ function App() {
   const [activeSequence, setActiveSequence] = useState(sequence);
   const [activeNodes, setActiveNodes] = useState(nodes);
 
-  const calculatedHeight = window.innerHeight - 20 * 16;
+  const calculatedHeight = window.innerHeight - 20 * 20;
   const width = window.innerWidth < 1300 ? 1000 : 1200;
-  const height = calculatedHeight < 400 ? 400 : calculatedHeight;
+  const height = calculatedHeight < 350 ? 350 : calculatedHeight;
 
   useEffect(() => {
     noteOffsetRef.current = noteOffset;
@@ -127,7 +127,11 @@ function App() {
   const getNote = (index) => {
     // make this prettier at some point
     if (activeNodes.length && activeNodes[index] !== undefined) {
-      return toMidi(noteMappings[activeNodes[index].aminoacid]);
+      const acid = activeNodes[index].aminoacid
+      if (acid !== '-1') {
+        return toMidi(noteMappings[acid]);
+      }
+      return -1
     }
   };
 
@@ -355,27 +359,28 @@ function App() {
               setTimeout(() => {
                 if (activeRef[i].playing) {
                   const pos = countRefs[i].current; // make sure to use ref
-                  // for some reason the note is begin rendered one behind the note, TODO investigate this
-                  const note =
-                    getNote((pos + 1) % activeNodes.length) + active.offset;
+                  const base = getNote((pos + 1) % activeNodes.length);
+                  const note = base + active.offset;
                   setCounters[i]((pos + 1) % activeNodes.length);
-                  if (midiEnabled && midiOutputDevice !== -1) {
-                    // play to midi channel of each playhead
-                    device.playNote(note + noteOffsetRef.current, i + 1, {
-                      duration: active.legato * timeWindow,
-                      attack: 0.8,
-                    });
-                  } else {
-                    playNote(
-                      active.instrument,
-                      note + noteOffsetRef.current,
-                      active.legato * timeWindow
-                    );
+                  if (parseInt(base) !== -1) {
+                    if (midiEnabled && midiOutputDevice !== -1) {
+                      // play to midi channel of each playhead
+                      device.playNote(note + noteOffsetRef.current, i + 1, {
+                        duration: active.legato * timeWindow,
+                        attack: 0.8,
+                      });
+                    } else {
+                      playNote(
+                        active.instrument,
+                        note + noteOffsetRef.current,
+                        active.legato * timeWindow
+                      );
+                    }
+                    setActiveNotes[i](true);
+                    setTimeout(() => {
+                      setActiveNotes[i](false);
+                    }, active.legato * timeWindow);
                   }
-                  setActiveNotes[i](true);
-                  setTimeout(() => {
-                    setActiveNotes[i](false);
-                  }, active.legato * timeWindow);
                 }
               }, timeWindow * (hap - counter));
             });
@@ -416,7 +421,8 @@ function App() {
   };
 
   useMemo(() => {
-    const { nodes, sequence } = parseSequence(userInputSequence);
+    // const { nodes, sequence } = parseSequence(userInputSequence);
+    const { nodes, sequence } = parseAllSequence(userInputSequence);
     setNodes(nodes);
     setSequence(sequence);
     renderCount.current = 0;
@@ -425,7 +431,7 @@ function App() {
     setActiveSequence(sequence);
     setSequenceBounds([0, sequence.length]);
     boundsRef.current = [0, sequence.length];
-    resetCounters();
+    // resetCounters();
   }, [userInputSequence]);
 
   useMemo(() => {
@@ -458,7 +464,7 @@ function App() {
       const newZoom = mapN(length, 18, 300, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     } else {
-      const newZoom = mapN(sequence.length, 18, 300, 1, 0.6);
+      const newZoom = mapN(sequence.length, 18, 200, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     }
   }, [sequenceBounds, showOnlyActive]);
@@ -486,31 +492,49 @@ function App() {
       {
         modal &&
         <div
-        onClick={
-          () => {
-            getAudioContext()
-            setModal(false)
+          onClick={
+            () => {
+              getAudioContext()
+            }
           }
-          }
-        className="visible fixed w-full h-full bg-[rgba(0,0,0,0.8)] top-0 bottom-0 z-[999] flex items-center"
-      >
-        <div className="enter text-[#fff] text-center w-[25rem] bg-[#181818] p-[2rem] m-auto">
-          <h3 className="text-[1.4rem]">DNA SEQUENCER</h3>
-          <p className="mt-2">Create melodies from genomic sequences. Please select a type of DNA sequence.</p>
-          <div>
-
+          className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999] flex items-center"
+        >
+          <div className="enter relative text-[#fff] text-center w-[25rem] bg-[#181818] px-[1rem] py-[3rem] mx-auto">
+            <h3 className="text-[1.4rem]">DNA SEQUENCER</h3>
+            <p className="">Translate DNA into music</p>
+            <p className="mt-4 text-[0.8rem]">Type your name or phrase to get started!</p>
+            <div className="flex flex-col items-center">
+              <SequenceInput
+                userSequence={userSequence}
+                setUserSequence={setUserSequence}
+                userInputSequence={userInputSequence}
+                setUserInputSequence={setUserInputSequence}
+              />
+              <button
+                className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                style={{
+                  cursor: userSequence.length > 0 ? 'pointer' : 'initial',
+                  opacity: userSequence.length > 0 ? 1 : 0.5
+                }}
+                onClick={() => {
+                  if (userSequence.length > 0) {
+                    setModal(false)
+                    play()
+                  }
+                }}
+              >Create melody!</button>
+            </div>
+            <div className="absolute top-0 left-[0.5rem] p-[0.5rem] text-[0.8rem] hidden">
+              <button className="uppercase">exit</button>
+            </div>
           </div>
         </div>
-      </div>
       }
       <div className="absolute w-[100%] z-[1]">
         <div style={{ borderBottom: "1px solid #fff" }}>
-          <div className="mx-auto py-[1rem]" style={{ width: width }}>
+          <div className="mx-auto py-[1rem] w-[60rem]">
             <div
-              className="z-[1] text-[#888] flex justify-between"
-              style={{
-                width: width,
-              }}
+              className="z-[1] text-[#fff] flex justify-between"
             >
               <div>
                 <h3>DNA SEQUENCER</h3>
@@ -518,16 +542,8 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="w-[100%] text-center mx-auto" style={{ width: width }}>
-          <SequenceInput
-            userSequence={userSequence}
-            setUserSequence={setUserSequence}
-            userInputSequence={userInputSequence}
-            setUserInputSequence={setUserInputSequence}
-          />
-        </div>
       </div>
-      <div className="text-[0.9rem] bg-[#181818] max-w-[62rem] mx-auto mb-[0rem]">
+      <div className="text-[0.9rem] bg-[#181818] max-w-[60rem] mx-auto mb-[0rem]">
         <div
           className="relative"
           style={{
@@ -591,16 +607,26 @@ function App() {
           />
         </div>
         <div className="hidden">
-        <SequenceBoundsSlider
-          sequenceBounds={sequenceBounds}
-          setSequenceBounds={setSequenceBounds}
-          sequence={sequence}
-          width={width}
-          sequenceRef={sequenceRef}
-          boundsRef={boundsRef}
-        />
+          <SequenceBoundsSlider
+            sequenceBounds={sequenceBounds}
+            setSequenceBounds={setSequenceBounds}
+            sequence={sequence}
+            width={width}
+            sequenceRef={sequenceRef}
+            boundsRef={boundsRef}
+          />
         </div>
-        <div className="px-[1rem]">
+        <div className="w-[100%] mb-[1rem] text-center mx-auto"
+          style={{ width: '30rem' }}
+        >
+          <SequenceInput
+            userSequence={userSequence}
+            setUserSequence={setUserSequence}
+            userInputSequence={userInputSequence}
+            setUserInputSequence={setUserInputSequence}
+          />
+        </div>
+        <div className="">
           <div className="flex">
             <div className="">
               <PlayPauseButton
@@ -614,10 +640,10 @@ function App() {
                 stop={stop}
               />
             </div>
-            <div className="flex">
+            <div className="flex items-center">
               <div>
-                <div className="flex justify-start mx-[0.5rem] items-end">
-                  <div className="flex items-center h-[2.6rem] ">
+                <div className="flex items-center justify-start items-end">
+                  <div className="flex items-center">
                     <div className="leading-[1rem] px-2 text-[#888] w-[2.9rem] text-center">
                       <p className="text-[0.7rem]">BPM</p>
                       <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
@@ -651,7 +677,7 @@ function App() {
                         }
                       />
                     </div>
-                    <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
+                    <div className="leading-[1rem] px-1 text-[#888] text-center">
                       <p className="text-[0.7rem]">STEP</p>
                       <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
                         {masterSteps}
@@ -726,8 +752,8 @@ function App() {
                 <div className="bg-[#292929] mx-[0.5rem] pr-[0.5rem] rounded-b-[0.5rem] rounded-tl-[0.5rem]"></div>
               </div>
               <div className="">
-                <div className="h-[2.6rem] flex items-center justify-stretch">
-                  <div className="flex h-[100%] items-center justify-end ">
+                <div className="flex items-center justify-stretch">
+                  <div className="flex items-center justify-end ">
                     <div className="zoom flex justify-end">
                       <div className="rounded-[0.25rem] w-[5rem] ml-[0.5rem]">
                         <ReactSlider
@@ -780,120 +806,117 @@ function App() {
           </div>
 
           <div className="flex mt-[0.25rem]">
-            <div className="bg-[#292929] px-[0.5rem] 
-                  rounded-[0.5rem]">
-              <PlayheadButtons
-                playheads={playheads}
-                updatePlayhead={updatePlayhead}
-                playheadCount={playheadCount}
-                setPlayheadCount={setPlayheadCount}
-              />
-            </div>
             <div
               className={`
-                  bg-[#292929] mx-[0.5rem] pr-[0.5rem] 
+                  bg-[#292929] mr-[0.5rem] pr-[0.5rem] 
                   rounded-[0.5rem]
-                  w-[39rem] h-[13rem]
+                  w-[45rem] h-[13rem]
                   `}
               style={{
                 borderTopLeftRadius: menu === 0 ? 0 : "0.5rem",
               }}
             >
-              {menu === 2 ? (
-                <div>
-                  <PlayheadsView
+              <div className="h-full flex">
+                <div className="bg-[#292929] pl-[0.5rem] rounded-[0.5rem]">
+                  <PlayheadButtons
                     playheads={playheads}
                     updatePlayhead={updatePlayhead}
-                    playing={playing}
-                    ticker={ticker}
-                    masterSteps={masterSteps}
-                    counters={counters}
                     playheadCount={playheadCount}
-                    width={width}
+                    setPlayheadCount={setPlayheadCount}
+                    counter={counter}
+                    playing={playing}
+                    activeNotes={activeNoteRefs}
                   />
                 </div>
-              ) : (
-                <div className="p-[0.5rem]">
-                  <p className="text-[#888] text-[0.8rem] select-none">
-                    SOUND SETTINGS
-                  </p>
-                  <div className="flex">
-                    <button
-                      className="p-2 mt-[0.5rem] w-[5rem] rounded-[0.25rem]"
-                      style={{
-                        backgroundColor: midiEnabled ? "#555" : "#888",
-                        textDecoration: midiEnabled ? "none" : "line-through",
-                      }}
-                      onClick={() => {
-                        setMidiEnabled(!midiEnabled);
-                      }}
-                    >
-                      MIDI
-                    </button>
-                    <div className="p-2">
-                      {midiEnabled ? "enabled" : "disabled"}
-                    </div>
-                  </div>
-                  <div className="mt-[0.5rem]">
-                    {midiEnabled && (
-                      <div>
-                        {WebMidi &&
-                          WebMidi._outputs.map((midi, index) => {
-                            return (
-                              <button
-                                key={midi._midiOutput.name}
-                                className="mr-2 mt-2 p-1"
-                                style={{
-                                  backgroundColor:
-                                    index === midiOutputDevice.index
-                                      ? "#555"
-                                      : "#888",
-                                }}
-                                onClick={() => {
-                                  setMidiOutputDevice({
-                                    name: midi._midiOutput.name,
-                                    index,
-                                  });
-                                }}
-                              >
-                                {midi._midiOutput.name}
-                              </button>
-                            );
-                          })}
-                        <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="w-[16.5rem] p-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
-              <div className="bg-[#333] h-[14.5rem] m-auto p-[0.5rem] hidden">
-                <p>
-                  DNA Music sequencer. WIP.
-                  <br />
-                  Press Play to get started. Use headpones or speakers.
-                </p>
-                <div>
-                  <button className="mt-4" onClick={() => setShowFPS(!showFPS)}>
-                    FPS {showFPS ? "hide" : "show"}
-                  </button>
-                </div>
-                <div>
-                  <button className="mt-4" onClick={() => setShowViz(!showViz)}>
-                    Viz {showViz ? "hide" : "show"}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <VisualizerMappings
+                <PlayheadsView
                   playheads={playheads}
-                  countRefs={countRefs}
+                  updatePlayhead={updatePlayhead}
+                  playing={playing}
+                  ticker={ticker}
+                  masterSteps={masterSteps}
                   counters={counters}
-                  activeNodes={activeNodes}
                   playheadCount={playheadCount}
+                  width={width}
                 />
               </div>
+            </div>
+            <div className="w-[16.5rem] px-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
+              {
+                menu === 0 ?
+                  <div>
+                    <VisualizerMappings
+                      playheads={playheads}
+                      countRefs={countRefs}
+                      counters={counters}
+                      activeNodes={activeNodes}
+                      playheadCount={playheadCount}
+                    />
+                  </div>
+                  : menu === 1 ?
+                    <div className="p-[0.5rem]">
+                      <p className="text-[#888] text-[0.8rem] select-none">
+                        SOUND SETTINGS
+                      </p>
+                      <div className="flex">
+                        <div>Hi</div>
+                        <div>
+
+                          <div className="flex mt-[0.25rem]">
+                            <button
+                              className="p-2 w-[5rem] rounded-[0.25rem]"
+                              style={{
+                                backgroundColor: midiEnabled ? "#555" : "#888",
+                                textDecoration: midiEnabled ? "none" : "line-through",
+                              }}
+                              onClick={() => {
+                                setMidiEnabled(!midiEnabled);
+                              }}
+                            >
+                              MIDI
+                            </button>
+                            <div className="p-2">
+                              {midiEnabled ? "enabled" : "disabled"}
+                            </div>
+                          </div>
+                          <div className="mt-[0.5rem]">
+                            {midiEnabled && (
+                              <div>
+                                {WebMidi &&
+                                  WebMidi._outputs.map((midi, index) => {
+                                    return (
+                                      <button
+                                        key={midi._midiOutput.name}
+                                        className="mr-2 mt-2 p-1"
+                                        style={{
+                                          backgroundColor:
+                                            index === midiOutputDevice.index
+                                              ? "#555"
+                                              : "#888",
+                                        }}
+                                        onClick={() => {
+                                          setMidiOutputDevice({
+                                            name: midi._midiOutput.name,
+                                            index,
+                                          });
+                                        }}
+                                      >
+                                        {midi._midiOutput.name}
+                                      </button>
+                                    );
+                                  })}
+                                <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                    :
+                    <div>
+                      hello
+                    </div>
+              }
             </div>
           </div>
         </div>

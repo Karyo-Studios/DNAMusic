@@ -216,9 +216,7 @@ export const SequenceVisualizer = ({
           const spritePathAcid = getAcidSprite(currentAcid);
           const spritePath = getSprite(letter);
 
-          const note = toMidi(
-            noteMappings[nodes[Math.floor(index / 3)].aminoacid]
-          );
+          const note = currentAcid !== '-1' ? toMidi(noteMappings[currentAcid]) : -1;
           const noteColor = mapN(note, 50, 90, 60, 90);
           return (
             <Container x={x} y={y} key={index}>

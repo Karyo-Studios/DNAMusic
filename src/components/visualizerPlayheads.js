@@ -18,20 +18,24 @@ export const VisualizerPlayheads = ({
   playheadCount,
 }) => {
 
+
+  const showDetails = true;
   const currentSequence = showOnlyActive ? activeSequence : sequence;
 
   const lastCounter = useRef(counter);
-  const spacingX = 16;
+  const spacingX = width / 8;
   const boxSide = 30 * zoom;
-  const colSpace = boxSide / 5;
-  const rowSpace = boxSide / 3;
+  const colSpace = 0 * boxSide / 5;
+  const rowSpace = boxSide / 10;
   const boxAspect = 1.2;
-  const perRow =
+  const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
+
+  const cols =
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
     ) * 3;
-  const rows = Math.ceil(currentSequence.length / perRow);
-  const spacingY = height - rows * (boxSide * boxAspect + rowSpace * 1.5);
+  const rows = Math.ceil(currentSequence.length / cols);
+  const spacingY = height - (height / 8) - rows * (boxSide * boxAspect + rowSpace * 1.5 + detailSpace) + detailSpace;
 
   const letterScale = 0.8;
 
@@ -43,15 +47,17 @@ export const VisualizerPlayheads = ({
   }, [counter]);
 
   const getCoord = (i) => {
-    const col = i % perRow;
-    const row = Math.floor(i / perRow);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     const offsetX = Math.floor(col / 3);
     const x = col * boxSide + offsetX * colSpace;
-    const y = row * (boxSide + rowSpace);
+    const y = row * (boxSide + rowSpace + detailSpace);
+    const unit = boxSide + colSpace / 3
+    const xRemainder = rows === 1 ? (width - unit * currentSequence.length) / 2 : (width - unit * cols) / 2
     return {
-      //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
+      //   y: x%2 === 1 ? y : ((cols - 1) * boxSide) - y ,
       y: spacingY + y * boxAspect,
-      x: spacingX + x,
+      x: spacingX + x + xRemainder - spacingX,
     };
   };
   const getAcidSprite = (letter) => {
@@ -98,8 +104,10 @@ export const VisualizerPlayheads = ({
               if (index >= playheadCount) return;
               const count = showOnlyActive ? counters[index] * 3 : Math.ceil((bounds[0] + counters[index] * 3) / 3) * 3;
               const { x, y } = getCoord(count);
-              if (nodes[count / 3] === undefined) return;
-              const currentAcid = nodes[count / 3].aminoacid;
+              const currentNode = nodes[count / 3]
+              if (currentNode === undefined) return;
+              const currentAcid = currentNode.aminoacid;
+              const letter = currentNode.nucleotide[0]
               const spritePathAcid = getAcidSprite(currentAcid);
               return (
                 <div key={index + x}>
@@ -130,7 +138,7 @@ export const VisualizerPlayheads = ({
                         color: playhead.playing ? "#fff" : "rgba(0,0,0,0)",
                       }}
                     >
-                      <div>{playhead.playing ? currentAcid : ""}</div>
+                      <div>{playhead.playing ? parseInt(currentAcid) === -1 ? letter : currentAcid : ""}</div>
                     </div>
                   </div>
                 </div>

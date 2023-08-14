@@ -5,19 +5,63 @@ import { randRange } from "./utils";
 import { updateEuclid } from "./playhead";
 
 export const interpretSequence = (seq) => {
+  if (!seq) {
+    return
+  }
   const splitUp = seq.toUpperCase().split("");
   let combined = ""
   for (let i = 0; i < splitUp.length; i++) {
     const codons = aminoAcidToCodons[splitUp[i]]
-    console.log(codons)
     if (codons === undefined) {
-      combined += "..."
+      combined += splitUp[i] + splitUp[i] + splitUp[i]
     } else {
-      combined += codons[Math.floor(Math.random()*codons.length)] 
+      combined += codons[Math.floor(Math.random() * codons.length)]
     }
   }
   return combined
 }
+
+export const parseAllSequence = (seq) => {
+  if (!seq) {
+    return {
+      nodes: [],
+      sequence: [],
+    }
+  }
+  const filtered = seq.split("")
+  let amount = 0;
+  let tempNodes = [];
+  let triNucleotide = "";
+  if (filtered) {
+    for (let i = 0; i < filtered.length; i++) {
+      const l = filtered[i].toLowerCase();
+      triNucleotide += filtered[i];
+      amount = amount + 1;
+      if (amount === 3) {
+        if ((l === "c" || l === "a" || l === "t" || l === "g")) {
+          tempNodes.push({
+            nucleotide: triNucleotide.toUpperCase(),
+            aminoacid: codonMappings[triNucleotide.toUpperCase()],
+            index: i,
+          });
+        } else {
+          tempNodes.push({
+            nucleotide: triNucleotide,
+            aminoacid: '-1',
+            index: i,
+          });
+        }
+        triNucleotide = "";
+        amount = 0;
+      }
+    }
+  }
+  console.log(tempNodes, filtered)
+  return {
+    nodes: tempNodes,
+    sequence: filtered,
+  };
+};
 
 export const parseSequence = (seq) => {
   const splitUp = seq.split("");

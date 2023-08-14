@@ -7,10 +7,14 @@ export const PlayPauseButton = ({
 }) => {
   return (
     <div className="relative">
-      <div className="flex text-center text-[#888] select-none uppercase">
+      <div className="pl-[0.5rem] flex text-center text-[#888] select-none uppercase">
         <button
-          className="bg-[#555] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
+          className="bg-[#555] h-[2.5rem] w-[5.25rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
           onClick={() => (playing ? pause() : play())}
+          style={{
+            backgroundColor:
+              playing && ((counter - 1) / 2) % 1 === 0 ? "#777" : "#555",
+          }}
         >
           <div className="pl-[0.1rem] w-[1.2rem] h-[1.2rem] m-auto">
             {playing ? (
@@ -33,7 +37,7 @@ export const PlayPauseButton = ({
           </div>
         </button>
         <button
-          className="ml-[0.25rem] bg-[#555] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
+          className="ml-[0.5rem] bg-[#555] h-[2.5rem] w-[3.7rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
           onClick={stop}
         >
           <div className="w-[1rem] h-[1rem] m-auto">

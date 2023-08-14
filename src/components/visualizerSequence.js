@@ -19,19 +19,23 @@ export const VisualizerSequence = ({
 }) => {
   // boxSide x amount =
 
-  const currentSequence = showOnlyActive ? activeSequence : sequence
+  const currentSequence = showOnlyActive ? activeSequence : sequence;
 
-  const spacingX = 16;
+  const showDetails = true;
+
+  const spacingX = width / 8;
   const boxSide = 30 * zoom;
-  const colSpace = boxSide / 5;
-  const rowSpace = boxSide / 3;
+  const colSpace = 0 * boxSide / 5;
+  const rowSpace = boxSide / 10;
   const boxAspect = 1.2; // w x h 1 : 1.4
-  const perRow =
+  const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
+
+  const cols =
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
     ) * 3;
-  const rows = Math.ceil(currentSequence.length / perRow);
-  const spacingY = height - rows * (boxSide * boxAspect + rowSpace * 1.5);
+  const rows = Math.ceil(currentSequence.length / cols);
+  const spacingY = height - (height / 8) - rows * (boxSide * boxAspect + rowSpace * 1.5 + detailSpace) + detailSpace;
 
   const boxScale = 0.92;
 
@@ -40,15 +44,17 @@ export const VisualizerSequence = ({
 
 
   const getCoord = (i) => {
-    const col = i % perRow;
-    const row = Math.floor(i / perRow);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     const offsetX = Math.floor(col / 3);
     const x = col * boxSide + offsetX * colSpace;
-    const y = row * (boxSide + rowSpace);
+    const y = row * (boxSide + rowSpace + detailSpace);
+    const unit = (boxSide + colSpace / 3)
+    const xRemainder = rows === 1 ? (width - unit * currentSequence.length) / 2 : (width - unit * cols) / 2
     return {
-      //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
+      //   y: x%2 === 1 ? y : ((cols - 1) * boxSide) - y ,
       y: spacingY + y * boxAspect,
-      x: spacingX + x,
+      x: spacingX + x + xRemainder - spacingX,
     };
   };
 
@@ -75,10 +81,9 @@ export const VisualizerSequence = ({
             }
 
             const currentAcid = nodes[Math.floor(index / 3)].aminoacid;
-            const note = toMidi(
-              noteMappings[nodes[Math.floor(index / 3)].aminoacid]
-            );
-            const noteColor = mapN(note, 50, 90, 50, 100);
+            const note = currentAcid !== '-1' ? toMidi(noteMappings[currentAcid]) : -1;
+            const noteColor = parseInt(currentAcid) !== -1 ? mapN(note, 55, 90, 70, 150) : 15
+
             const isActive = showOnlyActive ? true : index >= bounds[0] && index <= bounds[1]
             return (
               <div
@@ -89,27 +94,39 @@ export const VisualizerSequence = ({
                   top: y,
                 }}
               >
-                {showAminoAcids ? (
-                  index % 3 === 0 && (
-                    <div>
-                    </div>
-                  )
-                ) : (
-                  <span className="relative select-text">
-                    <span
-                      className="absolute box-border text-center"
-                      style={{
-                        left: boxScale * ((1 - boxScale) / 2),
-                        width: boxSide * boxScale,
-                        height: boxSide * boxAspect,
-                        // border: "1px solid #888", 
-                        borderRadius: "0.25rem",
-                        lineHeight: `${boxSide * boxAspect}px`,
-                        // backgroundColor: 'rgba(255,255,255,0.4)'
-                        // backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`
-                        backgroundColor: isActive ? `hsla(192,0%,${noteColor}%, 0.5)` : `hsla(192,0%,${noteColor}%, 0.2)`
-                      }}
-                    ></span>
+                <span className="relative select-text">
+                  <span
+                    className="absolute box-border text-center"
+                    style={{
+                      top: detailSpace,
+                      left: boxScale * ((1 - boxScale) / 2),
+                      width: boxSide * boxScale,
+                      height: boxSide * boxAspect,
+                      // border: "1px solid #888", 
+                      borderRadius: "0.25rem",
+                      lineHeight: `${boxSide * boxAspect}px`,
+                      // backgroundColor: 'rgba(255,255,255,0.4)'
+                      // backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`
+                      backgroundColor: isActive ? `hsla(192,0%,${noteColor}%, 0.5)` : `hsla(192,0%,${noteColor}%, 0.2)`
+                    }}
+                  ></span>
+                  <span
+                    className="absolute box-border text-center uppercase"
+                    style={{
+                      top: detailSpace,
+                      left: boxScale * ((1 - boxScale) / 2),
+                      width: boxSide * boxScale,
+                      height: boxSide * boxAspect,
+                      lineHeight: `${boxSide * boxAspect}px`,
+                      fontSize: `${20 * zoom}px`,
+                      // color: '#ddd'
+                      // color: isActive ? '#fff' : '#000'
+                      color: '#000'
+                    }}
+                  >
+                    <span>{parseInt(currentAcid) === -1 ? '-' : letter}</span>
+                  </span>
+                  {(index - 1) % 3 === 0 && showDetails &&
                     <span
                       className="absolute box-border text-center uppercase"
                       style={{
@@ -122,10 +139,10 @@ export const VisualizerSequence = ({
                         color: isActive ? '#fff' : '#000'
                       }}
                     >
-                      <span>{letter}</span>
+                      <span>{parseInt(currentAcid) === -1 ? letter : currentAcid}</span>
                     </span>
-                  </span>
-                )}
+                  }
+                </span>
               </div>
             );
           })}

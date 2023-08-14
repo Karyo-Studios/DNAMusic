@@ -9,9 +9,9 @@ export const VisualizerMappings = ({
 }) => {
   return (
     <div className="">
-      <div className="flex mb-[0.25rem] text-[#888] text-[0.8rem] select-none">
-        <p className="text-center w-[6rem]">CODON</p>
-        <div className="w-[3rem]"></div>
+      <div className="flex pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+        <p className="text-center w-[5rem]">CODON</p>
+        <div className="w-[2rem]"></div>
         <p className="text-center w-[10rem]">AMINO ACID</p>
         <p className="text-center w-[7rem]">NOTE</p>
       </div>
@@ -21,58 +21,54 @@ export const VisualizerMappings = ({
         if (node === undefined) return
         if (index >= playheadCount) return;
         return (
-          <div key={index} className="flex items-center mb-[0.25rem]"
+          <div key={index} className="flex items-center mb-1 h-[1.85rem]"
             style={{
-             opacity: p.playing ? 1 : 0.3
+              opacity: p.playing ? 1 : 0.3
             }}
           >
             <div className="flex">
-              {node.nucleotide.split("").map((letter,index) => {
+              {node.nucleotide.split("").map((letter, index) => {
                 return <div
                   key={index}
-                  className="box-border text-center uppercase"
+                  className="box-border text-center uppercase text-[0.8rem]"
                   style={{
-                    width: '1.2rem',
+                    width: '0.8rem',
                     borderRadius: "0.25rem",
-                    border: "1px solid #888", 
-                    height: '1.85rem',
-                    lineHeight: '1.85rem',
-                    fontSize: '1rem',
+                    height: '1.8rem',
+                    lineHeight: '1.8rem',
                   }}
                 >
-                  {letter}
+
+                  {parseInt(node.aminoacid) === -1 ? '-' : letter}
                 </div>
               })}
             </div>
-            <div 
-                className="px-[0.25rem] text-[1.2rem]"
-                style={{color: p.color}}
+            <div
+              className="px-[0.25rem] text-[1rem]"
+              style={{ color: p.color }}
             >
-                {'>'}
+              {'>'}
             </div>
-            <div className="p-[0.25rem] rounded-[0.25rem] px-[0.5rem] w-[1.5rem] text-center"
-              style={{border: "1px solid #888"}}
-              >
-                <p>{node.aminoacid}</p>
-            </div>
-            <div 
-                className="px-[0.1rem] text-[1.2rem]"
+            {
+              parseInt(node.aminoacid) === -1 ?
+                <div className="p-[0.25rem] rounded-[0.25rem] text-[0.8rem] w-[7rem] text-center box-border"
+                >
+                  n/a
+                </div>
+                :
+                <div className="p-[0.25rem] rounded-[0.25rem] text-[0.8rem] w-[7rem] text-center box-border"
+                >
+                  {node.aminoacid} = {codonNames[node.aminoacid]}
+                </div>
+            }
+            <div
+              className="px-[0.25rem] text-[1rem]"
+              style={{ color: p.color }}
             >
-                {'='}
+              {'>'}
             </div>
-            <div className="p-[0.25rem] rounded-[0.25rem] w-[6rem] text-center"
-              style={{border: "1px solid #888"}}
-              >
-              {codonNames[node.aminoacid]}
-            </div>
-            <div 
-                className="px-[0.25rem] text-[1.2rem]"
-                style={{color: p.color}}
-            >
-                {'>'}
-            </div>
-            <div>
-                {noteMappings[node.aminoacid]}
+            <div className="px-[0.5rem] text-[0.8rem]">
+              {noteMappings[node.aminoacid]}
             </div>
           </div>
         );

@@ -29,18 +29,22 @@ export const VisualizerBlobs = ({
   const fixedLength = false;
   const ANIMATION_TIME = 3.0;
 
+  const showDetails = true;
   const lastCounter = useRef(counter);
-  const spacingX = 16;
+  const spacingX = width / 8;
   const boxSide = 30 * zoom;
-  const colSpace = boxSide / 5;
-  const rowSpace = boxSide / 3;
-  const boxAspect = 1.2; // w x h 1 : 1.4
-  const perRow =
+  // 1.2 * x + spacingX * 2 = 1200 * y .. TODO figure out this equation so the sequence takes up the whole space!
+  const colSpace = 0 * boxSide / 5;
+  const rowSpace = boxSide / 10;
+  const boxAspect = 1.2;
+  const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
+
+  const cols =
     Math.floor(
       Math.floor((width - spacingX * 2) / (boxSide + colSpace / 3)) / 3
     ) * 3;
-  const rows = Math.ceil(currentSequence.length / perRow);
-  const spacingY = height - rows * (boxSide * boxAspect + rowSpace * 1.5);
+  const rows = Math.ceil(currentSequence.length / cols);
+  const spacingY = height - (height / 8) - rows * (boxSide * boxAspect + rowSpace * 1.5 + detailSpace) + detailSpace;
 
   useEffect(() => {
     lastCounter.current = playing ? counter : lastCounter.current;
@@ -52,15 +56,17 @@ export const VisualizerBlobs = ({
   }, [clearClick])
 
   const getCoord = (i) => {
-    const col = i % perRow;
-    const row = Math.floor(i / perRow);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     const offsetX = Math.floor(col / 3);
     const x = col * boxSide + offsetX * colSpace;
-    const y = row * (boxSide + rowSpace);
+    const y = row * (boxSide + rowSpace + detailSpace);
+    const unit = boxSide + colSpace / 3
+    const xRemainder = rows === 1 ? (width - unit * currentSequence.length) / 2 : (width - unit * cols) / 2
     return {
-      //   y: x%2 === 1 ? y : ((perRow - 1) * boxSide) - y ,
+      //   y: x%2 === 1 ? y : ((cols - 1) * boxSide) - y ,
       y: spacingY + y * boxAspect,
-      x: spacingX + x,
+      x: spacingX + x + xRemainder - spacingX,
     };
   };
 
@@ -95,20 +101,18 @@ export const VisualizerBlobs = ({
         const currentNode = nodes[Math.floor(index)];
         if (currentNode === undefined) return;
         const count = showOnlyActive ? countRefs[i].current * 3 : Math.ceil((bounds[0] + countRefs[i].current * 3) / 3) * 3
-        const note = noteMappings[currentNode.aminoacid];
-        const midi = toMidi(note);
-        console.log(midi)
-        const noteX = mapN(midi, 45, 90, 0, width)
-        // const { x, y } = getCoord(count);
-        const x = noteX;
-        const y = 400;
+        // const noteX = mapN(midi, 45, 90, 0, width)
+        // const x = noteX;
+        // const y = 400;
+        if (parseInt(currentNode.aminoacid) === -1) continue;
+        const { x, y } = getCoord(count);
         // check if just switched from note active to active
         if (lastIndex[i] !== index) {
           if (!lastSpawned[i]) {
             blobCount += 1;
             startNoteAnimation(
-              // x + boxSide * 1.5,
-              noteX,
+              x + boxSide * 1.5,
+              // x,
               y,
               `${i}-${ticks}`,
               playheads[i].hsl,
@@ -126,8 +130,8 @@ export const VisualizerBlobs = ({
                 svg
               );
               startNoteAnimation(
-                // x + boxSide * 1.5,
-                noteX,
+                x + boxSide * 1.5,
+                // x,
                 y,
                 `${i}-${ticks}`,
                 playheads[i].hsl,

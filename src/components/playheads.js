@@ -21,9 +21,10 @@ export const PlayheadsView = ({
   return (
     <div>
       <div className="flex pt-[0.5rem] pb-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
-        <p className="w-[4.5rem]"># hits</p>
+        <p className="w-[4.5rem]">events</p>
         <p className="w-[2rem]"></p>
-        <p className="w-[19rem]"></p>
+        <p className="w-[17rem]">pattern</p>
+        <p className="w-[2rem]"></p>
         <p className="w-[4rem]">period</p>
         <p className="w-[4.2rem]">octave</p>
         <p className="w-[4rem]">length</p>
