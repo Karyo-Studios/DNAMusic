@@ -6,17 +6,14 @@ export const PlayheadButtons = ({
 }) => {
   {
     return (
-      <div className="">
-        <div className="pb-[0.3rem] pt-[0.6rem] flex text-center select-none uppercase">
-          <p className="w-[5.25rem] text-[#666] text-[0.8rem]">playheads</p>
+      <div className="text-center text-[0.8rem]">
+        <div className="flex text-center select-none uppercase">
+          <p className="pt-[0.5rem] pb-[0.25rem] w-[5.25rem] text-[#888]  text-[0.8rem]">playheads</p>
         </div>
         {playheads.map((p, index) => {
           if (index >= playheadCount) return;
           return (
             <div key={index} className="flex items-center relative">
-              <div className="absolute left-[-1.5rem] top-[0.5rem] text-[#444] text-[0.8rem]">
-                <p>{`[${index + 1}]`}</p>
-              </div>
               <div className="w-[5.25rem] mb-1">
                 <button
                   className="w-[5.25rem] p-1 rounded-[0.25rem] bg-[#555] box-sizing"

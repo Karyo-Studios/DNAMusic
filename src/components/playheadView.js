@@ -1,4 +1,12 @@
-export const PlayheadView = ({ p, masterSteps, playing, ticker, index }) => {
+export const PlayheadView = ({
+  p,
+  masterSteps,
+  playing,
+  ticker,
+  index,
+  width,
+}) => {
+  const rem = width < 1200 ? 16 : 20;
   return (
     <div className="flex items-center">
       <div className="flex w-[17rem] bg-[#393939] h-[1.85rem] rounded-[0.25rem]">
@@ -9,7 +17,7 @@ export const PlayheadView = ({ p, masterSteps, playing, ticker, index }) => {
               className="flex h-[100%] items-center transition-all rounded-[0.25rem]"
               key={`${hap} + ${i} + ${index}`}
               style={{
-                width: `${16 * 20 * (1 / masterSteps)}px`,
+                width: `${rem * 20 * (1 / masterSteps)}px`,
                 backgroundColor:
                   active && playing && p.playing
                     ? "rgba(255,255,255,0.1)"
@@ -24,16 +32,16 @@ export const PlayheadView = ({ p, masterSteps, playing, ticker, index }) => {
                     hap === 0
                       ? "#444"
                       : active && playing && p.playing
-                        ? "#fff"
-                        : `${p.color}`,
+                      ? "#fff"
+                      : `${p.color}`,
                   opacity: p.playing ? 1 : 0.3,
-                  width: hap === 0 ? 8 : 16 * 0.8,
+                  width: hap === 0 ? 8 : rem * 0.8,
                   height:
                     hap === 0
                       ? 8
                       : p.rotation === i
-                        ? 16 * 1.85 * 0.9
-                        : 16 * 1.85 * 0.6,
+                      ? rem * 1.85 * 0.9
+                      : rem * 1.85 * 0.6,
                   transitionDuration: active ? "10ms" : "250ms",
                 }}
               ></div>

@@ -13,7 +13,7 @@ export const VisualizerMappings = ({
         <p className="text-center w-[6rem]">CODON</p>
         <div className="w-[3rem]"></div>
         <p className="text-center w-[10rem]">AMINO ACID</p>
-        <p className="text-center w-[7rem]">MUSICAL NOTE</p>
+        <p className="text-center w-[7rem]">NOTE</p>
       </div>
       {playheads.map((p, index) => {
         const note = countRefs[index].current;
@@ -50,7 +50,9 @@ export const VisualizerMappings = ({
             >
                 {'>'}
             </div>
-            <div className="p-[0.25rem] bg-[#555] rounded-[0.25rem] px-[0.5rem] w-[1.5rem] text-center">
+            <div className="p-[0.25rem] rounded-[0.25rem] px-[0.5rem] w-[1.5rem] text-center"
+              style={{border: "1px solid #888"}}
+              >
                 <p>{node.aminoacid}</p>
             </div>
             <div 
@@ -58,7 +60,9 @@ export const VisualizerMappings = ({
             >
                 {'='}
             </div>
-            <div className="p-[0.25rem] bg-[#555] rounded-[0.25rem] w-[6rem] text-center">
+            <div className="p-[0.25rem] rounded-[0.25rem] w-[6rem] text-center"
+              style={{border: "1px solid #888"}}
+              >
               {codonNames[node.aminoacid]}
             </div>
             <div 

@@ -16,6 +16,7 @@ export const PlayheadsView = ({
   masterSteps,
   counters,
   playheadCount,
+  width,
 }) => {
   return (
     <div>
@@ -80,6 +81,7 @@ export const PlayheadsView = ({
               ticker={ticker}
               masterSteps={masterSteps}
               index={index}
+              width={width}
             />
             <div className="ml-1 mr-2">
               <RotationToggle

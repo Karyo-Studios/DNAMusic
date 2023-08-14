@@ -7,9 +7,6 @@ export const PlayPauseButton = ({
 }) => {
   return (
     <div className="relative">
-      <div className="absolute left-[-2.8rem] top-[0.7rem] text-[#444] text-[0.8rem] select-none">
-        <p>{`[`}<span className="text-[0.6rem]">SPACE</span>{']'}</p>
-      </div>
       <div className="flex text-center text-[#888] select-none uppercase">
         <button
           className="bg-[#555] h-[2.5rem] w-[2.5rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
