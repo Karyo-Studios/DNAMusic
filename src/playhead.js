@@ -16,6 +16,7 @@ export class Playhead {
     events = 3,
     instrumentName = '',
     rotation = 0,
+    preset = '',
   }) {
     this.playing = playing
     this.interval = interval
@@ -31,6 +32,7 @@ export class Playhead {
     this.followSteps = true
     this.rotation = rotation
     this.midiEnabled = false
+    this.preset = preset
   }
 
   start = () => {

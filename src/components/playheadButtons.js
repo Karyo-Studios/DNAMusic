@@ -5,7 +5,7 @@ export const PlayheadButtons = ({
   setPlayheadCount,
   counter,
   playing,
-  activeRefs
+  activeNotes
 }) => {
   {
     return (
@@ -19,16 +19,18 @@ export const PlayheadButtons = ({
             <div key={index} className="flex items-center relative">
               <div className="w-[5.25rem] mb-1">
                 <button
-                  className="w-[5.25rem] h-[1.85rem] p-1 rounded-[0.25rem] bg-[#555]"
+                  className="w-[5.25rem] h-[1.85rem] p-1 rounded-[0.25rem] bg-[#555] uppercase"
                   style={{
                     // backgroundColor: `hsl(${p.hsl.h*360},${p.hsl.s*100}%,${p.hsl.l})`
                     backgroundColor: p.playing
-                      ? playing && ((counter - 1) / 2) % 1 === 0 ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                        }%,1)` : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                        }%,0.85)`
+                      // ? playing && ((counter - 1) / 2) % 1 === 0 ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                      ? playing && activeNotes[index].current ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                        }%,2)` : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                        }%,0.7)`
                       : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
                       }%, 0.2)`,
                     opacity: p.playing ? 1 : 0.7,
+                    transition: activeNotes[index].current ? '0' : 'color 200ms linear'
                     // border: `2px solid ${p.color}`,
                   }}
 
@@ -39,7 +41,7 @@ export const PlayheadButtons = ({
                 //   updatePlayhead(index, { ...p, playing: !p.playing })
                 // }}
                 >
-                  {p.playing ? `P${p.instrumentName}` : "OFF"}
+                  {p.playing ? `${p.preset}` : "OFF"}
                 </button>
               </div>
             </div>

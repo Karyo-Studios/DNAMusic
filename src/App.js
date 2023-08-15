@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { loadSoundfont, startPresetNote } from "sfumato";
 import ReactSlider from "react-slider";
+//
+import { WebAudioFontPlayer } from "./soundfonts/WebAudioFont";
 
 import FPSStats from "react-fps-stats";
 
 import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
 import { p1, p2, p3, p4, p5 } from "./defaults";
-import { parseSequence, parseAllSequence, generatePattern, interpretSequence } from "./helpers";
+import {
+  parseSequence,
+  parseAllSequence,
+  generatePattern,
+  interpretSequence,
+} from "./helpers";
 import { mapN, randRange, toMidi } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
+
+import { presetMappings, presetOrder, instruments } from "./soundfonts";
 
 import { SwitchButton } from "./components/switchButton";
 import { PlayPauseButton } from "./components/playPauseButton";
@@ -31,7 +39,10 @@ import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
 
 function App() {
   const [menu, setMenu] = useState(0);
+  const [selectedPlayhead, setSelectedPlayhead] = useState(0);
   const [modal, setModal] = useState(true);
+
+  const [selectedPreset, setSelectedPreset] = useState(0);
 
   const [bpm, setBpm] = useState(150);
   const [playheadCount, setPlayheadCount] = useState(2);
@@ -39,18 +50,12 @@ function App() {
   const [noteOffset, setNoteOffset] = useState(0);
   const noteOffsetRef = useRef(0);
 
-  const [sequenceSelect, setSequenceSelect] = useState({
-    category: 'user',
-    value: 'hello'
-  })
-
-
   const [sequenceIndex, setSequenceIndex] = useState(0);
   const [userInputSequence, setUserInputSequence] = useState(
     savedSequences[sequenceIndex].sequence
   );
 
-  const [userSequence, setUserSequence] = useState('');
+  const [userSequence, setUserSequence] = useState("");
   const [zoom, setZoom] = useState(0.6);
   const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -107,31 +112,50 @@ function App() {
     renderCount.current = renderCount.current + 1;
   });
 
-  window.examplePattern = [0, 3 / 8, 3 / 4];
-  window.queryPattern = queryPattern;
+ 
+  const [players, setPlayers] = useState();
 
-  // loading sounds
-  const fonts = [
-    "Vintage Dreams Waves v2",
-    "Donkey Kong Country 2014",
-    "Earthbound_NEW",
-    "SuperMarioWorld",
-  ];
-  const [fontName, setFontName] = useState(fonts[0]);
-  const [loaded, setLoaded] = useState();
-  useEffect(() => {
-    fontName &&
-      loadSoundfont("./soundfonts/" + fontName + ".sf2").then(setLoaded);
-  }, [fontName]);
+  const initializePlayers = (audioContext) => {
+    let audioPlayers = [];
+    playheads.forEach((p, index) => {
+      console.log(p)
+      const player = new WebAudioFontPlayer();
+      const preset = presetMappings.find(x => x.name === p.preset);
+      console.log(preset, p.preset)
+      if (!preset) {
+        console.error('incorrect preset mapping')
+      }
+      player.adjustPreset(audioContext, preset.file);
+      audioPlayers.push(player)
+    })
+    setPlayers(audioPlayers);
+  };
+
+  const playSoundFont = (index, presetName, midi, duration, volume) => {
+    const audioContext = getAudioContext();
+    console.log("playing", presetName, midi, duration, volume);
+    const preset = presetMappings.find(x => x.name === presetName);
+    if (preset) {
+      players[index].queueWaveTable(
+        audioContext,
+        audioContext.destination,
+        preset.file,
+        audioContext.currentTime + 0.01,
+        midi,
+        duration / 1000,
+        volume
+      );
+    }
+  };
 
   const getNote = (index) => {
     // make this prettier at some point
     if (activeNodes.length && activeNodes[index] !== undefined) {
-      const acid = activeNodes[index].aminoacid
-      if (acid !== '-1') {
+      const acid = activeNodes[index].aminoacid;
+      if (acid !== "-1") {
         return toMidi(noteMappings[acid]);
       }
-      return -1
+      return -1;
     }
   };
 
@@ -198,6 +222,7 @@ function App() {
     if (!audioContext) {
       const newAudioContext = new AudioContext();
       setAudioContext(newAudioContext);
+      initializePlayers(newAudioContext);
       return newAudioContext;
     }
     return audioContext;
@@ -370,10 +395,17 @@ function App() {
                         attack: 0.8,
                       });
                     } else {
-                      playNote(
-                        active.instrument,
+                      // playNote(
+                      //   active.instrument,
+                      //   note + noteOffsetRef.current,
+                      //   active.legato * timeWindow
+                      // );
+                      playSoundFont(
+                        i,
+                        active.preset,
                         note + noteOffsetRef.current,
-                        active.legato * timeWindow
+                        active.legato * timeWindow,
+                        0.4
                       );
                     }
                     setActiveNotes[i](true);
@@ -405,19 +437,6 @@ function App() {
 
   const pause = () => {
     setPlaying(false);
-  };
-
-  const playNote = (instrument, note, duration) => {
-    if (audioContext) {
-      const stopHandle = startPresetNote(
-        audioContext,
-        loaded.presets[instrument],
-        note
-      );
-      setTimeout(() => stopHandle(), duration);
-    } else {
-      console.log("no context!");
-    }
   };
 
   useMemo(() => {
@@ -489,20 +508,19 @@ function App() {
           </div>
         </div>
       )}
-      {
-        modal &&
+      {modal && (
         <div
-          onClick={
-            () => {
-              getAudioContext()
-            }
-          }
+          onClick={() => {
+            getAudioContext();
+          }}
           className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999] flex items-center"
         >
           <div className="enter relative text-[#fff] text-center w-[25rem] bg-[#181818] px-[1rem] py-[3rem] mx-auto">
             <h3 className="text-[1.4rem]">DNA SEQUENCER</h3>
             <p className="">Translate DNA into music</p>
-            <p className="mt-4 text-[0.8rem]">Type your name or phrase to get started!</p>
+            <p className="mt-4 text-[0.8rem]">
+              Type your name or phrase to get started!
+            </p>
             <div className="flex flex-col items-center">
               <SequenceInput
                 userSequence={userSequence}
@@ -513,29 +531,65 @@ function App() {
               <button
                 className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
                 style={{
-                  cursor: userSequence.length > 0 ? 'pointer' : 'initial',
-                  opacity: userSequence.length > 0 ? 1 : 0.5
+                  cursor: userSequence.length > 0 ? "pointer" : "initial",
+                  opacity: userSequence.length > 0 ? 1 : 0.5,
                 }}
                 onClick={() => {
                   if (userSequence.length > 0) {
-                    setModal(false)
-                    play()
+                    setModal(false);
+                    play();
                   }
                 }}
-              >Create melody!</button>
+              >
+                Create melody!
+              </button>
+              {/* <button
+                className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                style={{
+                  cursor: userSequence.length > 0 ? "pointer" : "initial",
+                  opacity: userSequence.length > 0 ? 1 : 0.5,
+                }}
+                onClick={() => {
+                  getAudioContext();
+                }}
+              >
+                AUDIO CONTEXT
+              </button>
+              <button
+                className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                style={{
+                  cursor: userSequence.length > 0 ? "pointer" : "initial",
+                  opacity: userSequence.length > 0 ? 1 : 0.5,
+                }}
+                onClick={() => {
+                    testAudio()
+                }}
+              >
+                TEST
+              </button>
+              <button
+                className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                style={{
+                  cursor: userSequence.length > 0 ? "pointer" : "initial",
+                  opacity: userSequence.length > 0 ? 1 : 0.5,
+                }}
+                onClick={() => {
+                    testAudio2()
+                }}
+              >
+                TEST 2
+              </button> */}
             </div>
             <div className="absolute top-0 left-[0.5rem] p-[0.5rem] text-[0.8rem] hidden">
               <button className="uppercase">exit</button>
             </div>
           </div>
         </div>
-      }
+      )}
       <div className="absolute w-[100%] z-[1]">
         <div style={{ borderBottom: "1px solid #fff" }}>
           <div className="mx-auto py-[1rem] w-[60rem]">
-            <div
-              className="z-[1] text-[#fff] flex justify-between"
-            >
+            <div className="z-[1] text-[#fff] flex justify-between">
               <div>
                 <h3>DNA SEQUENCER</h3>
               </div>
@@ -616,8 +670,9 @@ function App() {
             boundsRef={boundsRef}
           />
         </div>
-        <div className="w-[100%] mb-[1rem] text-center mx-auto"
-          style={{ width: '30rem' }}
+        <div
+          className="w-[100%] mb-[1rem] text-center mx-auto"
+          style={{ width: "30rem" }}
         >
           <SequenceInput
             userSequence={userSequence}
@@ -749,7 +804,6 @@ function App() {
                     />
                   </div>
                 </div>
-                <div className="bg-[#292929] mx-[0.5rem] pr-[0.5rem] rounded-b-[0.5rem] rounded-tl-[0.5rem]"></div>
               </div>
               <div className="">
                 <div className="flex items-center justify-stretch">
@@ -812,9 +866,6 @@ function App() {
                   rounded-[0.5rem]
                   w-[45rem] h-[13rem]
                   `}
-              style={{
-                borderTopLeftRadius: menu === 0 ? 0 : "0.5rem",
-              }}
             >
               <div className="h-full flex">
                 <div className="bg-[#292929] pl-[0.5rem] rounded-[0.5rem]">
@@ -841,82 +892,130 @@ function App() {
               </div>
             </div>
             <div className="w-[16.5rem] px-[0.5rem]  ml-[0rem] bg-[#292929] rounded-[0.5rem]">
-              {
-                menu === 0 ?
-                  <div>
-                    <VisualizerMappings
-                      playheads={playheads}
-                      countRefs={countRefs}
-                      counters={counters}
-                      activeNodes={activeNodes}
-                      playheadCount={playheadCount}
-                    />
-                  </div>
-                  : menu === 1 ?
-                    <div className="p-[0.5rem]">
-                      <p className="text-[#888] text-[0.8rem] select-none">
-                        SOUND SETTINGS
-                      </p>
-                      <div className="flex">
-                        <div>Hi</div>
-                        <div>
-
-                          <div className="flex mt-[0.25rem]">
+              {menu === 0 ? (
+                <div>
+                  <VisualizerMappings
+                    playheads={playheads}
+                    countRefs={countRefs}
+                    counters={counters}
+                    activeNodes={activeNodes}
+                    playheadCount={playheadCount}
+                  />
+                </div>
+              ) : menu === 1 ? (
+                <div className="">
+                  <p className="px-[0.25rem] pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+                    SOUND SETTINGS
+                  </p>
+                  <div className="flex">
+                    <div className="flex flex-col mr-[0.25rem]">
+                      {playheads.map((p, index) => {
+                        if (index < playheadCount) {
+                          return (
                             <button
-                              className="p-2 w-[5rem] rounded-[0.25rem]"
+                              className="mb-1 p-1 w-[2rem] h-[1.85rem] p-[0.25rem] text-[#fff] rounded-[0.25rem]"
+                              key={index}
                               style={{
-                                backgroundColor: midiEnabled ? "#555" : "#888",
-                                textDecoration: midiEnabled ? "none" : "line-through",
-                              }}
-                              onClick={() => {
-                                setMidiEnabled(!midiEnabled);
+                                backgroundColor:
+                                  selectedPlayhead === index ? p.color : "#444",
                               }}
                             >
-                              MIDI
+                              P{index}
                             </button>
-                            <div className="p-2">
-                              {midiEnabled ? "enabled" : "disabled"}
-                            </div>
+                          );
+                        }
+                      })}
+                    </div>
+                    <div className="ml-[1rem]">
+                      <div>
+                        <p>Selected: </p>
+                      </div>
+                      <div className="overflow-y-scroll h-[7rem] bg-[#181818] w-full rounded-[0.25rem]">
+                        {midiEnabled ? (
+                          <div className="flex flex-col">
+                            {WebMidi &&
+                              WebMidi._outputs.map((midi, index) => {
+                                return (
+                                  <button
+                                    key={midi._midiOutput.name}
+                                    className="text-left p-[0.05rem] text-[0.8rem] w-full"
+                                    style={{
+                                      backgroundColor:
+                                        index === midiOutputDevice.index
+                                          ? "#555"
+                                          : "#333",
+                                    }}
+                                    onClick={() => {
+                                      setMidiOutputDevice({
+                                        name: midi._midiOutput.name,
+                                        index,
+                                      });
+                                    }}
+                                  >
+                                    <p className="whitespace-nowrap overflow-hidden">
+                                      {index}: {midi._midiOutput.name}
+                                    </p>
+                                  </button>
+                                );
+                              })}
                           </div>
-                          <div className="mt-[0.5rem]">
-                            {midiEnabled && (
-                              <div>
-                                {WebMidi &&
-                                  WebMidi._outputs.map((midi, index) => {
-                                    return (
-                                      <button
-                                        key={midi._midiOutput.name}
-                                        className="mr-2 mt-2 p-1"
-                                        style={{
-                                          backgroundColor:
-                                            index === midiOutputDevice.index
-                                              ? "#555"
-                                              : "#888",
-                                        }}
-                                        onClick={() => {
-                                          setMidiOutputDevice({
-                                            name: midi._midiOutput.name,
-                                            index,
-                                          });
-                                        }}
-                                      >
-                                        {midi._midiOutput.name}
-                                      </button>
-                                    );
-                                  })}
-                                <p className="mt-2">{`MIDI signals sent to [playhead n] => [channel n]`}</p>
-                              </div>
-                            )}
+                        ) : (
+                          <div className="flex flex-col">
+                            { 
+                              presetMappings.map((preset, index) => {
+                                return (
+                                  <button
+                                    key={index}
+                                    className="text-left p-[0.05rem] text-[0.8rem] w-full"
+                                    style={{
+                                      backgroundColor:
+                                        index === selectedPreset
+                                          ? "#555"
+                                          : "#333",
+                                    }}
+                                    onClick={() => {
+                                      setSelectedPreset(index);
+                                    }}
+                                  >
+                                    <p className="whitespace-nowrap overflow-hidden">
+                                      {index}: {preset.name}
+                                    </p>
+                                  </button>
+                                );
+                              })}
                           </div>
-                        </div>
-
+                        )}
+                      </div>
+                      <div className="flex mt-1">
+                        <button
+                          className="w-[50%] rounded-l-[0.25rem]"
+                          style={{
+                            backgroundColor: midiEnabled ? "#555" : "#888",
+                          }}
+                          onClick={() => {
+                            setMidiEnabled(!midiEnabled);
+                          }}
+                        >
+                          Audio
+                        </button>
+                        <button
+                          className="w-[50%] rounded-r-[0.25rem]"
+                          style={{
+                            backgroundColor: midiEnabled ? "#555" : "#888",
+                          }}
+                          onClick={() => {
+                            setMidiEnabled(!midiEnabled);
+                          }}
+                        >
+                          MIDI
+                        </button>
                       </div>
                     </div>
-                    :
-                    <div>
-                      hello
-                    </div>
-              }
+                  </div>
+                </div>
+              ) : (
+                <div>hello</div>
+              )}
             </div>
           </div>
         </div>

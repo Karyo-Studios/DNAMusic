@@ -56,7 +56,6 @@ export const parseAllSequence = (seq) => {
       }
     }
   }
-  console.log(tempNodes, filtered)
   return {
     nodes: tempNodes,
     sequence: filtered,

@@ -253,7 +253,7 @@ export const VisualizerBlobs = ({
       `--h: ${hsl.h * 360};
       --s: ${hsl.s * 100}%;
       --l: ${hsl.l * 100}%;
-      --stroke-width: ${50 * zoom};
+      --stroke-width: ${40 * zoom};
         --offset: ${path_offset};
         --start: ${start};
         --end: ${end};
@@ -325,7 +325,7 @@ export const VisualizerBlobs = ({
       `--h: ${hsl.h * 360};
       --s: ${hsl.s * 100}%;
       --l: ${hsl.l * 100}%;
-      --stroke-width: ${50 * zoom};
+      --stroke-width: ${40 * zoom};
       --offset: ${path_offset};
       --start: ${start};
       --end: ${end};

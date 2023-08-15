@@ -129,7 +129,7 @@ body {
 .blobs path,
 .blobs line {
   fill: none;
-  stroke-width: 15;
+  stroke-width: 10;
   stroke-linecap: round;
 }
 
