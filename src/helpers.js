@@ -114,14 +114,14 @@ export const generatePattern = ({
   let updated = [];
   for (let i = 0; i < playheads.length; i++) {
     const events = tempo > 140 ? randRange(1, 5) : randRange(2, steps);
-    let playing = i === 0 ? true : Math.random() > 0.3;
+    // let playing = i === 0 ? true : Math.random() > 0.3;
     const p = {
       ...playheads[i],
       steps,
       interval: 4,
       events: i === 3 ? randRange(1, 2) : events,
       rotation: Math.random() > 0.5 ? normalRotation : randRange(0, steps),
-      playing: playing,
+      // playing: playing,
     };
     updated.push(updateEuclid(p));
   }

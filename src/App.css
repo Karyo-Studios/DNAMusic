@@ -123,6 +123,9 @@ body {
 }
 
 
+textarea:focus, input:focus{
+  outline: none;
+}
 
 /* blobs */
 
@@ -147,14 +150,19 @@ body {
 
 @keyframes linePulseEnd {
   0% {
-    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke: hsla(var(--h), var(--s), var(--l), var(--a));
     stroke-dashoffset: var(--offset);
     stroke-width: var(--stroke-width);
     stroke-dasharray: var(--start) var(--initial) var(--segment_length);
   }
 
+  40% {
+    stroke: rgba(255, 255, 255, var(--a));
+    stroke-width: var(--stroke-width);
+  }
+  
   49% {
-    stroke: rgba(255, 255, 255, 1);
+    stroke: rgba(255, 255, 255, 0);
     stroke-width: var(--stroke-width);
   }
 
@@ -179,14 +187,14 @@ body {
 
 @keyframes linePulse {
   0% {
-    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke: hsla(var(--h), var(--s), var(--l), var(--a));
     stroke-width: var(--stroke-width);
     stroke-dashoffset: var(--offset);
     stroke-dasharray: var(--start) var(--initial) var(--segment_length);
   }
 
   100% {
-    stroke: hsla(var(--h), var(--s), var(--l), 1);
+    stroke: hsla(var(--h), var(--s), var(--l), var(--a));
     stroke-width: var(--stroke-width);
     stroke-dashoffset: var(--offset);
     stroke-dasharray: var(--end) var(--initial) var(--segment_length);

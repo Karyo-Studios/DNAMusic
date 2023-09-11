@@ -26,8 +26,8 @@ export const VisualizerSequence = ({
   const spacingX = width / 8;
   const boxSide = 30 * zoom;
   const colSpace = 0 * boxSide / 5;
-  const rowSpace = boxSide / 10;
-  const boxAspect = 1.2; // w x h 1 : 1.4
+  const rowSpace = boxSide / 2.5;
+  const boxAspect = 1;
   const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
 
   const cols =
@@ -82,7 +82,8 @@ export const VisualizerSequence = ({
 
             const currentAcid = nodes[Math.floor(index / 3)].aminoacid;
             const note = currentAcid !== '-1' ? toMidi(noteMappings[currentAcid]) : -1;
-            const noteColor = parseInt(currentAcid) !== -1 ? mapN(note, 55, 90, 70, 150) : 15
+            // const noteColor = parseInt(currentAcid) !== -1 ? mapN(note, 55, 90, 80, 150) : 20
+            const noteColor = parseInt(currentAcid) !== -1 ? mapN(note, 55, 90, 120, 120) : 20
 
             const isActive = showOnlyActive ? true : index >= bounds[0] && index <= bounds[1]
             return (
@@ -107,7 +108,7 @@ export const VisualizerSequence = ({
                       lineHeight: `${boxSide * boxAspect}px`,
                       // backgroundColor: 'rgba(255,255,255,0.4)'
                       // backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`
-                      backgroundColor: isActive ? `hsla(192,0%,${noteColor}%, 0.5)` : `hsla(192,0%,${noteColor}%, 0.2)`
+                      backgroundColor: isActive ? `hsla(192,0%,${noteColor}%, 0.6)` : `hsla(192,0%,${noteColor}%, 0.2)`
                     }}
                   ></span>
                   <span

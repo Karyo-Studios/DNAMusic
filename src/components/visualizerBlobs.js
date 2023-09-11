@@ -35,8 +35,8 @@ export const VisualizerBlobs = ({
   const boxSide = 30 * zoom;
   // 1.2 * x + spacingX * 2 = 1200 * y .. TODO figure out this equation so the sequence takes up the whole space!
   const colSpace = 0 * boxSide / 5;
-  const rowSpace = boxSide / 10;
-  const boxAspect = 1.2;
+  const rowSpace = boxSide / 2.5;
+  const boxAspect = 1;
   const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
 
   const cols =
@@ -166,7 +166,7 @@ export const VisualizerBlobs = ({
     setUpdatedCount(0);
     endAllAnimations();
     animationCallbackRef.current = animationCallback;
-  }, [sequence, cps, zoom, height, bounds, playheadCount]);
+  }, [sequence, cps, zoom, height, bounds, playheadCount, width]);
 
   useEffect(() => {
     setUpdatedCount(0);
@@ -177,7 +177,7 @@ export const VisualizerBlobs = ({
   // main animation loop
   useAnimationFrame(animationCallbackRef);
 
-  var paramSet = 0;
+  var paramSet = 1;
   var params = [
     {
       x: 0.05227467811158796,
@@ -253,6 +253,7 @@ export const VisualizerBlobs = ({
       `--h: ${hsl.h * 360};
       --s: ${hsl.s * 100}%;
       --l: ${hsl.l * 100}%;
+      --a: 0.5;
       --stroke-width: ${40 * zoom};
         --offset: ${path_offset};
         --start: ${start};
@@ -325,12 +326,14 @@ export const VisualizerBlobs = ({
       `--h: ${hsl.h * 360};
       --s: ${hsl.s * 100}%;
       --l: ${hsl.l * 100}%;
+      --a: 0.5;
       --stroke-width: ${40 * zoom};
       --offset: ${path_offset};
       --start: ${start};
       --end: ${end};
       --initial: ${initial};
-      --start_midway: ${(start + end) / 2};
+      --start_transition: ${(start + end) * 0.5};
+      --start_midway: ${(start + end) * 0.5};
       --timeout2: ${fixedLength ? "1.5s" : "2s"};
       --segment_length: ${segment_length}`
     );

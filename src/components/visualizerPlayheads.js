@@ -26,8 +26,8 @@ export const VisualizerPlayheads = ({
   const spacingX = width / 8;
   const boxSide = 30 * zoom;
   const colSpace = 0 * boxSide / 5;
-  const rowSpace = boxSide / 10;
-  const boxAspect = 1.2;
+  const rowSpace = boxSide / 2.5;
+  const boxAspect = 1;
   const detailSpace = showDetails ? boxSide * boxAspect * 1.1 : 0
 
   const cols =
