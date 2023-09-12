@@ -3,7 +3,6 @@ export const PlayheadButtons = ({
   updatePlayhead,
   playheadCount,
   setPlayheadCount,
-  counter,
   playing,
   activeNotes,
   setMenu,
@@ -18,7 +17,7 @@ export const PlayheadButtons = ({
           </p>
         </div>
         {playheads.map((p, index) => {
-          const buttonLabel = p.midiEnabled ? `MIDI ${p.midiOutputDevice.index}` : p.preset; 
+          const buttonLabel = p.midiEnabled ? `MIDI ${p.midiOutputDevice.index}` : p.preset;
           if (index >= playheadCount) return;
           return (
             <div key={index} className="flex items-center relative">
@@ -29,16 +28,13 @@ export const PlayheadButtons = ({
                     // backgroundColor: `hsl(${p.hsl.h*360},${p.hsl.s*100}%,${p.hsl.l})`
                     backgroundColor: p.playing
                       ? // ? playing && ((counter - 1) / 2) % 1 === 0 ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                        playing && activeNotes[index].current
-                        ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
-                            p.hsl.l * 100
-                          }%,2)`
-                        : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
-                            p.hsl.l * 100
-                          }%,0.7)`
-                      : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${
-                          p.hsl.l * 100
-                        }%, 0.2)`,
+                      playing && activeNotes[index].current
+                        ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                        }%,2)`
+                        : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                        }%,0.7)`
+                      : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
+                      }%, 0.2)`,
                     opacity: p.playing ? 1 : 0.7,
                     transition: activeNotes[index].current
                       ? "0"

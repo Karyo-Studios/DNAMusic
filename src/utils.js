@@ -45,7 +45,7 @@ export const hexToHSL = (hex) => {
   let h,
     s,
     l = (max + min) / 2;
-  if (max == min) {
+  if (max === min) {
     h = s = 0; // achromatic
   } else {
     const d = max - min;
@@ -59,6 +59,8 @@ export const hexToHSL = (hex) => {
         break;
       case b:
         h = (r - g) / d + 4;
+        break;
+      default:
         break;
     }
     h /= 6;

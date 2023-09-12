@@ -1,15 +1,13 @@
 import React, {
   useState,
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
 } from "react";
 
 import { mapN } from "../utils";
 import { Stage, Container, Sprite } from "@pixi/react";
 
-import { toMidi } from "sfumato";
+import { toMidi } from "../utils";
 
 import { aminoAcidColors, noteMappings } from "../mappings";
 

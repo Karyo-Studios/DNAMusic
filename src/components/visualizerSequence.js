@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React from "react";
 
-import { mapN } from "../utils";
+import { mapN, toMidi } from "../utils";
 
-import { toMidi } from "sfumato";
-
-import { aminoAcidColors, noteMappings } from "../mappings";
+import { noteMappings } from "../mappings";
 
 export const VisualizerSequence = ({
   sequence,
@@ -38,10 +36,6 @@ export const VisualizerSequence = ({
   const spacingY = height - (height / 8) - rows * (boxSide * boxAspect + rowSpace * 1.5 + detailSpace) + detailSpace;
 
   const boxScale = 0.92;
-
-  const [showLettersColors, setShowLettersColors] = useState(false);
-  const [showAminoAcids, setShowAminoAcids] = useState(false);
-
 
   const getCoord = (i) => {
     const col = i % cols;

@@ -2,7 +2,6 @@ import { noteMappings, codonNames } from "../mappings";
 
 export const VisualizerMappings = ({
   playheads,
-  counters,
   countRefs,
   activeNodes,
   playheadCount,

@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-import { mapN, randRange, toMidi } from "../utils";
-
-import { aminoAcidhsls, noteMappings } from "../mappings";
+import { randRange } from "../utils";
 
 import { useAnimationFrame } from "../graphics";
 

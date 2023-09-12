@@ -14,7 +14,6 @@ export const PlayheadsView = ({
   playing,
   ticker,
   masterSteps,
-  counters,
   playheadCount,
   width,
 }) => {
