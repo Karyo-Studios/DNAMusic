@@ -44,10 +44,10 @@ export const presetMappings = [
     name: instruments.vox,
     file: _tone_0530_Aspirin_sf2_file 
   },
-  { 
-    name: instruments.toms,
-    file: _tone_1170_Aspirin_sf2_file 
-  },
+  // { 
+  //   name: instruments.toms,
+  //   file: _tone_1170_Aspirin_sf2_file 
+  // },
   { 
     name: instruments.woodblock,
     file: _tone_1151_FluidR3_GM_sf2_file 
@@ -56,10 +56,10 @@ export const presetMappings = [
     name: instruments.organ,
     file: _tone_0161_SoundBlasterOld_sf2 
   },
-  { 
-    name: instruments.e_bass,
-    file: _tone_0390_FluidR3_GM_sf2_file 
-  },
+  // { 
+  //   name: instruments.e_bass,
+  //   file: _tone_0390_FluidR3_GM_sf2_file 
+  // },
   { 
     name: instruments.altosax,
     file: _tone_0660_Chaos_sf2_file 
@@ -68,10 +68,10 @@ export const presetMappings = [
     name: instruments.bass,
     file: _tone_0320_JCLive_sf2_file 
   },
-  { 
-    name: instruments.e_guitar,
-    file: _tone_0270_SBAWE32_sf2_file 
-  },
+  // { 
+  //   name: instruments.e_guitar,
+  //   file: _tone_0270_SBAWE32_sf2_file 
+  // },
   { 
     name: instruments.flute,
     file: _tone_0730_JCLive_sf2_file 
@@ -92,10 +92,10 @@ export const presetMappings = [
     name: instruments.piccolo,
     file: _tone_0720_GeneralUserGS_sf2_file 
   },
-  { 
-    name: instruments.saxophone,
-    file: _tone_0640_JCLive_sf2_file 
-  },
+  // { 
+  //   name: instruments.saxophone,
+  //   file: _tone_0640_JCLive_sf2_file 
+  // },
   { 
     name: instruments.xylophone,
     file: _tone_0130_GeneralUserGS_sf2_file 

@@ -171,7 +171,7 @@ export const SequencerSettings = ({
               </div>
             </div>
             {activeSequence.length < sequence.length && (
-              <div className="flex ml-[0.5rem]">
+              <div className="flex z-[999] ml-[0.5rem]">
                 <button
                   onClick={() => {
                     setSequenceBounds([0, sequence.length]);
@@ -181,13 +181,13 @@ export const SequencerSettings = ({
                 >
                   Reset
                 </button>
-                <p className="text-[#888] uppercase">View:&nbsp;</p>
+                {/* <p className="text-[#888] uppercase">View:&nbsp;</p>
                 <button
                   onClick={() => setShowOnlyActive(!showOnlyActive)}
                   className="uppercase rounded-[0.25rem]"
                 >
                   {showOnlyActive ? "active" : "all"}
-                </button>
+                </button> */}
               </div>
             )}
           </div>

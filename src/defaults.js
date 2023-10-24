@@ -11,7 +11,7 @@ export const p1 = new Playhead({
   events: 5,
   preset: instruments.guitar,
   instrumentName: '1',
-  color: "#0000E8",
+  color: "#2277E8",
   velocity: 0.4,
 });
 
@@ -28,7 +28,7 @@ export const p2 = new Playhead({
 });
 
 export const p3 = new Playhead({
-  playing: true,
+  playing: false,
   pattern: [0, 1 / 4, 2 / 4, 3 / 4], // 1(3,8)
   interval: 4,
   offset: 0,
@@ -41,7 +41,7 @@ export const p3 = new Playhead({
 });
 
 export const p4 = new Playhead({
-  playing: true,
+  playing: false,
   pattern: [0],
   interval: 4,
   events: 2,
@@ -54,7 +54,7 @@ export const p4 = new Playhead({
 });
 
 export const p5 = new Playhead({
-  playing: true,
+  playing: false,
   pattern: [0, 0.75],
   interval: 4,
   events: 3,

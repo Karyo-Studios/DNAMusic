@@ -1,14 +1,15 @@
 import ReactSlider from 'react-slider'
 
 export const SequenceBoundsSlider = ({
-    sequenceBounds,
-    setSequenceBounds,
-    sequence,
-    width,
-    sequenceRef,
-          boundsRef
+  sequenceBounds,
+  setSequenceBounds,
+  sequence,
+  selectedSequence,
+  width,
+  sequenceRef,
+  boundsRef
 }) => {
-    return <div>
+  return <div>
     <div className="relative text-[#888]" style={{ width: width }}>
       <div className="absolute flex left-[1rem] top-[-1rem]">
         <p className="text-[0.8rem]">
@@ -32,6 +33,11 @@ export const SequenceBoundsSlider = ({
           <span className="text-[#fff] text-[0.8rem]">
             {sequenceBounds[1] - sequenceBounds[0]}/{sequence.length}
           </span>
+        </p>
+      </div>
+      <div className="absolute flex justify-center right-[1rem] left-[1rem] top-[-1rem]">
+        <p className="text-[0.8rem]">
+          Sequence: {selectedSequence ? `${selectedSequence.name} – ${selectedSequence.description}` : ''}
         </p>
       </div>
       <div className="mb-[0.5rem] mt-[0.5rem]">

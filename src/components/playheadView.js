@@ -9,7 +9,7 @@ export const PlayheadView = ({
   const rem = width < 1200 ? 16 : 20;
   return (
     <div className="flex items-center">
-      <div className="flex w-[17rem] bg-[#393939] h-[1.85rem] rounded-[0.25rem]">
+      <div className="flex w-[17rem]  h-[1.85rem] rounded-[0.25rem]">
         {p.euclid.map((hap, i) => {
           const active = Math.floor(ticker / p.interval) % masterSteps === i;
           return (
@@ -35,13 +35,13 @@ export const PlayheadView = ({
                       ? "#fff"
                       : `${p.color}`,
                   opacity: p.playing ? 1 : 0.3,
-                  width: hap === 0 ? 8 : rem * 0.8,
+                  width: hap === 0 ? 4 : rem * 0.8,
                   height:
                     hap === 0
-                      ? 8
+                      ? rem * 1.85 * 1
                       : p.rotation === i
                       ? rem * 1.85 * 0.9
-                      : rem * 1.85 * 0.6,
+                      : rem * 1.85 * 0.5,
                   transitionDuration: active ? "10ms" : "250ms",
                 }}
               ></div>

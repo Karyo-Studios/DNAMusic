@@ -9,7 +9,7 @@ export const PlayPauseButton = ({
     <div className="relative">
       <div className="pl-[0.5rem] flex text-center text-[#888] select-none uppercase">
         <button
-          className="bg-[#555] h-[2.25rem] w-[5.25rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
+          className="bg-[#555] h-[2.25rem] w-[3.7rem] hover:bg-[#aaa] text-[1.2rem] rounded-[0.25rem]"
           onClick={() => (playing ? pause() : play())}
           style={{
             backgroundColor:

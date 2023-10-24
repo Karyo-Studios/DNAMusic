@@ -98,7 +98,7 @@ export const VisualizerSequence = ({
                       width: boxSide * boxScale,
                       height: boxSide * boxAspect,
                       // border: "1px solid #888", 
-                      borderRadius: "0.25rem",
+                      borderRadius: zoom*5,
                       lineHeight: `${boxSide * boxAspect}px`,
                       // backgroundColor: 'rgba(255,255,255,0.4)'
                       // backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`

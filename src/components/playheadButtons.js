@@ -1,10 +1,7 @@
 export const PlayheadButtons = ({
   playheads,
-  updatePlayhead,
   playheadCount,
   setPlayheadCount,
-  playing,
-  activeNotes,
   setMenu,
   setSelectedPlayhead,
 }) => {
@@ -13,7 +10,7 @@ export const PlayheadButtons = ({
       <div className="relative h-full text-center text-[0.8rem]">
         <div className="flex text-center select-none uppercase">
           <p className="pt-[0.5rem] pb-[0.25rem] w-[5.25rem] text-[#888] text-[0.8rem]">
-            playheads
+            SOUND
           </p>
         </div>
         {playheads.map((p, index) => {
@@ -23,30 +20,13 @@ export const PlayheadButtons = ({
             <div key={index} className="flex items-center relative">
               <div className="w-[5.25rem] mb-1">
                 <button
-                  className="w-[5.25rem] h-[1.85rem] p-1 rounded-[0.25rem] bg-[#555] uppercase"
-                  style={{
-                    // backgroundColor: `hsl(${p.hsl.h*360},${p.hsl.s*100}%,${p.hsl.l})`
-                    backgroundColor: p.playing
-                      ? // ? playing && ((counter - 1) / 2) % 1 === 0 ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                      playing && activeNotes[index].current
-                        ? `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                        }%,2)`
-                        : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                        }%,0.7)`
-                      : `hsla(${p.hsl.h * 360},${p.hsl.s * 100}%,${p.hsl.l * 100
-                      }%, 0.2)`,
-                    opacity: p.playing ? 1 : 0.7,
-                    transition: activeNotes[index].current
-                      ? "0"
-                      : "color 200ms linear",
-                  }}
+                  className="w-[5.25rem] h-[1.85rem] p-1 rounded-[0.25rem] bg-[#393939] hover:bg-[#444] uppercase"
                   onClick={() => {
-                    updatePlayhead(index, { ...p, playing: !p.playing });
                     setMenu(1);
                     setSelectedPlayhead(index)
                   }}
                 >
-                  {p.playing ? buttonLabel : "OFF"}
+                  {buttonLabel}
                 </button>
               </div>
             </div>
@@ -78,7 +58,7 @@ export const PlayheadButtons = ({
             </div>
           </div>
         ) : (
-          <div className="absolute bottom-[-0rem]">
+          <div className="absolute hidden bottom-[-0rem]">
             <div className="flex relative">
               <button
                 onClick={() =>

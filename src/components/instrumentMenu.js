@@ -16,19 +16,13 @@ export const InstrumentMenu = ({
             return (
               <div className="relative">
                 <button
-                  className="mb-1 p-1 w-[3rem] h-[1.85rem] p-[0.25rem] text-[#fff] rounded-[0.25rem]"
+                  className="mb-1 w-[0rem] h-[1.85rem] py-[0.25rem] text-[#fff] rounded-[0.25rem]"
                   key={index}
-                  style={{
-                    backgroundColor:
-                      selectedPlayhead === index
-                        ? p.color
-                        : "#444",
-                  }}
                   onClick={() => {
                     setSelectedPlayhead(index);
                   }}
                 >
-                  P{index}
+                  {/* P{index} */}
                 </button>
                 {selectedPlayhead === index && (
                   <div
