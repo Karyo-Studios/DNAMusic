@@ -11,7 +11,7 @@ export const p1 = new Playhead({
   events: 5,
   preset: instruments.guitar,
   instrumentName: '1',
-  color: "#2277E8",
+  color: "#ed1c51",
   velocity: 0.4,
 });
 
@@ -23,7 +23,7 @@ export const p2 = new Playhead({
   legato: 0.4,
   preset: instruments.kalimba,
   instrumentName: '2',
-  color: "#ed1c51",
+  color: "#2277E8",
   velocity: 0.4,
 });
 

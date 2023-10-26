@@ -49,3 +49,21 @@ export const savedSequences = [
     sequence: 'gtcaccaaatgaatgcaaccaaatgtgcctttcaactctcatgaagtgtgatcattgtggtgaaacttcatggcagacgggcgattttgttaaagccacttgcgaattttgtggcactgagaatttgactaaagaaggtgccactacttgtggttacttaccccaaaatgctgttgttaaaatttattgtccagcatgtc'
   },
 ]
+
+export const textSequences = [
+  {
+    value: 'hello world',
+  },
+  {
+    value: 'DNA drum machine',
+  },
+  {
+    value: 'kalimbas',
+  },
+  {
+    value: 'rainbows',
+  },
+  {
+    value: 'leucine',
+  },
+]

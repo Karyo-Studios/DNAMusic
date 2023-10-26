@@ -51,7 +51,7 @@ export const SequencerSettings = ({
                 {bpm}
               </p>
             </div>
-            <div className=" rounded-[0.25rem] w-[8rem]">
+            <div className=" rounded-[0.25rem] w-[6rem]">
               <ReactSlider
                 className="tempo-slider"
                 thumbClassName="tempo-thumb"
@@ -65,20 +65,7 @@ export const SequencerSettings = ({
                 }}
               ></ReactSlider>
             </div>
-            <div className="flex items-center">
-              <RemixButton
-                generatePattern={() =>
-                  generatePattern({
-                    playheads,
-                    updateTempo,
-                    setNoteOffset,
-                    setMasterSteps,
-                    setPlayheads,
-                  })
-                }
-              />
-            </div>
-            <div className="leading-[1rem] px-1 text-[#888] text-center">
+            <div className="leading-[1rem] px-1 ml-[0.5rem] text-[#888] text-center">
               <p className="text-[0.7rem]">STEP</p>
               <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
                 {masterSteps}

@@ -8,11 +8,10 @@ export const VisualizerMappings = ({
 }) => {
   return (
     <div className="">
-      <div className="flex pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
-        <p className="text-center w-[4rem]">CODON</p>
-        <div className="w-[2rem]"></div>
-        <p className="text-center w-[10rem]">AMINO ACID</p>
-        <p className="text-center w-[7rem]">NOTE</p>
+      <div className="flex w-[90%] justify-between pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+        <p className="text-left">CODON</p>
+        <p className="text-center">AMINO ACID</p>
+        <p className="text-right">NOTE</p>
       </div>
       {playheads.map((p, index) => {
         const note = countRefs[index].current;

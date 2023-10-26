@@ -1,9 +1,9 @@
-export const RemixButton = ({ generatePattern }) => {
+export const RemixButton = ({ onclick }) => {
   return (
     <div className="px-[0.5rem] remix">
       <div
         onClick={() => {
-          generatePattern();
+          onclick();
         }}
       >
         <button className="h-[2rem] w-[2rem] bg-[#393939] hover:bg-[#666] px-[0.5rem] rounded-[0.25rem]">

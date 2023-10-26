@@ -1,11 +1,7 @@
-import ReactSlider from "react-slider";
-
 import { RotationToggle } from "./rotationToggle";
 import { PlayheadView } from "./playheadView";
 import { HitsToggle } from "./hitsToggle";
-import { SpeedToggle } from "./speedToggle";
 import { ToggleButton } from "./toggleButton";
-import { SwitchButtonCenterText } from "./switchButtonCenterText";
 
 import { updateEuclid } from "../playhead";
 
@@ -28,8 +24,8 @@ export const PlayheadsView = ({
         <p className="w-[17.75rem]">rhythm</p>
         <p className="w-[4rem]">#beats</p>
         <p className="w-[3.8rem]">offset</p>
-        <p className="w-[4rem]">octave</p>
-        <p className="w-[4rem]">length</p>
+        {/* <p className="w-[4rem]">octave</p> */}
+        {/* <p className="w-[4rem]">length</p> */}
       </div>
       {playheads.map((p, index) => {
         if (index >= playheadCount) return;
@@ -126,49 +122,6 @@ export const PlayheadsView = ({
               >
                 {">"}
               </RotationToggle>
-            </div>
-            <div className="flex items-center">
-
-              <div>
-                <SwitchButtonCenterText
-                  leftOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      offset: p.offset > -4 * 12 ? p.offset - 12 : p.offset,
-                    });
-                    setSelectedPlayhead(index);
-                  }}
-                  rightOnClick={() => {
-                    updatePlayhead(index, {
-                      ...p,
-                      offset: p.offset < 4 * 12 ? p.offset + 12 : p.offset,
-                    });
-                    setSelectedPlayhead(index);
-                  }}
-                  leftText={"-"}
-                  rightText={"+"}
-                  value={p.offset / 12}
-                />
-              </div>
-              <div className="ml-1 bg-[#393939] rounded-[0.25rem] w-[4rem]">
-                <ReactSlider
-                  className="length-slider"
-                  thumbClassName="length-thumb"
-                  trackClassName="length-track"
-                  min={0.1}
-                  max={1}
-                  value={p.legato}
-                  step={0.1}
-                  onChange={(value) => {
-                    updatePlayhead(index, {
-                      ...p,
-                      legato: value,
-                    });
-                    setSelectedPlayhead(index);
-                  }}
-                  renderThumb={(props, state) => <div {...props}></div>}
-                />
-              </div>
             </div>
           </div>
         );

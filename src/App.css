@@ -27,11 +27,17 @@ body {
 /* react slider  */
 
 .bounds-slider {
-  width: calc(100% - 1rem);
+  width: 1200px;
   height: 2rem;
   margin: auto;
-  margin-left: 1rem;
   cursor: pointer;
+}
+
+
+@media all and (max-width: 1300px) {
+  .bounds-slider { 
+     width: 1000px;
+  }
 }
 
 .bounds-thumb {
@@ -76,7 +82,7 @@ body {
   height: 1rem;
   background-color: #393939;
   border-radius: 0.25rem;
-  margin: auto;
+  /* margin: auto; */
 }
 
 .length-slider:hover {

@@ -29,7 +29,7 @@ export const VisualizerBlobs = ({
 
   const showDetails = true;
   const lastCounter = useRef(counter);
-  const spacingX = width / 8;
+  const spacingX = width / 10;
   const boxSide = 30 * zoom;
   // 1.2 * x + spacingX * 2 = 1200 * y .. TODO figure out this equation so the sequence takes up the whole space!
   const colSpace = 0 * boxSide / 5;

@@ -23,7 +23,7 @@ export const VisualizerPlayheads = ({
   const currentSequence = showOnlyActive ? activeSequence : sequence;
 
   const lastCounter = useRef(counter);
-  const spacingX = width / 8;
+  const spacingX = width / 10;
   const boxSide = 30 * zoom;
   const colSpace = 0 * boxSide / 5;
   const rowSpace = boxSide / 2.5;

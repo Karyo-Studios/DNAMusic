@@ -10,9 +10,11 @@ export const SpeedToggle = ({ leftOnClick, rightOnClick, value }) => {
     rightText="+"
     leftStyle={{
       fontWeight: "bold",
+      padding: '0.16rem 0.3rem'
     }}
     rightStyle={{
       fontWeight: "bold",
+      padding: '0.16rem 0.3rem'
     }}
     value={value}
   />;

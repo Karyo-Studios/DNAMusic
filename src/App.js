@@ -46,12 +46,14 @@ import { VisualizerBlobs } from "./components/visualizerBlobs";
 import { VisualizerMappings } from "./components/visualizerMappings";
 import { InstrumentMenu } from "./components/instrumentMenu";
 import { SequencerSettings } from "./components/sequencerSettings";
+import { PresetMenu } from "./components/presetMenu";
 
 import { noteMappings } from "./mappings";
-import { loadedSequences, savedSequences } from "./loadedSequences";
+import { loadedSequences, savedSequences, textSequences } from "./loadedSequences";
 
 import "./App.css";
 import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
+import { RemixButton } from "./components/remixButton";
 
 function App() {
   const [menu, setMenu] = useState(0);
@@ -69,7 +71,7 @@ function App() {
   const [showEntireSequence, setShowEntireSequence] = useState(true);
   const [selectedSequence, setSelectedSequence] = useState(savedSequences[0])
 
-  const [bpm, setBpm] = useState(150);
+  const [bpm, setBpm] = useState(180);
   const [playheadCount, setPlayheadCount] = useState(5);
   const [masterSteps, setMasterSteps] = useState(8);
   const [noteOffset, setNoteOffset] = useState(0);
@@ -147,16 +149,12 @@ function App() {
     setPlayers(audioPlayers);
   };
 
+  // updates audio players
   const updatePlayer = (index, preset) => {
     const audioContext = getAudioContext();
     const currentPreset = presetMappings.find((x) => x.name === preset);
-    const currentPlayhead = {
-      ...playheads[index],
-      preset: currentPreset.name,
-    };
     const newPlayer = new WebAudioFontPlayer();
     newPlayer.adjustPreset(audioContext, currentPreset.file);
-    updatePlayhead(index, currentPlayhead);
     updatePlayers(index, newPlayer);
   };
 
@@ -266,9 +264,8 @@ function App() {
   const getAudioContext = () => {
     if (!audioContext) {
       const newAudioContext = new AudioContext();
-      const reverb = newAudioContext.createReverb(10);
-      reverb.connect(newAudioContext.destination);
-      // reverb.setDuration(10);
+      // const reverb = newAudioContext.createReverb(2);
+      // reverb.connect(newAudioContext.destination);
       setAudioContext(newAudioContext);
       initializePlayers(newAudioContext);
       return newAudioContext;
@@ -460,7 +457,7 @@ function App() {
                         note + noteOffsetRef.current,
                         (timeWindow * (hap - counter)) / 1000,
                         active.legato * timeWindow,
-                        0.4
+                        active.velocity
                       );
                     }
                     setActiveNotes[i](true);
@@ -541,14 +538,26 @@ function App() {
   }, [sequenceBounds, showOnlyActive]);
 
   const getState = () => {
-    return {
-      playheads: playheads,
-      bpm,
-      masterSteps,
-      noteOffset,
-      userSequence,
-      sequenceBounds
+    let ps = []
+    for (let i=0; i<playheads.length; i++) {
+      ps.push({
+        playing: playheads[i].playing,
+        events: playheads[i].events,
+        rotation: playheads[i].rotation,
+        offset: playheads[i].offset,
+        legato: playheads[i].legato,
+        preset: playheads[i].preset,
+      })
     }
+    return JSON.stringify({
+      name: "",
+      author: "",
+      bpm,
+      steps: masterSteps,
+      keyOffset: noteOffset,
+      userSequence,
+      playheads: ps
+    }, null, 2)
   }
 
   return (
@@ -578,10 +587,10 @@ function App() {
           }}
           className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[9999] flex items-center"
         >
-          <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#181818] px-[1rem] py-[2rem] mx-auto">
-            <h3 className="text-[1.4rem]">DNA Melodic Sequencer</h3>
+          <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto">
+            <h3 className="text-[1.4rem]">DNA Drum Machine</h3>
             <p className="">Translate DNA into music</p>
-            <div className="flex my-2">
+            <div className="flex mt-[1rem] w-[12em] m-auto">
               <button
                 className="w-[50%] rounded-l-[0.25rem]"
                 style={{
@@ -606,54 +615,50 @@ function App() {
                   setShowEntireSequence(true)
                 }}
               >
-                sequence
+                sequences
               </button>
             </div>
             <div>
               {
                 showEntireSequence ?
                   <div>
-                    <p className="mt-4 text-[0.8rem]">
-                      Select a sequence to get started!
+                    <p className="mt-[1.5rem] text-[0.8rem]">
+                      Select a DNA sequence to get started!
                     </p>
                     <div className="flex flex-col items-center justify-center">
-                      <div className="h-[8.5rem] w-[10.75rem] bg-[#181818] w-full rounded-[0.25rem]">
-
-                        <div className="">
-                          <div className="flex flex-wrap w-[15rem] mx-auto pt-[1rem] h-[8.5rem] overflow-y-scroll rounded-[0.25rem]">
-                            {savedSequences.map((sequence, index) => {
-                              return (
-                                <div>
-                                  <button
-                                    key={index}
-                                    className="text-left text-[0.8rem] w-[15rem] px-[0.25rem]"
-                                    style={{
-                                      backgroundColor:
-                                        selectedSequence.name ===
-                                          sequence.name
-                                          ? "#333"
-                                          : "rgba(0,0,0,0)",
-                                    }}
-                                    onClick={() => {
-                                      setSelectedSequence(sequence)
-                                    }}
-                                  >
-                                    <p className="whitespace-nowrap overflow-hidden">
-                                      {sequence.name}
-                                    </p>
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
+                      <div className="h-[8.5rem] w-[10.75rem] bg-[#222] w-full rounded-[0.25rem]">
+                        <div className="flex flex-wrap w-[15rem] mx-auto pt-[1rem] h-[10rem] overflow-y-scroll rounded-[0.25rem]">
+                          {savedSequences.map((sequence, index) => {
+                            return (
+                              <div className="bg-[#181818]">
+                                <button
+                                  key={index}
+                                  className="text-left text-[0.8rem] w-[15rem] px-[0.25rem]"
+                                  style={{
+                                    backgroundColor:
+                                      selectedSequence.name ===
+                                        sequence.name
+                                        ? "#333"
+                                        : "rgba(0,0,0,0)",
+                                  }}
+                                  onClick={() => {
+                                    setSelectedSequence(sequence)
+                                  }}
+                                >
+                                  <p className="whitespace-nowrap overflow-hidden text-[1rem]">
+                                    {sequence.name}
+                                  </p>
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                       <button
-                        className="mt-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                        className="mt-[2rem] absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
                         onClick={() => {
                           setModal(false);
                           play();
-                          console.log(savedSequences[sequenceIndex], selectedSequence)
                           setUserInputSequence(
                             selectedSequence.sequence
                           );
@@ -668,18 +673,25 @@ function App() {
                   </div>
                   :
                   <div>
-                    <p className="mt-4 text-[0.8rem]">
+                    <p className="mt-[1.5rem] text-[0.8rem]">
                       Type your name or phrase to get started!
                     </p>
                     <div className="flex flex-col items-center">
-                      <SequenceInput
-                        userSequence={userSequence}
-                        setUserSequence={setUserSequence}
-                        userInputSequence={userInputSequence}
-                        setUserInputSequence={setUserInputSequence}
-                      />
+                      <div className="flex relative">
+                        <SequenceInput
+                          userSequence={userSequence}
+                          setUserSequence={setUserSequence}
+                        />
+                        <div className="absolute right-[-3rem] top-[0.5rem]">
+                          <RemixButton
+                            onclick={() => {
+                              setUserSequence(textSequences[Math.floor(Math.random() * textSequences.length)].value)
+                            }}
+                          />
+                        </div>
+                      </div>
                       <button
-                        className="mt-3 py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                        className="mt-3 absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
                         style={{
                           cursor: userSequence.length > 0 ? "pointer" : "initial",
                           opacity: userSequence.length > 0 ? 1 : 0.5,
@@ -692,7 +704,7 @@ function App() {
                           }
                         }}
                       >
-                        Create melody!
+                        Get started
                       </button>
                     </div>
                     <div className="absolute top-0 left-[0.5rem] p-[0.5rem] text-[0.8rem] hidden">
@@ -709,7 +721,7 @@ function App() {
           <div className="mx-auto py-[1rem] w-[60rem]">
             <div className="z-[1] text-[#fff] flex justify-between">
               <div>
-                <h3>DNA Melodic Sequencer</h3>
+                <h3>DNA Drum Machine</h3>
               </div>
               <button onClick={
                 () => {
@@ -802,50 +814,64 @@ function App() {
         )}
         <div
           className="mb-[1rem] text-center mx-auto"
-          style={{ width: "45rem" }}
+          style={{ width: "30rem" }}
         >
           {!showEntireSequence && (
-            <SequenceInput
-              userSequence={userSequence}
-              setUserSequence={setUserSequence}
-              userInputSequence={userInputSequence}
-              setUserInputSequence={setUserInputSequence}
-            />
+            <div className="relative">
+              <SequenceInput
+                userSequence={userSequence}
+                setUserSequence={setUserSequence}
+                userInputSequence={userInputSequence}
+                setUserInputSequence={setUserInputSequence}
+                width={'30rem'}
+              />
+              <div className="absolute right-[-3rem] top-[0.5rem]">
+                <RemixButton
+                  onclick={() => {
+                    setUserSequence(textSequences[Math.floor(Math.random() * textSequences.length)].value)
+                  }}
+                />
+              </div>
+            </div>
           )}
         </div>
         <div className="">
-          <SequencerSettings
-            playing={playing}
-            counter={counter}
-            play={play}
-            pause={pause}
-            bpm={bpm}
-            stop={stop}
-            updateTempo={updateTempo}
-            setPlayheads={setPlayheads}
-            masterSteps={masterSteps}
-            setMasterSteps={setMasterSteps}
-            playheads={playheads}
-            setNoteOffset={setNoteOffset}
-            noteOffset={noteOffset}
-            zoom={zoom}
-            setZoom={setZoom}
-            activeSequence={activeSequence}
-            setSequenceBounds={setSequenceBounds}
-            sequence={sequence}
-            boundsRef={boundsRef}
-            setShowOnlyActive={setShowOnlyActive}
-            showOnlyActive={showOnlyActive}
-          />
-          <div className="flex mt-[0.5rem]">
+          <div className="flex justify-center">
+            <div className="w-[55rem]">
+              <SequencerSettings
+                playing={playing}
+                counter={counter}
+                play={play}
+                pause={pause}
+                bpm={bpm}
+                stop={stop}
+                updateTempo={updateTempo}
+                setPlayheads={setPlayheads}
+                masterSteps={masterSteps}
+                setMasterSteps={setMasterSteps}
+                playheads={playheads}
+                setNoteOffset={setNoteOffset}
+                noteOffset={noteOffset}
+                zoom={zoom}
+                setZoom={setZoom}
+                activeSequence={activeSequence}
+                setSequenceBounds={setSequenceBounds}
+                sequence={sequence}
+                boundsRef={boundsRef}
+                setShowOnlyActive={setShowOnlyActive}
+                showOnlyActive={showOnlyActive}
+              />
+            </div>
+          </div>
+          <div className="flex justify-center mt-[0.5rem] mx-auto">
             <div
               className={`
                   bg-[#292929] mr-[0.5rem] pr-[0.25rem] 
                   rounded-[0.5rem]
-                  w-[45rem] h-[13rem]
+                  w-[38rem] h-[13rem]
                   `}
             >
-              <div className="h-full flex">
+              <div className="flex">
                 <PlayheadsView
                   playheads={playheads}
                   updatePlayhead={updatePlayhead}
@@ -876,7 +902,7 @@ function App() {
               className="w-[16.5rem] px-[0.5rem] ml-[0rem] bg-[#292929] rounded-tl-[0.5rem] rounded-b-[0.5rem] relative"
               style={{
                 borderTopRightRadius: menu === 0 ? "0" : "0.5rem",
-                // borderTopLeftRadius: menu === 1 ? "0" : "0.5rem",
+                borderTopLeftRadius: menu === 1 ? "0" : "0.5rem",
               }}
             >
               <div className="absolute flex justify-end w-[16.5rem] h-[2.7rem] top-[-2.7rem] left-[0.0rem]">
@@ -890,13 +916,13 @@ function App() {
                   Sounds
                 </button>
                 <button
-                  className="uppercase hidden text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
+                  className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
                   onClick={() => setMenu(2)}
                   style={{
                     backgroundColor: menu === 2 ? "#292929" : "rgba(0,0,0,0)",
                   }}
                 >
-                  Rhythm
+                  Presets
                 </button>
                 <button
                   className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
@@ -930,7 +956,17 @@ function App() {
                   updatePlayer={updatePlayer}
                 />
               ) : (
-                <div className="w-[16.5rem]"></div>
+                <div className="w-[16.5rem]">
+                  <PresetMenu
+                    playheads={playheads}
+                    updatePlayer={updatePlayer}
+                    setPlayheads={setPlayheads}
+                    updateTempo={updateTempo}
+                    setMasterSteps={setMasterSteps}
+                    setNoteOffset={setNoteOffset}
+                    updatePlayhead={updatePlayhead}
+                  />
+                </div>
               )}
             </div>
           </div>

@@ -21,7 +21,7 @@ export const VisualizerSequence = ({
 
   const showDetails = true;
 
-  const spacingX = width / 8;
+  const spacingX = width / 10;
   const boxSide = 30 * zoom;
   const colSpace = 0 * boxSide / 5;
   const rowSpace = boxSide / 2.5;
