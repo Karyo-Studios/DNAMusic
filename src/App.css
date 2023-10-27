@@ -133,6 +133,26 @@ textarea:focus, input:focus{
   outline: none;
 }
 
+/* Sequence interactions */
+
+.intro-title {
+  border: 1px #444 solid;
+  color: #444;
+  cursor: initial;
+}
+
+.intro-title.active {
+  border: 1px white solid;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+
+.intro-title.active:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
 /* blobs */
 
 .blobs path,

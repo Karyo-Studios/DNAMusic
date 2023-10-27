@@ -40,7 +40,7 @@ export const SequenceBoundsSlider = ({
           Sequence: {selectedSequence ? `${selectedSequence.name} – ${selectedSequence.description}` : ''}
         </p>
       </div>
-      <div className="mb-[0.5rem] mt-[0.5rem]">
+      <div className="mt-[1.2rem]">
         <ReactSlider
           className="bounds-slider"
           thumbClassName="bounds-thumb"

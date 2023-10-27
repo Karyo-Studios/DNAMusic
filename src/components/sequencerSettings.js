@@ -6,6 +6,8 @@ import { SwitchButton } from "./switchButton";
 import { updateEuclid } from "../playhead";
 import { generatePattern } from "../helpers";
 
+import { ToggleButton } from "./toggleButton";
+
 export const SequencerSettings = ({
   playing,
   counter,
@@ -26,10 +28,11 @@ export const SequencerSettings = ({
   setSequenceBounds,
   sequence,
   boundsRef,
-  setShowOnlyActive,
-  showOnlyActive,
+  updatePlayhead,
+  showControls,
+  activeNotes,
 }) => {
-  return <div className="flex">
+  return <div className="flex z-[9999]">
     <div className="">
       <PlayPauseButton
         playing={playing}
@@ -157,29 +160,53 @@ export const SequencerSettings = ({
                 ></ReactSlider>
               </div>
             </div>
-            {activeSequence.length < sequence.length && (
-              <div className="flex z-[999] ml-[0.5rem]">
+            {
+              /*
+              {activeSequence.length < sequence.length && (
+                <div className="flex z-[999] ml-[0.5rem]">
                 <button
-                  onClick={() => {
-                    setSequenceBounds([0, sequence.length]);
-                    boundsRef.current = [0, sequence.length];
-                  }}
-                  className="uppercase rounded-[0.25rem] mr-2"
+                onClick={() => {
+                  setSequenceBounds([0, sequence.length]);
+                  boundsRef.current = [0, sequence.length];
+                }}
+                className="uppercase rounded-[0.25rem] mr-2"
                 >
-                  Reset
+                Reset
                 </button>
-                {/* <p className="text-[#888] uppercase">View:&nbsp;</p>
+                <p className="text-[#888] uppercase">View:&nbsp;</p>
                 <button
-                  onClick={() => setShowOnlyActive(!showOnlyActive)}
-                  className="uppercase rounded-[0.25rem]"
+                onClick={() => setShowOnlyActive(!showOnlyActive)}
+                className="uppercase rounded-[0.25rem]"
                 >
-                  {showOnlyActive ? "active" : "all"}
-                </button> */}
+                {showOnlyActive ? "active" : "all"}
+              </button>
               </div>
-            )}
+              )}
+              */
+            }
           </div>
         </div>
       </div>
+      {
+        !showControls &&
+        <div className="flex ml-[2.2rem]">
+          {playheads.map((p, index) => {
+            return <div
+                key={index}
+                className="mr-[0.25rem]"
+              >
+                <ToggleButton
+                  onClick={() => {
+                    updatePlayhead(index, { ...p, playing: !p.playing });
+                  }}
+                  playhead={p}
+                  index={index}
+                  activeNotes={activeNotes}
+                />
+              </div>
+          })}
+        </div>
+      }
     </div>
   </div>
 } 

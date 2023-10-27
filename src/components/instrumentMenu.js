@@ -15,7 +15,7 @@ export const InstrumentMenu = ({
   updatePlayer
 }) => {
   const p = playheads[selectedPlayhead]
-  return <div className="w-[16.5rem]">
+  return <div className="w-[16.5rem] px-[0.5rem]">
     <div className="w-full pt-[0.5rem] pb-[0.25rem] text-center text-[0.8rem] select-none uppercase"
       style={{
         color: p.color

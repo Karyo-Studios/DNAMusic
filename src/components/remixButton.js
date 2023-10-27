@@ -6,11 +6,11 @@ export const RemixButton = ({ onclick }) => {
           onclick();
         }}
       >
-        <button className="h-[2rem] w-[2rem] bg-[#393939] hover:bg-[#666] px-[0.5rem] rounded-[0.25rem]">
+        <button className="h-[2rem] w-[2rem]  hover:bg-[#666] px-[0.2rem] rounded-[0.25rem]">
           <div className=" m-auto">
             <svg
-              width="1rem"
-              height="1rem"
+              width="1.3rem"
+              height="1.3rem"
               viewBox="0 0 30 30"
               fill="#ddd"
               xmlns="http://www.w3.org/2000/svg"

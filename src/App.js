@@ -27,10 +27,7 @@ import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 import "./reverb.js";
 
 import { p1, p2, p3, p4, p5 } from "./defaults";
-import {
-  parseAllSequence,
-  interpretSequence,
-} from "./helpers";
+import { parseAllSequence, interpretSequence } from "./helpers";
 import { mapN, toMidi } from "./utils";
 import { queryPattern } from "./pattern";
 import { updateEuclid } from "./playhead";
@@ -49,7 +46,13 @@ import { SequencerSettings } from "./components/sequencerSettings";
 import { PresetMenu } from "./components/presetMenu";
 
 import { noteMappings } from "./mappings";
-import { loadedSequences, savedSequences, textSequences } from "./loadedSequences";
+import {
+  loadedSequences,
+  savedSequences,
+  textSequences,
+} from "./loadedSequences";
+
+import { helpMessages } from "./information";
 
 import "./App.css";
 import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
@@ -61,15 +64,34 @@ function App() {
   const [modal, setModal] = useState(true);
   const [initialMenu, setInitialMenu] = useState(false);
 
-  // modes 
+  // modes
   // 0 = phrase
   // 1 = melodies
   // 2 = entire sequence
 
-  const [mode, setMode] = useState(0)
+  const [showIntroduction, setShowIntroduction] = useState(true);
+  const [introductionIndex, setIntroductionIndex] = useState(0);
 
-  const [showEntireSequence, setShowEntireSequence] = useState(true);
-  const [selectedSequence, setSelectedSequence] = useState(savedSequences[0])
+  const [showControls, setShowControls] = useState(false);
+  const [showControlsTransition, setShowControlsTransition] = useState(false);
+
+  const transitionRef = useRef(0);
+  useEffect(() => {
+    transitionRef.current = showControlsTransition;
+  }, showControlsTransition);
+
+  const [showSequenceAbove, setShowSequenceAbove] = useState(false);
+
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpMessage, setHelpMessage] = useState({
+    name: "",
+    description: "",
+    img: "",
+    source: "",
+  });
+
+  const [showEntireSequence, setShowEntireSequence] = useState(false);
+  const [selectedSequence, setSelectedSequence] = useState(savedSequences[0]);
 
   const [bpm, setBpm] = useState(180);
   const [playheadCount, setPlayheadCount] = useState(5);
@@ -108,7 +130,12 @@ function App() {
   const [activeNodes, setActiveNodes] = useState(nodes);
 
   const calculatedHeight =
-    window.innerHeight - (window.innerWidth < 1300 ? 16 * 20 : 20 * 20);
+    window.innerHeight -
+    (window.innerWidth < 1300
+      ? (showControls ? 16 : 12) * 20
+      : (showControls ? 20 : 16) * 20);
+  // const calculatedHeight =
+  //   window.innerHeight - (window.innerWidth < 1300 ? 16 * 20 : 20 * 20);
   const width = window.innerWidth < 1300 ? 1000 : 1200;
   const height = calculatedHeight < 350 ? 350 : calculatedHeight;
 
@@ -203,7 +230,7 @@ function App() {
       });
     }
     if (event.keyCode === 13) {
-      console.log('enter button! TODO')
+      console.log("enter button! TODO");
     }
   };
 
@@ -508,6 +535,9 @@ function App() {
   useMemo(() => {
     const seq = interpretSequence(userSequence);
     setUserInputSequence(seq);
+    if (userSequence.length === 0) {
+      pause();
+    }
   }, [userSequence]);
 
   useEffect(() => {
@@ -532,14 +562,14 @@ function App() {
       const newZoom = mapN(length, 18, 300, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     } else {
-      const newZoom = mapN(sequence.length, 18, 200, 1, 0.6);
+      const newZoom = mapN(sequence.length, 18, 300, 1, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     }
   }, [sequenceBounds, showOnlyActive]);
 
   const getState = () => {
-    let ps = []
-    for (let i=0; i<playheads.length; i++) {
+    let ps = [];
+    for (let i = 0; i < playheads.length; i++) {
       ps.push({
         playing: playheads[i].playing,
         events: playheads[i].events,
@@ -547,24 +577,30 @@ function App() {
         offset: playheads[i].offset,
         legato: playheads[i].legato,
         preset: playheads[i].preset,
-      })
+        interval: playheads[i].interval,
+      });
     }
-    return JSON.stringify({
-      name: "",
-      author: "",
-      bpm,
-      steps: masterSteps,
-      keyOffset: noteOffset,
-      userSequence,
-      playheads: ps
-    }, null, 2)
-  }
+    return JSON.stringify(
+      {
+        name: "",
+        author: "",
+        bpm,
+        steps: masterSteps,
+        keyOffset: noteOffset,
+        userSequence,
+        playheads: ps,
+      },
+      null,
+      2
+    );
+  };
 
   return (
     <div
       onKeyDown={captureKeyboardEvent}
       tabIndex={-1}
       className="App outline-none text-left max-w-full select-none"
+      style={{ height: "100vh", minHeight: "700px" }}
       onClick={() => {
         setClearClick(clearClick + 1);
       }}
@@ -588,18 +624,20 @@ function App() {
           className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[9999] flex items-center"
         >
           <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto">
-            <h3 className="text-[1.4rem]">DNA Drum Machine</h3>
+            <h3 className="text-[1.4rem]">DNA Music Maker</h3>
             <p className="">Translate DNA into music</p>
-            <div className="flex mt-[1rem] w-[12em] m-auto">
+            <div className="flex mt-[1rem] h-[3rem] w-[12em] m-auto">
               <button
                 className="w-[50%] rounded-l-[0.25rem]"
                 style={{
                   backgroundColor: !showEntireSequence
                     ? "#555"
                     : "rgba(50,50,50,0.4)",
+                  textDecoration: showEntireSequence ? "initial" : "underline",
                 }}
                 onClick={() => {
-                  setShowEntireSequence(false)
+                  setShowEntireSequence(false);
+                  setUserInputSequence("type here");
                 }}
               >
                 phrase
@@ -610,108 +648,103 @@ function App() {
                   backgroundColor: showEntireSequence
                     ? "#555"
                     : "rgba(50,50,50,0.4)",
+                  textDecoration: !showEntireSequence ? "initial" : "underline",
                 }}
                 onClick={() => {
-                  setShowEntireSequence(true)
+                  setShowEntireSequence(true);
                 }}
               >
                 sequences
               </button>
             </div>
             <div>
-              {
-                showEntireSequence ?
-                  <div>
-                    <p className="mt-[1.5rem] text-[0.8rem]">
-                      Select a DNA sequence to get started!
-                    </p>
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="h-[8.5rem] w-[10.75rem] bg-[#222] w-full rounded-[0.25rem]">
-                        <div className="flex flex-wrap w-[15rem] mx-auto pt-[1rem] h-[10rem] overflow-y-scroll rounded-[0.25rem]">
-                          {savedSequences.map((sequence, index) => {
-                            return (
-                              <div className="bg-[#181818]">
-                                <button
-                                  key={index}
-                                  className="text-left text-[0.8rem] w-[15rem] px-[0.25rem]"
-                                  style={{
-                                    backgroundColor:
-                                      selectedSequence.name ===
-                                        sequence.name
-                                        ? "#333"
-                                        : "rgba(0,0,0,0)",
-                                  }}
-                                  onClick={() => {
-                                    setSelectedSequence(sequence)
-                                  }}
-                                >
-                                  <p className="whitespace-nowrap overflow-hidden text-[1rem]">
-                                    {sequence.name}
-                                  </p>
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
+              {showEntireSequence ? (
+                <div>
+                  <p className="mt-[1.5rem] text-[0.9rem]">
+                    Select a DNA sequence to get started!
+                  </p>
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="h-[8.5rem] w-[10.75rem] bg-[#222] w-full rounded-[0.25rem]">
+                      <div className="flex flex-wrap w-[15rem] mx-auto pt-[1rem] h-[10rem] overflow-y-scroll rounded-[0.25rem]">
+                        {savedSequences.map((sequence, index) => {
+                          return (
+                            <div className="bg-[#181818]">
+                              <button
+                                key={index}
+                                className="text-left w-[15rem] px-[0.25rem]"
+                                style={{
+                                  backgroundColor:
+                                    selectedSequence.name === sequence.name
+                                      ? "#333"
+                                      : "rgba(0,0,0,0)",
+                                }}
+                                onClick={() => {
+                                  setSelectedSequence(sequence);
+                                }}
+                              >
+                                <p className="whitespace-nowrap overflow-hidden text-[1rem]">
+                                  {sequence.name}
+                                </p>
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <button
-                        className="mt-[2rem] absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
-                        onClick={() => {
+                    </div>
+                    <button
+                      className="mt-[2rem] absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                      onClick={() => {
+                        setModal(false);
+                        play();
+                        setUserInputSequence(selectedSequence.sequence);
+                      }}
+                    >
+                      Get started
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="mt-[1.5rem] text-[0.9rem]">
+                    Type your name or phrase to get started!
+                  </p>
+                  <div className="flex flex-col items-center">
+                    <div className="flex relative">
+                      <SequenceInput
+                        userSequence={userSequence}
+                        setUserSequence={setUserSequence}
+                      />
+                      <div className="absolute left-[-3rem] top-[0.5rem]">
+                        <RemixButton
+                          onclick={() => {
+                            setUserSequence(
+                              textSequences[
+                                Math.floor(Math.random() * textSequences.length)
+                              ].value
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      className="mt-3 absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                      style={{
+                        cursor: userSequence.length > 0 ? "pointer" : "initial",
+                        opacity: userSequence.length > 0 ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (userSequence.length > 0) {
                           setModal(false);
                           play();
-                          setUserInputSequence(
-                            selectedSequence.sequence
-                          );
-                        }}
-                      >
-                        Get started
-                      </button>
-                    </div>
-                    <div className="absolute top-0 left-[0.5rem] p-[0.5rem] text-[0.8rem] hidden">
-                      <button className="uppercase">exit</button>
-                    </div>
+                          setInitialMenu(false);
+                        }
+                      }}
+                    >
+                      Get started
+                    </button>
                   </div>
-                  :
-                  <div>
-                    <p className="mt-[1.5rem] text-[0.8rem]">
-                      Type your name or phrase to get started!
-                    </p>
-                    <div className="flex flex-col items-center">
-                      <div className="flex relative">
-                        <SequenceInput
-                          userSequence={userSequence}
-                          setUserSequence={setUserSequence}
-                        />
-                        <div className="absolute right-[-3rem] top-[0.5rem]">
-                          <RemixButton
-                            onclick={() => {
-                              setUserSequence(textSequences[Math.floor(Math.random() * textSequences.length)].value)
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <button
-                        className="mt-3 absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
-                        style={{
-                          cursor: userSequence.length > 0 ? "pointer" : "initial",
-                          opacity: userSequence.length > 0 ? 1 : 0.5,
-                        }}
-                        onClick={() => {
-                          if (userSequence.length > 0) {
-                            setModal(false);
-                            play();
-                            setInitialMenu(false);
-                          }
-                        }}
-                      >
-                        Get started
-                      </button>
-                    </div>
-                    <div className="absolute top-0 left-[0.5rem] p-[0.5rem] text-[0.8rem] hidden">
-                      <button className="uppercase">exit</button>
-                    </div>
-                  </div>
-              }
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -721,27 +754,67 @@ function App() {
           <div className="mx-auto py-[1rem] w-[60rem]">
             <div className="z-[1] text-[#fff] flex justify-between">
               <div>
-                <h3>DNA Drum Machine</h3>
+                <h3>DNA Music Maker</h3>
               </div>
-              <button onClick={
-                () => {
-                  setModal(true)
-                  pause()
-                  console.log(getState())
-                }
-              }>
-                <h3>Menu</h3>
-              </button>
+              <div className="flex">
+                <button
+                  onClick={() => {
+                    setShowControls(!showControls);
+                    setShowControlsTransition(true);
+                    setTimeout(() => {
+                      setShowControlsTransition(false);
+                    }, 400);
+                  }}
+                  className="mr-[1rem]"
+                >
+                  <h3>about</h3>
+                </button>
+                <button className="mr-[1rem]">
+                  <h3>learn</h3>
+                </button>
+                <button
+                  onClick={() => {
+                    setModal(true);
+                    pause();
+                    console.log(getState());
+                  }}
+                >
+                  <h3>menu</h3>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+        <div className="mx-auto w-[60rem]">
+          {helpMessages.introduction.map((intro, index) => {
+            return (
+              <button
+                onClick={() => {
+                  setHelpMessage(intro);
+                  setMenu(0);
+                  setShowHelp(true);
+                }}
+                key={index}
+                className={`py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${
+                  introductionIndex === index && "active"
+                }`}
+              >
+                {index + 1}: {intro.name}
+              </button>
+            );
+          })}
+        </div>
+        {/* <div className="mx-auto w-[60rem]">
+          <p>content!</p>
+        </div> */}
       </div>
-      <div className="text-[0.9rem] bg-[#181818] max-w-[60rem] mx-auto mb-[0rem]">
+      <div>
         <div
-          className="relative"
+          className="relative mx-auto transition-translate"
           style={{
             width: width,
             height: height,
+            transitionDuration: "200ms",
           }}
         >
           <svg
@@ -768,6 +841,7 @@ function App() {
               cps={cps}
               clearClick={clearClick}
               playheadCount={playheadCount}
+              showSequenceAbove={!showEntireSequence}
             />
           )}
           <VisualizerSequence
@@ -781,6 +855,15 @@ function App() {
             height={height}
             width={width}
             playheadCount={playheadCount}
+            setShowHelp={setShowHelp}
+            setHelpMessage={setHelpMessage}
+            playheads={playheads}
+            getNote={getNote}
+            noteOffsetRef={noteOffsetRef}
+            playSoundFont={playSoundFont}
+            setMenu={setMenu}
+            showSequenceAbove={!showEntireSequence}
+            showControlsTransition={showControlsTransition}
           />
           <VisualizerPlayheads
             playing={playing}
@@ -797,177 +880,222 @@ function App() {
             height={height}
             width={width}
             playheadCount={playheadCount}
+            showSequenceAbove={!showEntireSequence}
+            showControlsTransition={showControlsTransition}
           />
         </div>
-        {showEntireSequence && (
-          <div className="">
-            <SequenceBoundsSlider
-              selectedSequence={selectedSequence}
-              sequenceBounds={sequenceBounds}
-              setSequenceBounds={setSequenceBounds}
-              sequence={sequence}
-              width={width}
-              sequenceRef={sequenceRef}
-              boundsRef={boundsRef}
-            />
-          </div>
-        )}
-        <div
-          className="mb-[1rem] text-center mx-auto"
-          style={{ width: "30rem" }}
-        >
-          {!showEntireSequence && (
-            <div className="relative">
-              <SequenceInput
-                userSequence={userSequence}
-                setUserSequence={setUserSequence}
-                userInputSequence={userInputSequence}
-                setUserInputSequence={setUserInputSequence}
-                width={'30rem'}
-              />
-              <div className="absolute right-[-3rem] top-[0.5rem]">
-                <RemixButton
-                  onclick={() => {
-                    setUserSequence(textSequences[Math.floor(Math.random() * textSequences.length)].value)
-                  }}
+      </div>
+      <div
+      // className="relative"
+      //   style={{
+      //   // height: "100vh", minHeight: "700px"
+      //   height: '50rem'
+      // }}
+      >
+        <div className="text-[0.9rem] relative max-w-[60rem] mx-auto pb-[0.5rem] overflow-y-hidden">
+          {/* <div className="text-[0.9rem] absolute bottom-[0] left-[0] right-[0] max-w-[60rem] mx-auto pb-[0.5rem] overflow-y-hidden"> */}
+          {/* <div className="absolute bottom-[0] left-[0] right-[0] z-[88]"> */}
+          <div>
+            {showEntireSequence && (
+              <div className="">
+                <SequenceBoundsSlider
+                  selectedSequence={selectedSequence}
+                  sequenceBounds={sequenceBounds}
+                  setSequenceBounds={setSequenceBounds}
+                  sequence={sequence}
+                  width={width}
+                  sequenceRef={sequenceRef}
+                  boundsRef={boundsRef}
                 />
               </div>
-            </div>
-          )}
-        </div>
-        <div className="">
-          <div className="flex justify-center">
-            <div className="w-[55rem]">
-              <SequencerSettings
-                playing={playing}
-                counter={counter}
-                play={play}
-                pause={pause}
-                bpm={bpm}
-                stop={stop}
-                updateTempo={updateTempo}
-                setPlayheads={setPlayheads}
-                masterSteps={masterSteps}
-                setMasterSteps={setMasterSteps}
-                playheads={playheads}
-                setNoteOffset={setNoteOffset}
-                noteOffset={noteOffset}
-                zoom={zoom}
-                setZoom={setZoom}
-                activeSequence={activeSequence}
-                setSequenceBounds={setSequenceBounds}
-                sequence={sequence}
-                boundsRef={boundsRef}
-                setShowOnlyActive={setShowOnlyActive}
-                showOnlyActive={showOnlyActive}
-              />
-            </div>
-          </div>
-          <div className="flex justify-center mt-[0.5rem] mx-auto">
-            <div
-              className={`
-                  bg-[#292929] mr-[0.5rem] pr-[0.25rem] 
-                  rounded-[0.5rem]
-                  w-[38rem] h-[13rem]
-                  `}
-            >
-              <div className="flex">
-                <PlayheadsView
-                  playheads={playheads}
-                  updatePlayhead={updatePlayhead}
-                  playing={playing}
-                  ticker={ticker}
-                  masterSteps={masterSteps}
-                  counters={counters}
-                  playheadCount={playheadCount}
-                  width={width}
-                  activeNotes={activeNoteRefs}
-                  setSelectedPlayhead={setSelectedPlayhead}
-                />
-                <div className="bg-[#292929] pl-[0.5rem] rounded-[0.5rem]">
-                  <PlayheadButtons
-                    playheads={playheads}
-                    updatePlayhead={updatePlayhead}
-                    playheadCount={playheadCount}
-                    setPlayheadCount={setPlayheadCount}
-                    counter={counter}
-                    playing={playing}
-                    setMenu={setMenu}
-                    setSelectedPlayhead={setSelectedPlayhead}
+            )}
+            {!showEntireSequence && (
+              <div
+                className="mb-[1rem] text-center mx-auto"
+                style={{ width: "30rem" }}
+              >
+                <div className="relative">
+                  <SequenceInput
+                    userSequence={userSequence}
+                    setUserSequence={setUserSequence}
+                    width={"30rem"}
                   />
+                  <div className="absolute left-[-3rem] top-[0.5rem]">
+                    <RemixButton
+                      onclick={() => {
+                        setUserSequence(
+                          textSequences[
+                            Math.floor(Math.random() * textSequences.length)
+                          ].value
+                        );
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <div
-              className="w-[16.5rem] px-[0.5rem] ml-[0rem] bg-[#292929] rounded-tl-[0.5rem] rounded-b-[0.5rem] relative"
               style={{
-                borderTopRightRadius: menu === 0 ? "0" : "0.5rem",
-                borderTopLeftRadius: menu === 1 ? "0" : "0.5rem",
+                height: showControls ? "15.8rem" : "2.25rem",
+                transitionDuration: "400ms",
               }}
             >
-              <div className="absolute flex justify-end w-[16.5rem] h-[2.7rem] top-[-2.7rem] left-[0.0rem]">
-                <button
-                  className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
-                  onClick={() => setMenu(1)}
-                  style={{
-                    backgroundColor: menu === 1 ? "#292929" : "rgba(0,0,0,0)",
-                  }}
-                >
-                  Sounds
-                </button>
-                <button
-                  className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
-                  onClick={() => setMenu(2)}
-                  style={{
-                    backgroundColor: menu === 2 ? "#292929" : "rgba(0,0,0,0)",
-                  }}
-                >
-                  Presets
-                </button>
-                <button
-                  className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
-                  onClick={() => setMenu(0)}
-                  style={{
-                    backgroundColor: menu === 0 ? "#292929" : "rgba(0,0,0,0)",
-                  }}
-                >
-                  Log
-                </button>
-              </div>
-              {menu === 0 ? (
-                <div className="w-[16.5rem]">
-                  <VisualizerMappings
-                    playheads={playheads}
-                    countRefs={countRefs}
-                    counters={counters}
-                    activeNodes={activeNodes}
-                    playheadCount={playheadCount}
-                  />
-                </div>
-              ) : menu === 1 ? (
-                <InstrumentMenu
-                  playheads={playheads}
-                  selectedPlayhead={selectedPlayhead}
-                  updatePlayhead={updatePlayhead}
-                  WebMidi={WebMidi}
-                  presetMappings={presetMappings}
-                  playheadCount={playheadCount}
-                  setSelectedPlayhead={setSelectedPlayhead}
-                  updatePlayer={updatePlayer}
-                />
-              ) : (
-                <div className="w-[16.5rem]">
-                  <PresetMenu
-                    playheads={playheads}
-                    updatePlayer={updatePlayer}
-                    setPlayheads={setPlayheads}
+              <div className="flex justify-center">
+                <div className="w-[38rem]">
+                  <SequencerSettings
+                    playing={playing}
+                    counter={counter}
+                    play={play}
+                    pause={pause}
+                    bpm={bpm}
+                    stop={stop}
                     updateTempo={updateTempo}
+                    setPlayheads={setPlayheads}
+                    masterSteps={masterSteps}
                     setMasterSteps={setMasterSteps}
+                    playheads={playheads}
                     setNoteOffset={setNoteOffset}
+                    noteOffset={noteOffset}
+                    zoom={zoom}
+                    setZoom={setZoom}
+                    activeSequence={activeSequence}
+                    setSequenceBounds={setSequenceBounds}
+                    sequence={sequence}
+                    boundsRef={boundsRef}
+                    showControls={showControls}
                     updatePlayhead={updatePlayhead}
+                    activeNotes={activeNoteRefs}
                   />
                 </div>
-              )}
+              </div>
+              <div className="flex justify-center mt-[0.5rem] mx-auto">
+                <div
+                  className={`
+                    bg-[#292929] mr-[0.5rem] pr-[0.25rem] 
+                    rounded-[0.5rem]
+                    w-[38rem] h-[13rem]
+                    relative
+                    `}
+                >
+                  <div className="flex">
+                    <PlayheadsView
+                      playheads={playheads}
+                      updatePlayhead={updatePlayhead}
+                      playing={playing}
+                      ticker={ticker}
+                      masterSteps={masterSteps}
+                      counters={counters}
+                      playheadCount={playheadCount}
+                      width={width}
+                      activeNotes={activeNoteRefs}
+                      setSelectedPlayhead={setSelectedPlayhead}
+                    />
+                    <div className="bg-[#292929] pl-[0.5rem] rounded-[0.5rem]">
+                      <PlayheadButtons
+                        playheads={playheads}
+                        updatePlayhead={updatePlayhead}
+                        playheadCount={playheadCount}
+                        setPlayheadCount={setPlayheadCount}
+                        counter={counter}
+                        playing={playing}
+                        setMenu={setMenu}
+                        setSelectedPlayhead={setSelectedPlayhead}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="w-[16.5rem] ml-[0rem] bg-[#292929] rounded-tl-[0.5rem] rounded-b-[0.5rem] absolute hidden top-0 right-[-16rem]"
+                    style={{
+                      borderTopRightRadius: menu === 0 ? "0" : "0.5rem",
+                      borderTopLeftRadius: menu === 1 ? "0" : "0.5rem",
+                    }}
+                  >
+                    <div
+                      className="absolute flex justify-end w-[16.5rem] h-[2.7rem] top-[-2.7rem] left-[0.0rem]"
+                      style={{
+                        display: showControls ? "flex" : "none",
+                      }}
+                    >
+                      <button
+                        className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
+                        onClick={() => {
+                          setMenu(1);
+                          setShowHelp(false);
+                        }}
+                        style={{
+                          backgroundColor:
+                            menu === 1 ? "#292929" : "rgba(0,0,0,0)",
+                        }}
+                      >
+                        Sounds
+                      </button>
+                      <button
+                        className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
+                        onClick={() => {
+                          setMenu(2);
+                          setShowHelp(false);
+                        }}
+                        style={{
+                          backgroundColor:
+                            menu === 2 ? "#292929" : "rgba(0,0,0,0)",
+                        }}
+                      >
+                        Presets
+                      </button>
+                      <button
+                        className="uppercase text-[#aaa] rounded-t-[0.5rem] w-[5.5rem] text-center"
+                        onClick={() => {
+                          setMenu(0);
+                          setShowHelp(false);
+                        }}
+                        style={{
+                          backgroundColor:
+                            menu === 0 ? "#292929" : "rgba(0,0,0,0)",
+                        }}
+                      >
+                        Log
+                      </button>
+                    </div>
+                    {menu === 0 ? (
+                      <div className="w-[16.5rem]">
+                        <VisualizerMappings
+                          playheads={playheads}
+                          countRefs={countRefs}
+                          counters={counters}
+                          activeNodes={activeNodes}
+                          playheadCount={playheadCount}
+                          showHelp={showHelp}
+                          helpMessage={helpMessage}
+                          setShowHelp={setShowHelp}
+                        />
+                      </div>
+                    ) : menu === 1 ? (
+                      <InstrumentMenu
+                        playheads={playheads}
+                        selectedPlayhead={selectedPlayhead}
+                        updatePlayhead={updatePlayhead}
+                        WebMidi={WebMidi}
+                        presetMappings={presetMappings}
+                        playheadCount={playheadCount}
+                        setSelectedPlayhead={setSelectedPlayhead}
+                        updatePlayer={updatePlayer}
+                      />
+                    ) : (
+                      <div className="w-[16.5rem]">
+                        <PresetMenu
+                          playheads={playheads}
+                          updatePlayer={updatePlayer}
+                          setPlayheads={setPlayheads}
+                          updateTempo={updateTempo}
+                          setMasterSteps={setMasterSteps}
+                          setNoteOffset={setNoteOffset}
+                          updatePlayhead={updatePlayhead}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

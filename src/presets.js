@@ -76,52 +76,57 @@ export const factoryPresets = [
     ]
   },
   {
-    "name": "choral",
+    "name": "random blips",
     "author": "karyo",
-    "bpm": 180,
-    "steps": 8,
-    "keyOffset": 0,
-    "userSequence": "",
+    "bpm": 125,
+    "steps": 16,
+    "keyOffset": -1,
+    "userSequence": "rainbows",
     "playheads": [
       {
         "playing": true,
-        "events": 5,
-        "rotation": 6,
+        "events": 4,
+        "rotation": 0,
+        "offset": 12,
+        "legato": 0.2,
+        "preset": "synth",
+        "interval": 6
+      },
+      {
+        "playing": true,
+        "events": 2,
+        "rotation": 1,
         "offset": 0,
-        "legato": 0.4,
-        "preset": "choir"
+        "legato": 0.2,
+        "preset": "synth",
+        "interval": 5
       },
       {
         "playing": true,
         "events": 3,
-        "rotation": 0,
-        "offset": -12,
-        "legato": 0.3,
-        "preset": "choir"
-      },
-      {
-        "playing": false,
-        "events": 3,
-        "rotation": 1,
-        "offset": 0,
-        "legato": 0.4,
-        "preset": "flute"
-      },
-      {
-        "playing": false,
-        "events": 5,
         "rotation": 2,
-        "offset": 0,
-        "legato": 0.4,
-        "preset": "woodblock"
+        "offset": -12,
+        "legato": 0.2,
+        "preset": "synth",
+        "interval": 4
       },
       {
-        "playing": false,
+        "playing": true,
         "events": 2,
-        "rotation": 0,
+        "rotation": 3,
         "offset": -24,
-        "legato": 0.1,
-        "preset": "kick"
+        "legato": 0.5,
+        "preset": "kick2",
+        "interval": 3
+      },
+      {
+        "playing": true,
+        "events": 2,
+        "rotation": 4,
+        "offset": -12,
+        "legato": 0.2,
+        "preset": "synth",
+        "interval": 2
       }
     ]
   },
@@ -274,5 +279,5 @@ export const factoryPresets = [
         "preset": "kick"
       }
     ]
-  }
+  },
 ]

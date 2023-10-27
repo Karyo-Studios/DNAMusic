@@ -16,10 +16,11 @@ export const VisualizerPlayheads = ({
   bounds,
   showOnlyActive,
   playheadCount,
+  showSequenceAbove,
+  showControlsTransition,
 }) => {
 
-
-  const showDetails = true;
+  const showDetails = showSequenceAbove;
   const currentSequence = showOnlyActive ? activeSequence : sequence;
 
   const lastCounter = useRef(counter);
@@ -85,21 +86,25 @@ export const VisualizerPlayheads = ({
     <div className="pointer-events-none">
       {sequence.length ? (
         <div
-          className="absolute"
+          className="absolute transition-translate"
           style={{
             top: 0,
             left: 0,
             width: width,
             height: height,
+            // transitionDuration: showControlsTransition ? '200ms' : 0
+            transitionDuration: 0,
           }}
         >
           <div
-            className="relative"
-            style={{
-              width: width,
-              height: height,
-            }}
-          >
+          className="relative transition-translate"
+          style={{
+            width: width,
+            height: height,
+            // transitionDuration: showControlsTransition ? '200ms' : 0
+            transitionDuration: 0,
+          }}
+        >
             {playheads.map((playhead, index) => {
               if (index >= playheadCount) return;
               const count = showOnlyActive ? counters[index] * 3 : Math.ceil((bounds[0] + counters[index] * 3) / 3) * 3;
@@ -112,18 +117,20 @@ export const VisualizerPlayheads = ({
               return (
                 <div key={index + x}>
                   <div
-                    className="absolute box-border text-center"
+                    className="absolute box-border text-center transition-translate"
                     style={{
                       left: x,
                       top: playhead.playing ? y : y + boxSide * boxAspect,
                       // transition: "top 100ms linear",
+                      // transitionDuration: showControlsTransition ? '200ms' : 0
+                      transitionDuration: 0,
                     }}
                   >
                     <div
                       style={{
                         width: boxSide * 2.95,
                         height: playhead.playing ? boxSide * boxAspect : "3px",
-                        borderRadius: playhead.playing ? "0.25rem" : 0,
+                        borderRadius: playhead.playing ? zoom * 5 : 0,
                         backgroundColor: playhead.playing
                           ? playhead.color
                           : "rgba(0,0,0,0)",

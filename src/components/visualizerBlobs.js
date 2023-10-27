@@ -21,13 +21,14 @@ export const VisualizerBlobs = ({
   showOnlyActive,
   clearClick,
   playheadCount,
+  showSequenceAbove
 }) => {
 
   const currentSequence = showOnlyActive ? activeSequence : sequence
   const fixedLength = false;
   const ANIMATION_TIME = 3.0;
 
-  const showDetails = true;
+  const showDetails = showSequenceAbove;
   const lastCounter = useRef(counter);
   const spacingX = width / 10;
   const boxSide = 30 * zoom;
