@@ -92,8 +92,8 @@ export const VisualizerPlayheads = ({
             left: 0,
             width: width,
             height: height,
-            // transitionDuration: showControlsTransition ? '200ms' : 0
-            transitionDuration: 0,
+            transitionDuration: showControlsTransition ? '200ms' : 0,
+            // transitionDuration: 0,
           }}
         >
           <div
@@ -101,8 +101,8 @@ export const VisualizerPlayheads = ({
           style={{
             width: width,
             height: height,
-            // transitionDuration: showControlsTransition ? '200ms' : 0
-            transitionDuration: 0,
+            transitionDuration: showControlsTransition ? '200ms' : 0,
+            // transitionDuration: 0,
           }}
         >
             {playheads.map((playhead, index) => {
@@ -122,8 +122,8 @@ export const VisualizerPlayheads = ({
                       left: x,
                       top: playhead.playing ? y : y + boxSide * boxAspect,
                       // transition: "top 100ms linear",
-                      // transitionDuration: showControlsTransition ? '200ms' : 0
-                      transitionDuration: 0,
+                      transitionDuration: showControlsTransition ? '200ms' : '0ms',
+                      // transitionDuration: 0,
                     }}
                   >
                     <div

@@ -1,19 +1,13 @@
 // TODOs:
 /*
 
-- add menu button
-- add main modes
-- fix bug when clearing the input and it pauses things 
 - enter button on input
-- when interacting with specific playhead, select that within the menu 
-- hide period
-- add advanced menu w/ period and steps per track
-- playheads viz is active during note length
-
-who we know who would want to share these things 
-  - get people to use it 
-  - have a way to understand the sentiment around it 
-  
+- ifx popup menu things to be more prominant and background bug
+- bug when switching from dna sequence to phrase when phrase is already populated
+- design for the menu
+- add about page 
+- fix height of the fullscreen version
+- add rhythm controls to the main section  
 
 */
 
@@ -132,8 +126,8 @@ function App() {
   const calculatedHeight =
     window.innerHeight -
     (window.innerWidth < 1300
-      ? (showControls ? 16 : 12) * 20
-      : (showControls ? 20 : 16) * 20);
+      ? (showControls ? 16 : 8) * 20
+      : (showControls ? 20 : 10) * 20);
   // const calculatedHeight =
   //   window.innerHeight - (window.innerWidth < 1300 ? 16 * 20 : 20 * 20);
   const width = window.innerWidth < 1300 ? 1000 : 1200;
@@ -757,19 +751,7 @@ function App() {
                 <h3>DNA Music Maker</h3>
               </div>
               <div className="flex">
-                <button
-                  onClick={() => {
-                    setShowControls(!showControls);
-                    setShowControlsTransition(true);
-                    setTimeout(() => {
-                      setShowControlsTransition(false);
-                    }, 400);
-                  }}
-                  className="mr-[1rem]"
-                >
-                  <h3>{showControls ? 'fullscreen' : 'show controls'}</h3>
-                </button>
-                <button onClick={()=> {
+                <button onClick={() => {
                   setShowIntroduction(!showIntroduction)
                 }} className="mr-[1rem]">
                   <h3>{!showIntroduction ? 'learn' : 'hide'}</h3>
@@ -797,18 +779,62 @@ function App() {
                   setShowHelp(true);
                 }}
                 key={index}
-                className={`py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${
-                  introductionIndex === index && "active"
-                }`}
+                className={`py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${introductionIndex === index && "active"
+                  }`}
               >
                 {index + 1}: {intro.name}
               </button>
             );
           })}
         </div>
-        {/* <div className="mx-auto w-[60rem]">
-          <p>content!</p>
-        </div> */}
+        {
+          showHelp && !showControls &&
+          <div className="mx-auto w-[60rem]">
+            <div className="relative w-full h-full max-w-[30rem] h-[10rem]"
+              style={{
+                border: '1px white solid',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }}
+            >
+              <div className="overflow-y-scroll h-[9.8rem] pl-[0.75rem] pr-[3rem] py-[0.5rem]">
+                <p className="mb-[0.25rem]">{helpMessage.name}</p>
+                {helpMessage.description && (
+                  <p className="text-[0.8rem] mb-[0.25rem]">
+                    {helpMessage.description}
+                  </p>
+                )}
+                {helpMessage.img && (
+                  <div className="bg-[#eee] p-[0.5rem] rounded-[0.25rem] relative max-w-[15rem]">
+                    <img className="w-auto m-auto" src={helpMessage.img}
+                      style={{
+                        height: helpMessage.imgHeight ? helpMessage.imgHeight : '6rem'
+                      }}
+                    ></img>
+                    <div className="w-full h-[7rem] m-auto absolute top-0 left-0 z-[999]"
+                      style={{
+                        mixBlendMode: 'difference'
+                      }}
+                    >
+                    </div>
+                  </div>
+                )}
+                {helpMessage.source && (
+                  <a target="_blank" href={helpMessage.source}>
+                    <p className="underline text-[0.8rem]">learn more</p>
+                  </a>
+                )}
+              </div>
+              <button
+                className="uppercase text-[0.8rem] absolute bottom-[0.75rem] right-[0.5rem] z-[99]"
+                onClick={() => {
+                  setShowHelp(false);
+                }}
+              >
+                close
+              </button>
+            </div>
+          </div>
+        }
       </div>
       <div>
         <div
@@ -943,7 +969,21 @@ function App() {
               }}
             >
               <div className="flex justify-center">
-                <div className="w-[54.5rem]">
+                <div className="w-[54.5rem] relative">
+                  <div className="absolute right-0 top-[-2rem]">
+                    <button
+                      onClick={() => {
+                        setShowControls(!showControls);
+                        setShowControlsTransition(true);
+                        setTimeout(() => {
+                          setShowControlsTransition(false);
+                        }, 400);
+                      }}
+                      className=""
+                    >
+                      <h3>{showControls ? 'hide controls' : 'show controls'}</h3>
+                    </button>
+                  </div>
                   <SequencerSettings
                     playing={playing}
                     counter={counter}
@@ -1012,7 +1052,7 @@ function App() {
                   }}
                 >
                   <div
-                    className="absolute flex justify-end w-[16.5rem] h-[2.7rem] top-[-2.7rem] left-[0.0rem]"
+                    className="absolute left-[-1px] flex justify-end w-[16.5rem] h-[2.7rem] top-[-2.7rem] left-[0.0rem]"
                     style={{
                       display: showControls ? "flex" : "none",
                     }}
@@ -1074,6 +1114,7 @@ function App() {
                         showHelp={showHelp}
                         helpMessage={helpMessage}
                         setShowHelp={setShowHelp}
+                        showControls={showControls}
                       />
                     </div>
                   ) : menu === 1 ? (

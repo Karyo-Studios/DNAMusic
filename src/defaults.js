@@ -8,7 +8,7 @@ export const p1 = new Playhead({
   offset: 0,
   legato: 0.6,
   steps: 8,
-  events: 5,
+  events: 4,
   preset: instruments.guitar,
   instrumentName: '1',
   color: "#ed1c51",

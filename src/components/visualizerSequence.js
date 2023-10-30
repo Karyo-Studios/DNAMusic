@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 import { mapN, toMidi } from "../utils";
 
@@ -78,8 +78,8 @@ export const VisualizerSequence = ({
       style={{
         width: width,
         height: height,
-        // transitionDuration: showControlsTransition ? '200ms' : 0,
-        transitionDuration: 0
+        transitionDuration: showControlsTransition ? '200ms' : 0,
+        // transitionDuration: 0
       }}
     >
       <div>
@@ -88,8 +88,8 @@ export const VisualizerSequence = ({
           style={{
             width: width,
             height: height,
-            // transitionDuration: showControlsTransition ? '200ms' : 0,
-            transitionDuration: 0
+            transitionDuration: showControlsTransition ? '200ms' : 0,
+            // transitionDuration: 0
           }}
         >
           {currentSequence.map((letter, index) => {
@@ -115,8 +115,8 @@ export const VisualizerSequence = ({
                 style={{
                   left: x,
                   top: y,
-                  // transitionDuration: showControlsTransition ? '200ms' : 0,
-                  transitionDuration: 0
+                  transitionDuration: showControlsTransition ? '200ms' : '0ms',
+                  // transitionDuration: 0
                 }}
               >
                 <span className="relative select-text">
@@ -133,12 +133,12 @@ export const VisualizerSequence = ({
                       // backgroundColor: 'rgba(255,255,255,0.4)'
                       // backgroundColor: `hsla(192,0%,${noteColor}%, 0.5)`
                       backgroundColor: isActive
-                        ? `hsla(192,0%,${noteColor}%, 0.6)`
+                        ? (showDetails ? `hsla(192,0%,${noteColor}%, 0.6)` : `rgba(255,255,255, 0.5)`)
                         : `hsla(192,0%,${noteColor}%, 0.2)`,
                     }}
                   ></span>
                   <span
-                    className="absolute box-border text-center uppercase"
+                    className="absolute box-border text-center uppercase pointer-events-none"
                     style={{
                       top: detailSpace,
                       left: boxScale * ((1 - boxScale) / 2),
@@ -148,79 +148,99 @@ export const VisualizerSequence = ({
                       fontSize: `${20 * zoom}px`,
                       // color: '#ddd'
                       // color: isActive ? '#fff' : '#000'
-                      color: "#000",
+                      color: showDetails ? "#000" : '#fff',
                     }}
                   >
                     <span>{parseInt(currentAcid) === -1 ? "-" : letter}</span>
                   </span>
-                  {(index - 1) % 3 === 0 && showDetails && (
-                    <div className="relative">
-                      <div
-                        className={`absolute opacity-[0] hover:opacity-[0.3] z-[999] cursor-pointer`}
-                        style={{
-                          left: boxScale * ((1 - boxScale) / 2) - boxSide,
-                          width: boxSide * 2.95,
-                          height: boxSide*1.05 * boxAspect * 2,
-                          borderRadius: zoom * 5,
-                          backgroundColor: noteActive ? '#fff' : '#888',
-                          lineHeight: `${boxSide * boxAspect}px`,
-                        }}
-                        onClick={() => {
-                          const note = getNote(Math.floor(index/3))
-                          playSoundFont(
-                            0,
-                            playheads[0].preset,
-                            note + noteOffsetRef.current,
-                            0,
-                            playheads[0].legato * 300,
-                            playheads[0].velocity
-                          );
-                          setNoteActive(true)
-                          setTimeout(()=> {
-                            setNoteActive(false)
-                          }, 100)
-                          let helpMessage = {}
-                          if (helpMessages.acids[currentAcid] !== undefined) {
-                            helpMessage = {
-                              name: helpMessages.acids[currentAcid].name,
-                              description: helpMessages.acids[currentAcid].description,
-                              img: helpMessages.acids[currentAcid].img,
-                              source: helpMessages.acids[currentAcid].source,
+                  {(index - 1) % 3 === 0 &&
+                    (
+                      <div className="relative">
+                        <div
+                          className={`absolute opacity-[0] ${showDetails ? 'hover:opacity-[1]' : 'hover:opacity-[1]'} z-[999] cursor-pointer`}
+                          style={{
+                            left: boxScale * ((1 - boxScale) / 2) - boxSide,
+                            width: boxSide * 2.95,
+                            height: boxSide * 1.05 * boxAspect * (showDetails ? 2 : 1),
+                            borderRadius: zoom * 5,
+                            backgroundColor: '#fff',
+                            lineHeight: `${boxSide * boxAspect}px`,
+                          }}
+                          onClick={() => {
+                            const note = getNote(Math.floor(index / 3))
+                            playSoundFont(
+                              0,
+                              playheads[0].preset,
+                              note + noteOffsetRef.current,
+                              0,
+                              playheads[0].legato * 300,
+                              playheads[0].velocity
+                            );
+                            setNoteActive(true)
+                            setTimeout(() => {
+                              setNoteActive(false)
+                            }, 100)
+                            let helpMessage = {}
+                            if (helpMessages.acids[currentAcid] !== undefined) {
+                              helpMessage = {
+                                name: helpMessages.acids[currentAcid].name,
+                                description: helpMessages.acids[currentAcid].description,
+                                img: helpMessages.acids[currentAcid].img,
+                                source: helpMessages.acids[currentAcid].source,
+                              }
+                            } else {
+                              helpMessage = {
+                                name: helpMessages.acids.other.name,
+                                description: helpMessages.acids.other.description,
+                                img: helpMessages.acids.other.img,
+                                source: helpMessages.acids.other.source,
+                              }
                             }
-                          } else {
-                            helpMessage = {
-                              name: helpMessages.acids.other.name,
-                              description: helpMessages.acids.other.description,
-                              img: helpMessages.acids.other.img,
-                              source: helpMessages.acids.other.source,
-                            }
-                          }
-                          setMenu(0)
-                          setShowHelp(true)
-                          setHelpMessage(
-                            helpMessage
-                          )
-                          console.log(currentAcid, currentSequence[index-1], letter, currentSequence[index+1])
-                        }}
-                      ></div>
-                      <span
-                        className="absolute box-border text-center uppercase"
-                        style={{
-                          left: boxScale * ((1 - boxScale) / 2),
-                          width: boxSide * boxScale,
-                          height: boxSide * boxAspect,
-                          lineHeight: `${boxSide * boxAspect}px`,
-                          fontSize: `${20 * zoom}px`,
-                          // color: '#ddd'
-                          color: isActive ? "#fff" : "#888",
-                        }}
-                      >
-                        <span>
-                          {parseInt(currentAcid) === -1 ? letter : currentAcid}
+                            setMenu(0)
+                            setShowHelp(true)
+                            setHelpMessage(
+                              helpMessage
+                            )
+                            console.log(currentAcid, currentSequence[index - 1], letter, currentSequence[index + 1])
+                          }}
+                        >
+                          <span
+                          className="absolute box-border text-center uppercase"
+                          // className="absolute box-border text-center uppercase opacity-[0] hover:opacity-[1]"
+                          style={{
+                            lineHeight: `${boxSide * boxAspect}px`,
+                            fontSize: `${20 * zoom}px`,
+                            width: '100%',
+                            // color: '#ddd'
+                            color: '#000'
+                          }}
+                        >
+                          <span>
+                            {parseInt(currentAcid) === -1 ? letter : currentAcid}
+                          </span>
                         </span>
-                      </span>
-                    </div>
-                  )}
+                        </div>
+                        <span
+                          className="absolute box-border text-center uppercase"
+                          // className="absolute box-border text-center uppercase opacity-[0] hover:opacity-[1]"
+                          style={{
+                            left: boxScale * ((1 - boxScale) / 2),
+                            width: boxSide * boxScale,
+                            height: boxSide * boxAspect,
+                            lineHeight: `${boxSide * boxAspect}px`,
+                            fontSize: `${20 * zoom}px`,
+                            // color: '#ddd'
+                            color: isActive ? "#fff" : "#888",
+                            display: showDetails ? 'initial' : 'none'
+                          }}
+                        >
+                          <span>
+                            {parseInt(currentAcid) === -1 ? letter : currentAcid}
+                          </span>
+                        </span>
+                      </div>
+                    )
+                  }
                 </span>
               </div>
             );

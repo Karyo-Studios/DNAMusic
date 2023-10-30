@@ -8,12 +8,18 @@ export const VisualizerMappings = ({
   showHelp,
   helpMessage,
   setShowHelp,
+  showControls,
 }) => {
   return (
-    <div className="relative px-[0.5rem] ">
-      {showHelp && (
-        <div className="absolute w-[15.5rem] pt-[0.5rem] h-full z-[98] bg-[#292929] p-[0rem]">
-          <div className="bg-[#181818] h-[12rem] rounded-[0.25rem]">
+    <div className="relative">
+      {showHelp && showControls && (
+        <div className="absolute w-full top-[-2.7rem] left-[-1px] pt-[0.5rem] h-[15.6rem] z-[98] bg-[#181818]"
+          style={{
+            border: '1px white solid',
+            borderBottom: 'none'
+        }}
+        >
+          <div className="h-[12rem]">
             <div className="relative w-full h-full overflow-y-scroll px-[0.75rem] py-[0.25rem]">
               <p className="mb-[0.25rem]">{helpMessage.name}</p>
               {helpMessage.description && (
@@ -53,12 +59,12 @@ export const VisualizerMappings = ({
           </div>
         </div>
       )}
-      <div className="flex justify-between pt-[0.5rem] pb-[0.25rem] px-[0.25rem] text-[#888] text-[0.8rem] select-none">
+      <div className="flex px-[0.5rem] justify-between pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
         <p className="text-left">CODON</p>
         <p className="text-center">AMINO ACID</p>
         <p className="text-right">NOTE</p>
       </div>
-      <div className="bg-[#181818] h-[10rem] rounded-[0.25rem] px-[0.25rem]">
+      <div className=" px-[0.5rem] h-[10rem] rounded-[0.25rem]">
       {playheads.map((p, index) => {
         const note = countRefs[index].current;
         const node = activeNodes[note];
