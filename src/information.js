@@ -129,13 +129,13 @@ export const helpMessages = {
                 name: "Glutamicacid",
                 description: "",
                 source: "https://en.wikipedia.org/wiki/Glutamic_acid",
-                img: "./assets/structures/L-Glutaminsäure_-_L-Glutamic_acid.svg",
+                img: "./assets/structures/L-Glutaminsaure_-_L-Glutamic_acid.svg",
             },
             D: {
                 name: "Asparticacid",
                 description: "",
                 source: "https://en.wikipedia.org/wiki/Aspartic_acid",
-                img: "./assets/structures/L-Asparaginsäure_-_L-Aspartic_acid.svg",
+                img: "./assets/structures/L-Asparaginsaure_-_L-Aspartic_acid.svg",
             },
             K: {
                 name: "Lysine",

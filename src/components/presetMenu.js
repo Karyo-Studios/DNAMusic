@@ -41,12 +41,17 @@ export const PresetMenu = ({
 
   return (
     <div className="px-[0.5rem]">
-      <div className="flex justify-between w-full pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+      <div className="flex justify-between w-full pt-[0.5rem] px-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
         <p className="text-left">NAME</p>
         <p className="text-right">AUTHOR</p>
       </div>
-      <div className="h-[8.5rem] overflow-y-scroll w-full bg-[#222] rounded-[0.25rem]">
-        <div className="flex flex-wrap mx-auto h-[7rem]">
+      <div className="h-[8.5rem] overflow-y-scroll w-full bg-[#222]"
+      style={{
+        border: '1px white solid'
+      }}
+      >
+        <div className="flex flex-wrap mx-auto h-[7rem]"
+          >
           {factoryPresets.map((preset, index) => {
             return (
               <div className="bg-[#181818]">
@@ -62,7 +67,7 @@ export const PresetMenu = ({
                       updatePlayheads(preset);
                     }}
                   ></button>
-                  <div className="flex px-[0.25rem] justify-between text-[0.8rem] w-[15.5rem]">
+                  <div className="flex px-[0.25rem] py-[0.2rem] justify-between text-[0.8rem] w-[15.5rem]">
                     <p className="whitespace-nowrap overflow-hidden">
                       {preset.name}
                     </p>
@@ -76,9 +81,9 @@ export const PresetMenu = ({
           })}
         </div>
       </div>
-      <div className="flex justify-between w-[100%] pt-[0.5rem] pb-[0.25rem]text-[0.8rem] select-none">
+      <div className="flex w-[100%] px-[0.5rem] pt-[0.5rem] pb-[0.25rem]text-[0.8rem] select-none">
         <p className="text-left text-[#888] ">RANDOMIZE</p>
-        <button className="text-[#fff] text-right"
+        <button className="text-[#fff] text-left ml-[1rem]"
           onClick={() =>
             generatePattern({
               playheads,

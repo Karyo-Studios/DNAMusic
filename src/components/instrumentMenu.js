@@ -25,7 +25,9 @@ export const InstrumentMenu = ({
     </div>
     <div className="flex">
       <div className=" flex">
-        <div className="h-[8.5rem] w-[8rem] bg-[#181818] rounded-[0.25rem]">
+        <div className="h-[8.5rem] w-[8.2rem]"
+          style={{border: '1px white solid'}}
+        >
           {p.midiEnabled ? (
             <div>
               <div className="flex flex-col overflow-y-scroll h-[8.5rem] w-[8rem]">

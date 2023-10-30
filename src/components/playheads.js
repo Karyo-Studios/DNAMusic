@@ -17,16 +17,7 @@ export const PlayheadsView = ({
   activeNotes
 }) => {
   return (
-    <div>
-      <div className="flex pt-[0.5rem] pb-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
-        <p className="w-[1.25rem]"></p>
-        <p className="w-[3.5rem]">off/on</p>
-        <p className="w-[17.75rem]">rhythm</p>
-        <p className="w-[4rem]">#beats</p>
-        <p className="w-[3.8rem]">offset</p>
-        {/* <p className="w-[4rem]">octave</p> */}
-        {/* <p className="w-[4rem]">length</p> */}
-      </div>
+    <div className=" pt-[0.5rem]">
       {playheads.map((p, index) => {
         if (index >= playheadCount) return;
         return (
@@ -126,6 +117,15 @@ export const PlayheadsView = ({
           </div>
         );
       })}
+       <div className="flex pb-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
+        <p className="w-[1.25rem]"></p>
+        <p className="w-[3.5rem]">off/on</p>
+        <p className="w-[17.75rem]">rhythm</p>
+        <p className="w-[4rem]">beats</p>
+        <p className="w-[3.8rem]">offset</p>
+        {/* <p className="w-[4rem]">octave</p> */}
+        {/* <p className="w-[4rem]">length</p> */}
+      </div>
     </div>
   );
 };

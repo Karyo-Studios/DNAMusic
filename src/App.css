@@ -36,7 +36,8 @@ body {
 
 @media all and (max-width: 1300px) {
   .bounds-slider { 
-     width: 1000px;
+     max-width: 1000px;
+     width: 100%;
   }
 }
 
@@ -133,7 +134,7 @@ textarea:focus, input:focus{
   outline: none;
 }
 
-/* Sequence interactions */
+/* intro */
 
 .intro-title {
   border: 1px #444 solid;
@@ -145,6 +146,12 @@ textarea:focus, input:focus{
   border: 1px white solid;
   color: #fff;
   cursor: pointer;
+}
+
+/* btns */
+
+.btn-default:hover {
+  background-color: 'rgba(255,255,255,0.2)'
 }
 
 

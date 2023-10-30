@@ -15,7 +15,7 @@ export const ToggleButton = ({
         >
           {playhead.playing ? 'on' : 'off'}
         </button>
-        <div className={`bg-[#393939] h-[1.85rem] hover:bg-[#444] 
+        <div className={`h-[1.85rem] bg-[#232323] hover:bg-[#353535] 
         p-1 w-[3rem] rounded-[0.25rem] relative`} style={{ cursor: 'pointer' }}>
           <div
             className={'absolute w-[1.2rem] h-[1.35rem] rounded-[0.4rem] transition-translate'}
