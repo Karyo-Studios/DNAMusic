@@ -55,15 +55,33 @@ export const textSequences = [
     value: 'hello world',
   },
   {
-    value: 'DNA drum machine',
+    value: 'Cerebellum',
+  },
+  {
+    value: 'precipitating',
+  },
+  {
+    value: 'Geneticist',
+  },
+  {
+    value: 'mitochondria',
   },
   {
     value: 'kalimbas',
   },
   {
-    value: 'rainbows',
+    value: 'leucine',
   },
   {
-    value: 'leucine',
+    value: 'Tardigrade',
+  },
+  {
+    value: 'Hereditary',
+  },
+  {
+    value: 'Endosymbiosis',
+  },
+  {
+    value: 'Genetic',
   },
 ]

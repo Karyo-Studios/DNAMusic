@@ -27,7 +27,7 @@ export const PlayheadButtons = ({
             </div>
           );
         })}
-                <div className="flex text-center select-none uppercase">
+        <div className="flex text-center select-none uppercase">
           <p className="pb-[0.25rem] w-[5.25rem] text-[#888] text-[0.8rem]">
             SOUND
           </p>

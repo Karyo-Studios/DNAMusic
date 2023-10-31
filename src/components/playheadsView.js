@@ -14,7 +14,9 @@ export const PlayheadsView = ({
   playheadCount,
   width,
   setSelectedPlayhead,
-  activeNotes
+  activeNotes,
+  setMenu,
+  selectedPlayhead,
 }) => {
   return (
     <div className=" pt-[0.5rem]">
@@ -23,20 +25,25 @@ export const PlayheadsView = ({
         return (
           <div
             key={"playheads" + index}
-            className="relative mb-1 flex items-center"
+            className="relative mb-1 flex items-center text-center"
           >
-            <div className="w-[1.25rem] px-[0.5rem]"
+            <button className="px-[0.75rem] ml-[0.5rem] py-[0.25rem]"
               style={{
-                color: p.playing ? '#ffffff' : '#aaaaaa',
+                backgroundColor:  selectedPlayhead === index ? p.color : 'rgba(0,0,0,0)',
+              }}
+              onClick={()=> {
+                setMenu(1)
+                setSelectedPlayhead(index)
               }}
             >
               {index + 1}
-            </div>
+            </button>
             <div className="mx-1 mr-[0.5rem]">
               <ToggleButton
                 onClick={() => {
                   updatePlayhead(index, { ...p, playing: !p.playing });
                   setSelectedPlayhead(index);
+                  setMenu(1);
                 }}
                 playhead={p}
                 index={index}
@@ -62,6 +69,7 @@ export const PlayheadsView = ({
                     );
                   }
                   setSelectedPlayhead(index);
+                  setMenu(1);
                 }}
                 rightOnClick={() => {
                   if (p.events < masterSteps) {
@@ -71,6 +79,7 @@ export const PlayheadsView = ({
                     );
                   }
                   setSelectedPlayhead(index);
+                  setMenu(1);
                 }}
                 p={p}
                 masterSteps={masterSteps}
@@ -88,6 +97,7 @@ export const PlayheadsView = ({
                     })
                   );
                   setSelectedPlayhead(index);
+                  setMenu(1);
                 }}
                 p={p}
                 masterSteps={masterSteps}
@@ -107,6 +117,7 @@ export const PlayheadsView = ({
                     })
                   );
                   setSelectedPlayhead(index);
+                  setMenu(1);
                 }}
                 p={p}
                 masterSteps={masterSteps}

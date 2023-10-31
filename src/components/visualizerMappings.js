@@ -12,59 +12,7 @@ export const VisualizerMappings = ({
 }) => {
   return (
     <div className="relative">
-      {showHelp && showControls && (
-        <div className="absolute w-full top-[-2.7rem] left-[-1px] pt-[0.5rem] h-[15.6rem] z-[98] bg-[#181818]"
-          style={{
-            border: '1px white solid',
-            borderBottom: 'none'
-        }}
-        >
-          <div className="h-[12rem]">
-            <div className="relative w-full h-full overflow-y-scroll px-[0.75rem] py-[0.25rem]">
-              <p className="mb-[0.25rem]">{helpMessage.name}</p>
-              {helpMessage.description && (
-                <p className="text-[0.8rem] mb-[0.25rem]">
-                  {helpMessage.description}
-                </p>
-              )}
-              {helpMessage.img && (
-                <div className="bg-[#eee] p-[0.5rem] rounded-[0.25rem] relative">
-                  <img className="w-auto m-auto" src={helpMessage.img}
-                    style={{
-                      height: helpMessage.imgHeight ? helpMessage.imgHeight : '6rem'
-                    }}
-                  ></img>
-                  <div className="w-full h-[7rem] m-auto absolute top-0 left-0 z-[999]" 
-                    style={{
-                      mixBlendMode: 'difference'
-                    }}
-                  >
-                  </div>
-                </div>
-              )}
-              {helpMessage.source && (
-                <a target="_blank" href={helpMessage.source}>
-                  <p className="underline text-[0.8rem]">learn more</p>
-                </a>
-              )}
-            </div>
-            <button
-              className="uppercase text-[0.8rem] absolute top-[0.75rem] right-[0.5rem] z-[99]"
-              onClick={() => {
-                setShowHelp(false);
-              }}
-            >
-              close
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="flex px-[0.5rem] justify-between pt-[0.5rem] pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
-        <p className="text-left">CODON</p>
-        <p className="text-center">AMINO ACID</p>
-        <p className="text-right">NOTE</p>
-      </div>
-      <div className=" px-[0.5rem] h-[10rem] rounded-[0.25rem]">
+      <div className="pt-[0.5rem] px-[0.5rem] h-[10rem] rounded-[0.25rem]">
       {playheads.map((p, index) => {
         const note = countRefs[index].current;
         const node = activeNodes[note];
@@ -125,6 +73,11 @@ export const VisualizerMappings = ({
           </div>
         );
       })}
+      </div>
+      <div className="flex pt-[0.85rem] px-[0.5rem] justify-between pb-[0.25rem] text-[#888] text-[0.8rem] select-none">
+        <p className="text-left">CODON</p>
+        <p className="text-center">AMINO ACID</p>
+        <p className="text-right">NOTE</p>
       </div>
     </div>
   );

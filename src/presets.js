@@ -1,56 +1,6 @@
 export const factoryPresets = [
   {
-    name: 'hello world',
-    author: 'karyo',
-    "bpm": 180,
-    "steps": 8,
-    "keyOffset": 0,
-    "userSequence": "",
-    "playheads": [
-      {
-        "playing": true,
-        "events": 5,
-        "rotation": 0,
-        "offset": 0,
-        "legato": 0.6,
-        "preset": "guitar"
-      },
-      {
-        "playing": false,
-        "events": 3,
-        "rotation": 0,
-        "offset": 12,
-        "legato": 0.4,
-        "preset": "kalimba"
-      },
-      {
-        "playing": false,
-        "events": 3,
-        "rotation": 1,
-        "offset": 0,
-        "legato": 0.3,
-        "preset": "flute"
-      },
-      {
-        "playing": false,
-        "events": 2,
-        "rotation": 0,
-        "offset": -24,
-        "legato": 1,
-        "preset": "bass"
-      },
-      {
-        "playing": false,
-        "events": 3,
-        "rotation": 0,
-        "offset": 0,
-        "legato": 0.5,
-        "preset": "xylophone"
-      }
-    ]
-  },
-  {
-    name: 'bachata',
+    name: 'bio bachata',
     author: 'karyo',
     bpm: 185,
     steps: 8,
@@ -62,7 +12,7 @@ export const factoryPresets = [
         playing: true, events: 5, rotation: 7, offset: 0, legato: 0.4, preset: "guitar", velocity: 0.7,
       },
       {
-        playing: false, events: 5, rotation: 0, offset: 0, legato: 0.7, preset: "woodblock", velocity: 0.,
+        playing: true, events: 5, rotation: 0, offset: 0, legato: 0.7, preset: "woodblock", velocity: 0.,
       },
       {
         playing: true, events: 3, rotation: 1, offset: -24, legato: 0.7, preset: "bass", velocity: 0.7,
@@ -76,7 +26,7 @@ export const factoryPresets = [
     ]
   },
   {
-    "name": "random blips",
+    "name": "mutaded melody",
     "author": "karyo",
     "bpm": 125,
     "steps": 16,
@@ -127,6 +77,111 @@ export const factoryPresets = [
         "legato": 0.2,
         "preset": "synth",
         "interval": 2
+      }
+    ]
+  },
+  {
+    "name": "cell conversation",
+    "author": "karyo",
+    "bpm": 233,
+    "steps": 8,
+    "keyOffset": 0,
+    "userSequence": "mitochondria",
+    "playheads": [
+      {
+        "playing": true,
+        "events": 5,
+        "rotation": 7,
+        "offset": 0,
+        "legato": 0.7,
+        "preset": "choir",
+        "interval": 4
+      },
+      {
+        "playing": true,
+        "events": 5,
+        "rotation": 0,
+        "offset": 0,
+        "legato": 0.5,
+        "preset": "choir",
+        "interval": 4
+      },
+      {
+        "playing": false,
+        "events": 3,
+        "rotation": 1,
+        "offset": -12,
+        "legato": 0.5,
+        "preset": "choir",
+        "interval": 4
+      },
+      {
+        "playing": false,
+        "events": 2,
+        "rotation": 1,
+        "offset": -24,
+        "legato": 0.5,
+        "preset": "kick2",
+        "interval": 4
+      },
+      {
+        "playing": false,
+        "events": 3,
+        "rotation": 5,
+        "offset": -24,
+        "legato": 0.1,
+        "preset": "kick",
+        "interval": 4
+      }
+    ]
+  },
+  {
+    name: 'cell genesis',
+    author: 'karyo',
+    "bpm": 180,
+    "steps": 8,
+    "keyOffset": 0,
+    "userSequence": "",
+    "playheads": [
+      {
+        "playing": true,
+        "events": 5,
+        "rotation": 0,
+        "offset": 0,
+        "legato": 0.6,
+        "preset": "guitar"
+      },
+      {
+        "playing": false,
+        "events": 3,
+        "rotation": 0,
+        "offset": 12,
+        "legato": 0.4,
+        "preset": "kalimba"
+      },
+      {
+        "playing": false,
+        "events": 3,
+        "rotation": 1,
+        "offset": 0,
+        "legato": 0.3,
+        "preset": "flute"
+      },
+      {
+        "playing": false,
+        "events": 2,
+        "rotation": 0,
+        "offset": -24,
+        "legato": 1,
+        "preset": "bass"
+      },
+      {
+        "playing": false,
+        "events": 3,
+        "rotation": 0,
+        "offset": 0,
+        "legato": 0.5,
+        "preset": "xylophone"
       }
     ]
   },

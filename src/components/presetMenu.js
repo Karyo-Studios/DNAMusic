@@ -67,7 +67,7 @@ export const PresetMenu = ({
                       updatePlayheads(preset);
                     }}
                   ></button>
-                  <div className="flex px-[0.25rem] py-[0.2rem] justify-between text-[0.8rem] w-[15.5rem]">
+                  <div className="flex px-[0.75rem] py-[0.2rem] justify-between text-[0.8rem] w-[15.25rem]">
                     <p className="whitespace-nowrap overflow-hidden">
                       {preset.name}
                     </p>
@@ -81,9 +81,9 @@ export const PresetMenu = ({
           })}
         </div>
       </div>
-      <div className="flex w-[100%] px-[0.5rem] pt-[0.5rem] pb-[0.25rem]text-[0.8rem] select-none">
-        <p className="text-left text-[#888] ">RANDOMIZE</p>
-        <button className="text-[#fff] text-left ml-[1rem]"
+      <div className="flex w-[100%] px-[0.5rem] pt-[0.25rem] text-center pb-[0.25rem] uppercase text-[0.8rem] select-none">
+        <p className="text-[#888] ">Randomize:</p>
+        <button className="text-[#fff] ml-[1rem]"
           onClick={() =>
             generatePattern({
               playheads,

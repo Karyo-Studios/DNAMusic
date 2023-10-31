@@ -16,9 +16,9 @@ export const InstrumentMenu = ({
 }) => {
   const p = playheads[selectedPlayhead]
   return <div className="w-[16.5rem] px-[0.5rem]">
-    <div className="w-full pt-[0.5rem] pb-[0.25rem] text-center text-[0.8rem] select-none uppercase"
+    <div className="w-full my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-center text-[0.8rem] select-none uppercase text-[#fff]"
       style={{
-        color: p.color
+        // backgroundColor: p.color,
       }}
     >
       Playhead {selectedPlayhead + 1}
@@ -30,7 +30,7 @@ export const InstrumentMenu = ({
         >
           {p.midiEnabled ? (
             <div>
-              <div className="flex flex-col overflow-y-scroll h-[8.5rem] w-[8rem]">
+              <div className="flex flex-col overflow-y-scroll h-[8.4rem] w-[8rem]">
                 {WebMidi &&
                   WebMidi._outputs.map((midi, index) => {
                     return (
@@ -112,7 +112,7 @@ export const InstrumentMenu = ({
               </div>
               :
               <button
-                className="w-full mt-[0.25rem] hover:bg-[#444] py-[0.25rem] px-[1rem] rounded-[0.25rem] text-[0.8rem]"
+                className="hidden w-full mt-[0.25rem] hover:bg-[#444] py-[0.25rem] px-[1rem] rounded-[0.25rem] text-[0.8rem]"
                 onClick={() => {
                   const presetIndex = Math.floor(Math.random() * presetMappings.length)
                   updatePlayer(

@@ -5,12 +5,11 @@ export const SequenceBoundsSlider = ({
   setSequenceBounds,
   sequence,
   selectedSequence,
-  width,
   sequenceRef,
   boundsRef
 }) => {
   return <div>
-    <div className="relative text-[#888]" style={{ width: width }}>
+    <div className="relative text-[#888] w-full m-auto">
       <div className="absolute flex left-[1rem] top-[-1rem]">
         <p className="text-[0.8rem]">
           START{" "}
