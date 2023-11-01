@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/dnamusic/static/css/main.5ec920f7.css",
-    "main.js": "/dnamusic/static/js/main.3e805cf2.js",
+    "main.css": "/dnamusic/static/css/main.d7fb79e1.css",
+    "main.js": "/dnamusic/static/js/main.321562c5.js",
     "static/js/787.c1112931.chunk.js": "/dnamusic/static/js/787.c1112931.chunk.js",
     "static/media/din.ttf": "/dnamusic/static/media/din.8567efa4f57bf6a76dab.ttf",
     "static/media/din-reg.ttf": "/dnamusic/static/media/din-reg.a2a891e79c2edfc10f44.ttf",
     "index.html": "/dnamusic/index.html",
-    "main.5ec920f7.css.map": "/dnamusic/static/css/main.5ec920f7.css.map",
-    "main.3e805cf2.js.map": "/dnamusic/static/js/main.3e805cf2.js.map",
+    "main.d7fb79e1.css.map": "/dnamusic/static/css/main.d7fb79e1.css.map",
+    "main.321562c5.js.map": "/dnamusic/static/js/main.321562c5.js.map",
     "787.c1112931.chunk.js.map": "/dnamusic/static/js/787.c1112931.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5ec920f7.css",
-    "static/js/main.3e805cf2.js"
+    "static/css/main.d7fb79e1.css",
+    "static/js/main.321562c5.js"
   ]
 }
