@@ -6,7 +6,9 @@ export const SequenceBoundsSlider = ({
   sequence,
   selectedSequence,
   sequenceRef,
-  boundsRef
+  boundsRef,
+  setShowHelp,
+  setHelpMessage,
 }) => {
   return <div>
     <div className="relative text-[#888] w-full m-auto">
@@ -35,8 +37,18 @@ export const SequenceBoundsSlider = ({
         </p>
       </div>
       <div className="absolute flex justify-center right-[1rem] left-[1rem] top-[-1rem]">
-        <p className="text-[0.8rem]">
-          Sequence: {selectedSequence ? `${selectedSequence.name} – ${selectedSequence.description}` : ''}
+        <p className="text-[0.8rem] cursor-pointer sequence-button"
+          onClick={()=> {
+            const helpMessage = {
+              name: 'Current DNA sequence: ' + selectedSequence.name,
+              description: selectedSequence.description,
+            }
+            
+            setShowHelp(true)
+            setHelpMessage(helpMessage)
+          }}
+        >
+          Sequence: {selectedSequence ? `${selectedSequence.name}` : ''}
         </p>
       </div>
       <div className="mt-[1.2rem]">

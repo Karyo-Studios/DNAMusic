@@ -29,6 +29,7 @@ export const SequencerSettings = ({
   setShowControls,
   activeNotes,
   setShowControlsTransition,
+  setShowHelp,
 }) => {
   return (
     <div className="flex z-[9999]">
@@ -70,37 +71,39 @@ export const SequencerSettings = ({
                   })}
                 </div>
               )}
-              <div className="leading-[1rem] text-[#888] w-[3rem] text-center"
-                style={{ marginLeft: showControls ? '0rem' : '0.5rem' }}
-              >
-                <p className="text-[0.7rem]">BPM</p>
-                <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{bpm / 2}</p>
-              </div>
-              <div className="rounded-[0.25rem]"
-                style={{
-                  width: showControls ? '8rem' : '10rem',
-                  marginRight: showControls ? '0rem' : '1.25rem',
-                }}
-              >
-                <ReactSlider
-                  className={showControls ? 'tempo-slider' : 'tempo-slider expanded'}
-                  thumbClassName={showControls ? 'tempo-thumb' : 'tempo-thumb expanded'}
-                  trackClassName={showControls ? 'tempo-track' : 'tempo-track expanded'}
-                  min={60}
-                  max={300}
-                  step={1}
-                  value={bpm}
-                  onChange={(value) => {
-                    updateTempo(value);
+              <div className="flex mr-[2rem] items-center">
+                <div className="leading-[1rem] text-[#888] w-[3rem] text-center"
+                  style={{ marginLeft: showControls ? '0rem' : '0.5rem' }}
+                >
+                  <p className="text-[0.7rem]">BPM</p>
+                  <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{bpm / 2}</p>
+                </div>
+                <div className="rounded-[0.25rem]"
+                  style={{
+                    width: showControls ? '8rem' : '10rem',
+                    marginRight: showControls ? '0rem' : '1.25rem',
                   }}
-                ></ReactSlider>
+                >
+                  <ReactSlider
+                    className={showControls ? 'tempo-slider' : 'tempo-slider expanded'}
+                    thumbClassName={showControls ? 'tempo-thumb' : 'tempo-thumb expanded'}
+                    trackClassName={showControls ? 'tempo-track' : 'tempo-track expanded'}
+                    min={60}
+                    max={300}
+                    step={1}
+                    value={bpm}
+                    onChange={(value) => {
+                      updateTempo(value);
+                    }}
+                  ></ReactSlider>
+                </div>
               </div>
               {
-                showControls && <div className="flex items-center">
+                showControls && <div className="flex items-center mr-[1rem]">
                   <div className="leading-[1rem] px-1 ml-[0.5rem] text-[#888] text-center">
-                    <p className="text-[0.7rem]">STEP</p>
+                    <p className="text-[0.7rem]">METER</p>
                     <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
-                      {masterSteps}
+                      {masterSteps}/4
                     </p>
                   </div>
                   <SwitchButton
@@ -149,28 +152,6 @@ export const SequencerSettings = ({
                   />
                 </div>
               }
-              {
-                showControls && <div className="flex items-center mr-[1rem]">
-                  <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
-                    <p className="text-[0.7rem]">KEY</p>
-                    <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
-                      {noteOffset}
-                    </p>
-                  </div>
-                  <SwitchButton
-                    leftOnClick={() =>
-                      setNoteOffset(noteOffset > -12 ? noteOffset - 1 : noteOffset)
-                    }
-                    rightOnClick={() =>
-                      setNoteOffset(noteOffset < 12 ? noteOffset + 1 : noteOffset)
-                    }
-                    leftText={"-"}
-                    rightText={"+"}
-                  />
-
-                </div>
-
-              }
             </div>
 
             {
@@ -200,6 +181,7 @@ export const SequencerSettings = ({
             <button
               className="bg-[#232323] hover:bg-[#353535] w-[3.5rem] text-[1.2rem]"
               onClick={() => {
+                setShowHelp(false);
                 setShowControls(!showControls);
                 setShowControlsTransition(true);
                 setTimeout(() => {
