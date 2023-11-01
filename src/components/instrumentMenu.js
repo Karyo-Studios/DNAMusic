@@ -16,12 +16,12 @@ export const InstrumentMenu = ({
 }) => {
   const p = playheads[selectedPlayhead]
   return <div className="w-[16.5rem] px-[0.5rem]">
-    <div className="w-full my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-center text-[0.8rem] select-none uppercase text-[#fff]"
+    <div className="w-full my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-left text-[0.8rem] select-none uppercase text-[#fff]"
       style={{
         // backgroundColor: p.color,
       }}
     >
-      Playhead {selectedPlayhead + 1}
+      Playhead {selectedPlayhead + 1}: <span><u>{p.preset}</u></span>
     </div>
     <div className="flex">
       <div className=" flex">
@@ -106,13 +106,13 @@ export const InstrumentMenu = ({
                     <div className="w-full text-center">
             {p.midiEnabled ?
               <div className="w-full text-center">
-                <div className=" mt-[0.25rem] py-[0.25rem] px-[1rem] rounded-[0.25rem] text-[0.8rem] text-[#aaa]">
-                  midi chan = {selectedPlayhead + 1}
+                <div className="py-[0.25rem] px-[1rem] rounded-[0.25rem] text-[0.8rem] text-[#aaa]">
+                  midi channel = {selectedPlayhead + 1}
                 </div>
               </div>
               :
               <button
-                className="hidden w-full mt-[0.25rem] hover:bg-[#444] py-[0.25rem] px-[1rem] rounded-[0.25rem] text-[0.8rem]"
+                className="hidden w-full mt-[0.25rem] hover:bg-[#444] px-[1rem] rounded-[0.25rem] text-[0.8rem]"
                 onClick={() => {
                   const presetIndex = Math.floor(Math.random() * presetMappings.length)
                   updatePlayer(
@@ -212,22 +212,22 @@ export const InstrumentMenu = ({
           </div>
           <div className="flex items-center justify-between mb-[0.5rem]">
             <p className="text-[#888] text-[0.8rem] select-none uppercase">
-              Period
+              Speed
             </p>
             <SpeedToggle
               leftOnClick={() => {
                 updatePlayhead(selectedPlayhead, {
                   ...p,
-                  interval: p.interval > 1 ? p.interval - 1 : p.interval,
+                  interval: p.interval + 1,
                 });
               }}
               rightOnClick={() => {
                 updatePlayhead(selectedPlayhead, {
                   ...p,
-                  interval: p.interval + 1,
+                  interval: p.interval > 1 ? p.interval - 1 : p.interval,
                 });
               }}
-              value={`${p.interval}`}
+              value={`${(1 / (p.interval/4)).toFixed(1)}`}
             />
           </div>
           <div className="flex items-center justify-between mb-[0.5rem]">
@@ -245,11 +245,11 @@ export const InstrumentMenu = ({
                 }}
               >
               </button>
-              <div className={`bg-[#393939] h-[1.85rem] hover:bg-[#444] p-1 w-[3rem] rounded-[0.25rem] relative`} style={{ cursor: 'pointer' }}>
+              <div className={`bg-[#393939] h-[1.5rem] hover:bg-[#444] p-1 w-[2.5rem] rounded-[0.25rem] relative`} style={{ cursor: 'pointer' }}>
                 <div
-                  className={'absolute w-[1.2rem] h-[1.35rem] rounded-[0.4rem] transition-translate'}
+                  className={'absolute w-[1rem] h-[1rem] rounded-[0.2rem] transition-translate'}
                   style={{
-                    left: p.midiEnabled ? '1.5rem' : '0.25rem',
+                    left: p.midiEnabled ? '1.3rem' : '0.25rem',
                     transitionDuration: '100ms',
                     backgroundColor: '#aaa'
                   }}

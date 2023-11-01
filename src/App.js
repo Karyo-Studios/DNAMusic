@@ -15,8 +15,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 
 import FPSStats from "react-fps-stats";
 
-import Markdown from "react-markdown";
-
 import { WebAudioFontPlayer } from "./soundfonts/WebAudioFont"; // exportable version of https://surikov.github.io/webaudiofont/
 import { enableWebMidi, WebMidi, getDevice } from "./webmidi";
 
@@ -30,7 +28,6 @@ import { updateEuclid } from "./playhead";
 
 import { presetMappings } from "./soundfonts";
 
-import { PlayheadButtons } from "./components/playheadButtons";
 import { PlayheadsView } from "./components/playheadsView";
 import { SequenceInput } from "./components/sequenceInput";
 import { VisualizerSequence } from "./components/visualizerSequence";
@@ -40,6 +37,7 @@ import { VisualizerMappings } from "./components/visualizerMappings";
 import { InstrumentMenu } from "./components/instrumentMenu";
 import { SequencerSettings } from "./components/sequencerSettings";
 import { PresetMenu } from "./components/presetMenu";
+import { ConsoleWindow } from "./components/consoleWindow";
 
 import { noteMappings } from "./mappings";
 import {
@@ -82,6 +80,7 @@ function App() {
   const [showSequenceAbove, setShowSequenceAbove] = useState(false);
 
   const [showHelp, setShowHelp] = useState(false);
+  const [helpIndex, setHelpIndex] = useState(0);
   const [helpMessage, setHelpMessage] = useState({
     name: "",
     description: "",
@@ -557,11 +556,11 @@ function App() {
     );
     setActiveSequence(snippet);
     setActiveNodes(nodeSnippet);
-    if (showOnlyActive) {
-      const newZoom = mapN(length, 18, 300, 1, 0.6);
+    if (showEntireSequence) {
+      const newZoom = mapN(sequence.length, 18, 300, 0.95, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     } else {
-      const newZoom = mapN(sequence.length, 18, 300, 1, 0.6);
+      const newZoom = mapN(sequence.length, 18, 300, 0.95, 0.6);
       setZoom(newZoom < 0.4 ? 0.4 : newZoom);
     }
   }, [sequenceBounds, showOnlyActive]);
@@ -797,52 +796,18 @@ function App() {
             );
           })}
         </div>
-        {
-          showHelp && !showControls &&
-          <div className="mx-auto w-[60rem]">
-            <div className="relative w-full h-full max-w-[30rem] h-[10rem]"
-              style={{
-                border: '1px white solid',
-                backgroundColor: 'rgba(255,255,255,0.1)'
-              }}
-            >
-              <div className="overflow-y-scroll h-[9.8rem] pl-[0.75rem] pr-[3rem] py-[0.5rem]">
-                <p className="mb-[0.25rem]">{helpMessage.name}</p>
-                {helpMessage.description && (
-                  <Markdown>{helpMessage.description}</Markdown>
-                )}
-                {helpMessage.img && (
-                  <div className="bg-[#eee] p-[0.5rem] rounded-[0.25rem] relative max-w-[15rem]">
-                    <img className="w-auto m-auto" src={helpMessage.img}
-                      style={{
-                        height: helpMessage.imgHeight ? helpMessage.imgHeight : '6rem'
-                      }}
-                    ></img>
-                    <div className="w-full h-[7rem] m-auto absolute top-0 left-0 z-[999]"
-                      style={{
-                        mixBlendMode: 'difference'
-                      }}
-                    >
-                    </div>
-                  </div>
-                )}
-                {helpMessage.source && (
-                  <a target="_blank" href={helpMessage.source}>
-                    <p className="underline text-[0.8rem]">learn more</p>
-                  </a>
-                )}
-              </div>
-              <button
-                className="uppercase text-[0.8rem] absolute bottom-[0.75rem] right-[0.5rem] z-[99]"
-                onClick={() => {
-                  setShowHelp(false);
-                }}
-              >
-                close
-              </button>
-            </div>
-          </div>
-        }
+        <div className="mx-auto w-[60rem] h-[13rem]">
+          {
+            showHelp && !showControls &&
+            <ConsoleWindow
+              helpMessage={helpMessage}
+              setShowHelp={setShowHelp}
+              helpIndex={helpIndex}
+              setHelpIndex={setHelpIndex}
+              embedded={false}
+            />
+          }
+        </div>
       </div>
       <div>
         <div
@@ -921,16 +886,8 @@ function App() {
           />
         </div>
       </div>
-      <div
-      // className="relative"
-      //   style={{
-      //   // height: "100vh", minHeight: "700px"
-      //   height: '50rem'
-      // }}
-      >
+      <div>
         <div className="text-[0.9rem] relative max-w-[60rem] mx-auto pb-[0.5rem] overflow-y-hidden">
-          {/* <div className="text-[0.9rem] absolute bottom-[0] left-[0] right-[0] max-w-[60rem] mx-auto pb-[0.5rem] overflow-y-hidden"> */}
-          {/* <div className="absolute bottom-[0] left-[0] right-[0] z-[88]"> */}
           <div>
             {showEntireSequence && (
               <div className="w-[40rem] mx-auto">
@@ -941,6 +898,8 @@ function App() {
                   sequence={sequence}
                   sequenceRef={sequenceRef}
                   boundsRef={boundsRef}
+                  setShowHelp={setShowHelp}
+                  setHelpMessage={setHelpMessage}
                 />
               </div>
             )}
@@ -973,19 +932,29 @@ function App() {
             )}
             <div
               style={{
-                height: showControls ? "15.8rem" : "3.2rem",
+                height: showControls ? "15rem" : "3.7rem",
                 transitionDuration: "200ms",
               }}
             >
-              <div className="flex justify-center mx-auto">
+              <div className="flex justify-center mx-auto h-full relative">
                 {
                   showControls &&
                   <div
-                    className="w-[16.5rem] relative"
+                    className="w-[16.5rem] relative h-[15rem]"
                     style={{
                       border: '1px white solid'
                     }}
                   >
+                    {
+                      showControls && showHelp &&
+                      <ConsoleWindow
+                        helpMessage={helpMessage}
+                        setShowHelp={setShowHelp}
+                        helpIndex={helpIndex}
+                        setHelpIndex={setHelpIndex}
+                        embedded={true}
+                      />
+                    }
                     <ConsoleSelectButtons
                       setMenu={setMenu}
                       menu={menu}
@@ -1002,10 +971,6 @@ function App() {
                           counters={counters}
                           activeNodes={activeNodes}
                           playheadCount={playheadCount}
-                          showHelp={showHelp}
-                          helpMessage={helpMessage}
-                          setShowHelp={setShowHelp}
-                          showControls={showControls}
                         />
                       </div>
                     ) : menu === 1 ? (
@@ -1027,6 +992,7 @@ function App() {
                           setPlayheads={setPlayheads}
                           updateTempo={updateTempo}
                           setMasterSteps={setMasterSteps}
+                          noteOffset={noteOffset}
                           setNoteOffset={setNoteOffset}
                           updatePlayhead={updatePlayhead}
                         />
@@ -1035,12 +1001,12 @@ function App() {
                   </div>
                 }
                 <div
-                  className={`
-                    w-[37.5rem] 
+                  className={` 
                     relative ml-[0.5rem]
                     `}
                   style={{
                     border: "1px white solid",
+                    width: showControls ? '32rem' : '40rem'
                   }}
                 >
                   <SequencerSettings
@@ -1068,6 +1034,7 @@ function App() {
                     updatePlayhead={updatePlayhead}
                     activeNotes={activeNoteRefs}
                     setShowControlsTransition={setShowControlsTransition}
+                    setShowHelp={setShowHelp}
                   />
                   <div className="flex">
                     <PlayheadsView
@@ -1076,24 +1043,17 @@ function App() {
                       playing={playing}
                       ticker={ticker}
                       masterSteps={masterSteps}
+                      counter={counter}
                       counters={counters}
                       playheadCount={playheadCount}
                       width={width}
                       activeNotes={activeNoteRefs}
                       selectedPlayhead={selectedPlayhead}
-                      setSelectedPlayhead={setSelectedPlayhead}
-                      setMenu={setMenu}
-                    />
-                    <PlayheadButtons
-                      playheads={playheads}
-                      updatePlayhead={updatePlayhead}
-                      playheadCount={playheadCount}
                       setPlayheadCount={setPlayheadCount}
-                      counter={counter}
-                      playing={playing}
-                      setMenu={setMenu}
-                      selectedPlayhead={selectedPlayhead}
                       setSelectedPlayhead={setSelectedPlayhead}
+                      showControls={showControls}
+                      setMenu={setMenu}
+                      setShowHelp={setShowHelp}
                     />
                   </div>
                 </div>

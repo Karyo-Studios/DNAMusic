@@ -5,6 +5,8 @@ import { generatePattern } from "../helpers";
 
 import { RemixButton } from "./remixButton";
 
+import { SwitchButton } from "./switchButton";
+
 export const PresetMenu = ({
   playheads,
   updatePlayer,
@@ -12,6 +14,7 @@ export const PresetMenu = ({
   updateTempo,
   setMasterSteps,
   setNoteOffset,
+  noteOffset,
 }) => {
   const updatePlayheads = (preset) => {
     let updated = [];
@@ -45,13 +48,13 @@ export const PresetMenu = ({
         <p className="text-left">NAME</p>
         <p className="text-right">AUTHOR</p>
       </div>
-      <div className="h-[8.5rem] overflow-y-scroll w-full bg-[#222]"
-      style={{
-        border: '1px white solid'
-      }}
+      <div className="h-[8rem] overflow-y-scroll w-full bg-[#222]"
+        style={{
+          border: '1px white solid'
+        }}
       >
-        <div className="flex flex-wrap mx-auto h-[7rem]"
-          >
+        <div className="flex flex-wrap mx-auto h-[6rem]"
+        >
           {factoryPresets.map((preset, index) => {
             return (
               <div className="bg-[#181818]">
@@ -81,21 +84,41 @@ export const PresetMenu = ({
           })}
         </div>
       </div>
-      <div className="flex w-[100%] px-[0.5rem] pt-[0.25rem] text-center pb-[0.25rem] uppercase text-[0.8rem] select-none">
-        <p className="text-[#888] ">Randomize:</p>
-        <button className="text-[#fff] ml-[1rem]"
-          onClick={() =>
-            generatePattern({
-              playheads,
-              updateTempo,
-              setNoteOffset,
-              setMasterSteps,
-              setPlayheads,
-            })
-          }
-        >
-          Patterns
-        </button>
+      <div className="flex justify-between w-[100%] px-[0.5rem] pt-[0.25rem] text-left pb-[0.25rem] uppercase text-[0.8rem] select-none">
+        <div>
+          <button className="text-[#fff] bg-[#232323] hover:bg-[#353535] py-[0.25rem] px-2 text-left rounded-[0.25rem]"
+            onClick={() =>
+              generatePattern({
+                playheads,
+                updateTempo,
+                setNoteOffset,
+                setMasterSteps,
+                setPlayheads,
+              })
+            }
+          >
+            Randomize!
+          </button>
+        </div>
+        <div className="flex items-center">
+          <div className="leading-[1rem] ml-[0.25rem] px-2 text-[#888] text-center">
+            <p className="text-[0.7rem]">KEY</p>
+            <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">
+              {noteOffset}
+            </p>
+          </div>
+          <SwitchButton
+            leftOnClick={() =>
+              setNoteOffset(noteOffset > -12 ? noteOffset - 1 : noteOffset)
+            }
+            rightOnClick={() =>
+              setNoteOffset(noteOffset < 12 ? noteOffset + 1 : noteOffset)
+            }
+            leftText={"-"}
+            rightText={"+"}
+          />
+
+        </div>
       </div>
     </div>
   );
