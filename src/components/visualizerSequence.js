@@ -158,7 +158,7 @@ export const VisualizerSequence = ({
                     (
                       <div className="relative">
                         <div
-                          className={`absolute opacity-[0] ${showDetails ? 'hover:opacity-[0.8]' : 'hover:opacity-[1]'} z-[99] cursor-pointer`}
+                          className={`absolute opacity-[0] ${showDetails ? 'hover:opacity-[0.8]' : 'hover:opacity-[1]'} z-[9] cursor-pointer`}
                           style={{
                             left: boxScale * ((1 - boxScale) / 2) - boxSide,
                             width: boxSide * 2.95,

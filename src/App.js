@@ -764,7 +764,7 @@ function App() {
             <div>
               <div>
                 <p className="mt-[1.5rem] text-[0.9rem] text-left">
-                DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.  
+                DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.  
                 </p>
                 <div className="flex flex-col items-center">
                   <div>
