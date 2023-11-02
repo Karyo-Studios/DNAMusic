@@ -184,6 +184,12 @@ textarea:focus, input:focus{
   text-decoration: underline;
 }
 
+/* about page */
+
+.about-page a {
+  text-decoration: underline;
+}
+
 /* blobs */
 
 .blobs path,

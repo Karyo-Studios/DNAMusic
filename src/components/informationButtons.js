@@ -5,7 +5,9 @@ export const InformationButtons = ({
   setHelpMessage,
   setMenu,
   setShowHelp,
-  helpIndex
+  helpIndex,
+  setHelpIndex,
+  setShowIntroductionFlow,
 }) => {
   return <div className="overflow-x-hidden"
   >
@@ -15,12 +17,16 @@ export const InformationButtons = ({
           return (
             <button
               onClick={() => {
-                setHelpMessage(intro);
-                setMenu(0);
-                setShowHelp(true);
+                if (index === helpIndex) {
+                  setHelpMessage(intro);
+                  setMenu(0);
+                  setShowHelp(true);
+                  setHelpIndex(index);
+                  setShowIntroductionFlow(true);
+                }
               }}
               key={index}
-              className={`py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${helpIndex === index && "active"
+              className={`${index !== helpIndex && 'select-none'} py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${helpIndex === index && "active"
                 }`}
             >
               {index + 1}: {intro.name}

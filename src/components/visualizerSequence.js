@@ -25,6 +25,7 @@ export const VisualizerSequence = ({
   setMenu,
   showSequenceAbove,
   showControlsTransition,
+  setShowIntroductionFlow,
 }) => {
   // boxSide x amount =
 
@@ -198,6 +199,7 @@ export const VisualizerSequence = ({
                             }
                             setMenu(0)
                             setShowHelp(true)
+                            setShowIntroductionFlow(false)
                             setHelpMessage(
                               helpMessage
                             )

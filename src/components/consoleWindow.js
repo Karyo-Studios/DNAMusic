@@ -8,8 +8,9 @@ export const ConsoleWindow = ({
   setShowHelp,
   helpIndex,
   setHelpIndex,
-  embedded,
-}) => {
+  embedded, // styling for when the console is in the control panel
+  showIntroductionFlow
+}) => {  
   return <div className="absolute w-full h-full z-[9999]">
     <div className="relative w-full h-full max-w-[30rem] flex-col justify-between"
       style={{
@@ -50,8 +51,8 @@ export const ConsoleWindow = ({
       </div>
       <div className="absolute w-full"
         style={{
-          borderTop: embedded ? 'none' : '1px white solid',
-          borderBottom: !embedded ? 'none' : '1px white solid',
+          borderTop: !showIntroductionFlow ? 'none' : embedded ? 'none' : '1px white solid',
+          borderBottom: !showIntroductionFlow ? 'none' : !embedded ? 'none' : '1px white solid',
           top: embedded ? '0px' : 'initial',
           bottom: embedded ? 'initial' : '0px',
         }}
@@ -59,7 +60,7 @@ export const ConsoleWindow = ({
         <div className="flex justify-between">
           <div className="flex items-center">
             <button
-              className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              className={`${!showIntroductionFlow ? 'hidden' : ''} console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]`}
               style={{borderRight: '1px white solid'}}
               onClick={() => {
                 const newIndex = helpIndex > 0 ? helpIndex - 1 : helpIndex;
@@ -71,7 +72,7 @@ export const ConsoleWindow = ({
               Previous
             </button>
             <button
-              className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              className={`${!showIntroductionFlow ? 'hidden' : ''} console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]`}
               style={{borderRight: '1px white solid'}}
               onClick={() => {
                 const newIndex = helpIndex < helpMessages.introduction.length - 1 ? helpIndex + 1 : helpIndex;
@@ -85,7 +86,11 @@ export const ConsoleWindow = ({
           </div>
           <button
             className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
-            style={{borderLeft: '1px white solid'}}
+            style={{
+              borderLeft: '1px white solid',
+              borderBottom: !showIntroductionFlow && embedded ? '1px white solid' : 'none',
+              borderTop: !showIntroductionFlow && !embedded ? '1px white solid' : 'none',
+            }}
             onClick={() => {
               setShowHelp(false);
             }}

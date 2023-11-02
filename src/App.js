@@ -63,6 +63,7 @@ function App() {
   const [userModeSelect, setUserModeSelect] = useState(0);
 
   const [showIntroduction, setShowIntroduction] = useState(true);
+  const [showAbout, setShowAbout] = useState(false);
 
   const [showControls, setShowControls] = useState(false);
   const [showControlsTransition, setShowControlsTransition] = useState(false);
@@ -73,6 +74,8 @@ function App() {
   }, showControlsTransition);
 
   const [showSequenceAbove, setShowSequenceAbove] = useState(false);
+
+  const [showIntroductionFlow, setShowIntroductionFlow] = useState(false);
 
   const [showHelp, setShowHelp] = useState(false);
   const [helpIndex, setHelpIndex] = useState(0);
@@ -125,8 +128,8 @@ function App() {
   const calculatedHeight =
     window.innerHeight -
     (window.innerWidth < 1300
-      ? (showControls ? 18 : 7.5) * 20
-      : (showControls ? 22 : 9) * 20);
+      ? (showControls ? 16 : 7.5) * 20
+      : (showControls ? 20 : 9) * 20);
   // const calculatedHeight =
   //   window.innerHeight - (window.innerWidth < 1300 ? 16 * 20 : 20 * 20);
   const width = window.innerWidth < 1300 ? 1000 : 1200;
@@ -614,7 +617,7 @@ function App() {
           onClick={() => {
             getAudioContext();
           }}
-          className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[9999] flex items-center"
+          className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999999] flex items-center"
         >
           <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
             style={{ border: '1px white solid' }}
@@ -747,6 +750,43 @@ function App() {
           </div>
         </div>
       )}
+      {
+        showAbout && <div
+          onClick={() => {
+            getAudioContext();
+          }}
+          className="visible about-page fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999999] flex items-center"
+        >
+          <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
+            style={{ border: '1px white solid' }}
+          >
+            <h3 className="text-[1.4rem]">About</h3>
+            <div>
+              <div>
+                <p className="mt-[1.5rem] text-[0.9rem] text-left">
+                DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.  
+                </p>
+                <div className="flex flex-col items-center">
+                  <div>
+                  </div>
+                  <button
+                    className="mt-3 absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
+                    style={{
+                      cursor: userSequence.length > 0 ? "pointer" : "initial",
+                      opacity: userSequence.length > 0 ? 1 : 0.5,
+                    }}
+                    onClick={() => {
+                      setShowAbout(false)
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
       <div className="absolute w-[100%] z-[1]">
         <div style={{ borderBottom: "1px solid #fff" }}>
           <div className="mx-auto py-[1rem] w-[60rem]">
@@ -756,9 +796,9 @@ function App() {
               </div>
               <div className="flex">
                 <button onClick={() => {
-                  setShowIntroduction(!showIntroduction)
+                  setShowAbout(!showAbout)
                 }} className="mr-[1rem]">
-                  <h3>{!showIntroduction ? 'learn' : 'hide'}</h3>
+                  <h3>about</h3>
                 </button>
                 <button
                   onClick={() => {
@@ -774,7 +814,7 @@ function App() {
           </div>
         </div>
         {
-          !showControls &&
+          true &&
           <div className="mx-auto"
             style={{
               width: '39.5rem',
@@ -786,6 +826,8 @@ function App() {
               setMenu={setMenu}
               setShowHelp={setShowHelp}
               helpIndex={helpIndex}
+              setHelpIndex={setHelpIndex}
+              setShowIntroductionFlow={setShowIntroductionFlow}
             />
             <div className="w-full relative h-[15rem]">
               {
@@ -797,6 +839,7 @@ function App() {
                   helpIndex={helpIndex}
                   setHelpIndex={setHelpIndex}
                   embedded={false}
+                  showIntroductionFlow={showIntroductionFlow}
                 />
               }
             </div>
@@ -859,6 +902,7 @@ function App() {
             setMenu={setMenu}
             showSequenceAbove={!showEntireSequence}
             showControlsTransition={showControlsTransition}
+            setShowIntroductionFlow={setShowIntroductionFlow}
           />
           <VisualizerPlayheads
             playing={playing}
@@ -926,12 +970,12 @@ function App() {
             )}
             <div
               style={{
-                height: showControls ? "17rem" : "3.7rem",
+                height: showControls ? "15rem" : "3.7rem",
                 transitionDuration: "200ms",
               }}
             >
               {
-                showControls &&
+                false &&
                 <div className="mx-auto"
                   style={{
                     width: '49rem',
@@ -942,6 +986,8 @@ function App() {
                     setMenu={setMenu}
                     setShowHelp={setShowHelp}
                     helpIndex={helpIndex}
+                    setHelpIndex={setHelpIndex}
+                    setShowIntroductionFlow={setShowIntroductionFlow}
                   />
                 </div>
               }
@@ -963,6 +1009,7 @@ function App() {
                         helpIndex={helpIndex}
                         setHelpIndex={setHelpIndex}
                         embedded={true}
+                        showIntroductionFlow={showIntroductionFlow}
                       />
                     }
                     <ConsoleSelectButtons
