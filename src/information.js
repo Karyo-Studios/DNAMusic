@@ -7,7 +7,7 @@ export const helpMessages = {
     },
     {
       name: 'How is DNA Read?',
-      description: 'The order of these nucleotides are super important. They form the instructions. To read these instructions, DNA is grouped into sets of three nucleotides, which are called codons. For example, "ATG" is a codon.',
+      description: 'The order of these nucleotides is very important. They form the instructions. To read these instructions, DNA is grouped into sets of three nucleotides, which are called codons. For example, "ATG" is a codon.',
     },
     {
       name: 'What is a Codon?',
@@ -26,12 +26,6 @@ O = - - - (No corresponding amino acid)
 
 This gives us a DNA sequence: CAT, GAG, CTA, CTG
                 `,
-    },
-    {
-      name: '',
-      description: 'This diagram shows all of the mappings between codons and amino acids.',
-      img: "./assets/codon_wheel.png",
-      imgHeight: '13rem',
     },
     {
       name: 'What is DNA Sonification?',

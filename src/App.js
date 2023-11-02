@@ -37,6 +37,7 @@ import { VisualizerMappings } from "./components/visualizerMappings";
 import { InstrumentMenu } from "./components/instrumentMenu";
 import { SequencerSettings } from "./components/sequencerSettings";
 import { PresetMenu } from "./components/presetMenu";
+import { InformationButtons } from "./components/informationButtons";
 import { ConsoleWindow } from "./components/consoleWindow";
 
 import { noteMappings } from "./mappings";
@@ -61,13 +62,7 @@ function App() {
 
   const [userModeSelect, setUserModeSelect] = useState(0);
 
-  // modes
-  // 0 = phrase
-  // 1 = melodies
-  // 2 = entire sequence
-
   const [showIntroduction, setShowIntroduction] = useState(true);
-  const [introductionIndex, setIntroductionIndex] = useState(0);
 
   const [showControls, setShowControls] = useState(false);
   const [showControlsTransition, setShowControlsTransition] = useState(false);
@@ -130,8 +125,8 @@ function App() {
   const calculatedHeight =
     window.innerHeight -
     (window.innerWidth < 1300
-      ? (showControls ? 16 : 8) * 20
-      : (showControls ? 20 : 10) * 20);
+      ? (showControls ? 18 : 7.5) * 20
+      : (showControls ? 22 : 9) * 20);
   // const calculatedHeight =
   //   window.innerHeight - (window.innerWidth < 1300 ? 16 * 20 : 20 * 20);
   const width = window.innerWidth < 1300 ? 1000 : 1200;
@@ -778,36 +773,35 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="mx-auto w-[60rem]">
-          {showIntroduction && helpMessages.introduction.map((intro, index) => {
-            return (
-              <button
-                onClick={() => {
-                  setHelpMessage(intro);
-                  setMenu(0);
-                  setShowHelp(true);
-                }}
-                key={index}
-                className={`py-[0.5rem] px-[0.5rem] text-[0.8rem] intro-title ${introductionIndex === index && "active"
-                  }`}
-              >
-                {index + 1}: {intro.name}
-              </button>
-            );
-          })}
-        </div>
-        <div className="mx-auto w-[60rem] h-[13rem]">
-          {
-            showHelp && !showControls &&
-            <ConsoleWindow
-              helpMessage={helpMessage}
+        {
+          !showControls &&
+          <div className="mx-auto"
+            style={{
+              width: '39.5rem',
+            }}
+          >
+            <InformationButtons
+              showIntroduction={showIntroduction}
+              setHelpMessage={setHelpMessage}
+              setMenu={setMenu}
               setShowHelp={setShowHelp}
               helpIndex={helpIndex}
-              setHelpIndex={setHelpIndex}
-              embedded={false}
             />
-          }
-        </div>
+            <div className="w-full relative h-[15rem]">
+              {
+                showHelp && !showControls &&
+                <ConsoleWindow
+                  helpMessage={helpMessage}
+                  setHelpMessage={setHelpMessage}
+                  setShowHelp={setShowHelp}
+                  helpIndex={helpIndex}
+                  setHelpIndex={setHelpIndex}
+                  embedded={false}
+                />
+              }
+            </div>
+          </div>
+        }
       </div>
       <div>
         <div
@@ -932,10 +926,25 @@ function App() {
             )}
             <div
               style={{
-                height: showControls ? "15rem" : "3.7rem",
+                height: showControls ? "17rem" : "3.7rem",
                 transitionDuration: "200ms",
               }}
             >
+              {
+                showControls &&
+                <div className="mx-auto"
+                  style={{
+                    width: '49rem',
+                  }}>
+                  <InformationButtons
+                    showIntroduction={showIntroduction}
+                    setHelpMessage={setHelpMessage}
+                    setMenu={setMenu}
+                    setShowHelp={setShowHelp}
+                    helpIndex={helpIndex}
+                  />
+                </div>
+              }
               <div className="flex justify-center mx-auto h-full relative">
                 {
                   showControls &&
@@ -949,6 +958,7 @@ function App() {
                       showControls && showHelp &&
                       <ConsoleWindow
                         helpMessage={helpMessage}
+                        setHelpMessage={setHelpMessage}
                         setShowHelp={setShowHelp}
                         helpIndex={helpIndex}
                         setHelpIndex={setHelpIndex}

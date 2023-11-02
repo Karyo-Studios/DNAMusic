@@ -1,22 +1,26 @@
 import Markdown from "react-markdown";
 
+import { helpMessages } from "../information";
+
 export const ConsoleWindow = ({
   helpMessage,
+  setHelpMessage,
   setShowHelp,
   helpIndex,
   setHelpIndex,
   embedded,
 }) => {
-  return <div className="absolute w-full h-full">
-    <div className="relative w-full h-full max-w-[30rem] z-[99999] flex-col justify-between"
+  return <div className="absolute w-full h-full z-[9999]">
+    <div className="relative w-full h-full max-w-[30rem] flex-col justify-between"
       style={{
         border: '1px white solid',
-        backgroundColor: embedded ? '#181818' : 'rgba(50,50,50,0.1)',
+        backgroundColor: embedded ? '#181818' : 'rgba(30,30,30,0.4)',
       }}
     >
       <div className="overflow-y-scroll pl-[0.75rem] pr-[3rem] py-[0.5rem] pb-[3rem]"
         style={{
-          height: 'calc(100% - 2rem)'
+          height: 'calc(100% - 2rem)',
+          marginTop: embedded ? '2rem' : '0',
         }}
       >
         <p className="mb-[0.25rem]">{helpMessage.name}</p>
@@ -44,26 +48,44 @@ export const ConsoleWindow = ({
           </a>
         )}
       </div>
-      <div className="absolute bottom-0 w-full"
+      <div className="absolute w-full"
         style={{
-          borderTop: '1px white solid',
+          borderTop: embedded ? 'none' : '1px white solid',
+          borderBottom: !embedded ? 'none' : '1px white solid',
+          top: embedded ? '0px' : 'initial',
+          bottom: embedded ? 'initial' : '0px',
         }}
         >
         <div className="flex justify-between">
           <div className="flex items-center">
             <button
-              className="uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              style={{borderRight: '1px white solid'}}
+              onClick={() => {
+                const newIndex = helpIndex > 0 ? helpIndex - 1 : helpIndex;
+                console.log(newIndex)
+                setHelpIndex(newIndex)
+                setHelpMessage(helpMessages.introduction[newIndex])
+              }}
             >
               Previous
             </button>
             <button
-              className="uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+              style={{borderRight: '1px white solid'}}
+              onClick={() => {
+                const newIndex = helpIndex < helpMessages.introduction.length - 1 ? helpIndex + 1 : helpIndex;
+                console.log(newIndex)
+                setHelpIndex(newIndex)
+                setHelpMessage(helpMessages.introduction[newIndex])
+              }}
             >
               Next
             </button>
           </div>
           <button
-            className="uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+            className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
+            style={{borderLeft: '1px white solid'}}
             onClick={() => {
               setShowHelp(false);
             }}

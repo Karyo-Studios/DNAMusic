@@ -168,6 +168,10 @@ textarea:focus, input:focus{
   background-color: rgba(255,255,255,0.2);
 }
 
+.console-button:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
 .sequence-button {
     padding: 0.25rem 0.25rem;
     margin-top: -0.5rem;
