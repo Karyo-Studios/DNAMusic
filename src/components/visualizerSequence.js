@@ -80,7 +80,7 @@ export const VisualizerSequence = ({
         width: width,
         height: height,
         transitionDuration: showControlsTransition ? '200ms' : 0,
-        // transitionDuration: 0
+        // transitionDuration: 0,
       }}
     >
       <div>
@@ -90,6 +90,7 @@ export const VisualizerSequence = ({
             width: width,
             height: height,
             transitionDuration: showControlsTransition ? '200ms' : 0,
+            zIndex: 0,
             // transitionDuration: 0
           }}
         >
@@ -158,7 +159,7 @@ export const VisualizerSequence = ({
                     (
                       <div className="relative">
                         <div
-                          className={`absolute opacity-[0] ${showDetails ? 'hover:opacity-[0.8]' : 'hover:opacity-[1]'} z-[9] cursor-pointer`}
+                          className={`absolute opacity-[0] ${showDetails ? 'hover:opacity-[0.8]' : 'hover:opacity-[1]'}  cursor-pointer`}
                           style={{
                             left: boxScale * ((1 - boxScale) / 2) - boxSide,
                             width: boxSide * 2.95,
@@ -166,6 +167,7 @@ export const VisualizerSequence = ({
                             borderRadius: zoom * 5,
                             backgroundColor: '#fff',
                             lineHeight: `${boxSide * boxAspect}px`,
+                            zIndex: 999,
                           }}
                           onClick={() => {
                             const note = getNote(Math.floor(index / 3))

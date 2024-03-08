@@ -42,12 +42,9 @@ import { ConsoleWindow } from "./components/consoleWindow";
 
 import { noteMappings } from "./mappings";
 import {
-  loadedSequences,
   savedSequences,
   textSequences,
 } from "./loadedSequences";
-
-import { helpMessages } from "./information";
 
 import "./App.css";
 import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
@@ -64,6 +61,7 @@ function App() {
 
   const [showIntroduction, setShowIntroduction] = useState(true);
   const [showAbout, setShowAbout] = useState(false);
+  const [showLearn, setShowLearn] = useState(false);
 
   const [showControls, setShowControls] = useState(false);
   const [showControlsTransition, setShowControlsTransition] = useState(false);
@@ -636,6 +634,7 @@ function App() {
                 onClick={() => {
                   const seq = interpretSequence(userSequence);
                   setUserInputSequence(seq);
+                  setShowEntireSequence(false);
                   setUserModeSelect(0)
                 }}
               >
@@ -651,6 +650,8 @@ function App() {
                 }}
                 onClick={() => {
                   setUserModeSelect(1)
+                  setUserInputSequence(savedSequences[0].sequence);
+                  setShowEntireSequence(true);
                 }}
               >
                 sequences
@@ -679,6 +680,7 @@ function App() {
                                 }}
                                 onClick={() => {
                                   setSelectedSequence(sequence);
+                                  setUserInputSequence(sequence.sequence);
                                 }}
                               >
                                 <p className="whitespace-nowrap overflow-hidden text-[1rem]">
@@ -764,7 +766,7 @@ function App() {
             <div>
               <div>
                 <p className="mt-[1.5rem] text-[0.9rem] text-left">
-                DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.  
+                  DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.
                 </p>
                 <div className="flex flex-col items-center">
                   <div>
@@ -787,14 +789,19 @@ function App() {
           </div>
         </div>
       }
-      <div className="absolute w-[100%] z-[1]">
-        <div style={{ borderBottom: "1px solid #fff" }}>
+      <div className="absolute w-[100%] h-[8rem] z-[9]">
+        <div style={{ borderBottom: "1px solid #fff", }}>
           <div className="mx-auto py-[1rem] w-[60rem]">
-            <div className="z-[1] text-[#fff] flex justify-between">
+            <div className="text-[#fff] flex justify-between">
               <div>
                 <h3>DNA Music Maker</h3>
               </div>
               <div className="flex">
+                <button onClick={() => {
+                  setShowLearn(!showLearn)
+                }} className="mr-[1rem]">
+                  <h3>learn</h3>
+                </button>
                 <button onClick={() => {
                   setShowAbout(!showAbout)
                 }} className="mr-[1rem]">
@@ -818,20 +825,24 @@ function App() {
           <div className="mx-auto"
             style={{
               width: '39.5rem',
+              zIndex: 9,
             }}
           >
-            <InformationButtons
-              showIntroduction={showIntroduction}
-              setHelpMessage={setHelpMessage}
-              setMenu={setMenu}
-              setShowHelp={setShowHelp}
-              helpIndex={helpIndex}
-              setHelpIndex={setHelpIndex}
-              setShowIntroductionFlow={setShowIntroductionFlow}
-            />
-            <div className="w-full relative h-[15rem]">
-              {
-                showHelp && !showControls &&
+            {
+              showLearn &&
+              <InformationButtons
+                showIntroduction={showIntroduction}
+                setHelpMessage={setHelpMessage}
+                setMenu={setMenu}
+                setShowHelp={setShowHelp}
+                helpIndex={helpIndex}
+                setHelpIndex={setHelpIndex}
+                setShowIntroductionFlow={setShowIntroductionFlow}
+              />
+            }
+            {
+              showHelp && true &&
+              <div className="relative h-[15rem]">
                 <ConsoleWindow
                   helpMessage={helpMessage}
                   setHelpMessage={setHelpMessage}
@@ -841,8 +852,8 @@ function App() {
                   embedded={false}
                   showIntroductionFlow={showIntroductionFlow}
                 />
-              }
-            </div>
+              </div>
+            }
           </div>
         }
       </div>
@@ -992,77 +1003,12 @@ function App() {
                 </div>
               }
               <div className="flex justify-center mx-auto h-full relative">
-                {
-                  showControls &&
-                  <div
-                    className="w-[16.5rem] relative h-[15rem]"
-                    style={{
-                      border: '1px white solid'
-                    }}
-                  >
-                    {
-                      showControls && showHelp &&
-                      <ConsoleWindow
-                        helpMessage={helpMessage}
-                        setHelpMessage={setHelpMessage}
-                        setShowHelp={setShowHelp}
-                        helpIndex={helpIndex}
-                        setHelpIndex={setHelpIndex}
-                        embedded={true}
-                        showIntroductionFlow={showIntroductionFlow}
-                      />
-                    }
-                    <ConsoleSelectButtons
-                      setMenu={setMenu}
-                      menu={menu}
-                      setShowHelp={setShowHelp}
-                      showHelp={showHelp}
-                      helpMessage={helpMessage}
-                      showControls={showControls}
-                    />
-                    {menu === 0 ? (
-                      <div className="w-full">
-                        <VisualizerMappings
-                          playheads={playheads}
-                          countRefs={countRefs}
-                          counters={counters}
-                          activeNodes={activeNodes}
-                          playheadCount={playheadCount}
-                        />
-                      </div>
-                    ) : menu === 1 ? (
-                      <InstrumentMenu
-                        playheads={playheads}
-                        selectedPlayhead={selectedPlayhead}
-                        updatePlayhead={updatePlayhead}
-                        WebMidi={WebMidi}
-                        presetMappings={presetMappings}
-                        playheadCount={playheadCount}
-                        setSelectedPlayhead={setSelectedPlayhead}
-                        updatePlayer={updatePlayer}
-                      />
-                    ) : (
-                      <div className="w-full">
-                        <PresetMenu
-                          playheads={playheads}
-                          updatePlayer={updatePlayer}
-                          setPlayheads={setPlayheads}
-                          updateTempo={updateTempo}
-                          setMasterSteps={setMasterSteps}
-                          noteOffset={noteOffset}
-                          setNoteOffset={setNoteOffset}
-                          updatePlayhead={updatePlayhead}
-                        />
-                      </div>
-                    )}
-                  </div>
-                }
                 <div
                   className={` 
-                    relative ml-[0.5rem]
+                    relative mr-[0.5rem]
                     `}
                   style={{
-                    border: "1px white solid",
+                    border: "1px #999 solid",
                     width: showControls ? '32rem' : '40rem'
                   }}
                 >
@@ -1110,10 +1056,64 @@ function App() {
                       setSelectedPlayhead={setSelectedPlayhead}
                       showControls={showControls}
                       setMenu={setMenu}
+                      menu={menu}
                       setShowHelp={setShowHelp}
                     />
                   </div>
                 </div>
+                {
+                  showControls &&
+                  <div
+                    className="w-[16.5rem] relative h-[15rem]"
+                    style={{
+                      border: '1px #999 solid'
+                    }}
+                  >
+                    <ConsoleSelectButtons
+                      setMenu={setMenu}
+                      menu={menu}
+                      setShowHelp={setShowHelp}
+                      showHelp={showHelp}
+                      helpMessage={helpMessage}
+                      showControls={showControls}
+                    />
+                    {menu === 0 ? (
+                      <div className="w-full">
+                        <VisualizerMappings
+                          playheads={playheads}
+                          countRefs={countRefs}
+                          counters={counters}
+                          activeNodes={activeNodes}
+                          playheadCount={playheadCount}
+                        />
+                      </div>
+                    ) : menu === 1 ? (
+                      <InstrumentMenu
+                        playheads={playheads}
+                        selectedPlayhead={selectedPlayhead}
+                        updatePlayhead={updatePlayhead}
+                        WebMidi={WebMidi}
+                        presetMappings={presetMappings}
+                        playheadCount={playheadCount}
+                        setSelectedPlayhead={setSelectedPlayhead}
+                        updatePlayer={updatePlayer}
+                      />
+                    ) : (
+                      <div className="w-full">
+                        <PresetMenu
+                          playheads={playheads}
+                          updatePlayer={updatePlayer}
+                          setPlayheads={setPlayheads}
+                          updateTempo={updateTempo}
+                          setMasterSteps={setMasterSteps}
+                          noteOffset={noteOffset}
+                          setNoteOffset={setNoteOffset}
+                          updatePlayhead={updatePlayhead}
+                        />
+                      </div>
+                    )}
+                  </div>
+                }
               </div>
             </div>
           </div>

@@ -19,7 +19,7 @@ export const ConsoleSelectButtons = ({
         }}
         style={{
           color: menu === 1 ? '#fff' : '#aaa',
-          border: '1px white solid',
+          border: '1px #999 solid',
           backgroundColor:
             menu === 1 ? "#292929" : "rgba(0,0,0,0)",
         }}
@@ -34,7 +34,7 @@ export const ConsoleSelectButtons = ({
         }}
         style={{
           color: menu === 2 ? '#fff' : '#aaa',
-          border: '1px white solid',
+          border: '1px #999 solid',
           backgroundColor:
             menu === 2 ? "#292929" : "rgba(0,0,0,0)",
         }}
@@ -49,7 +49,7 @@ export const ConsoleSelectButtons = ({
         }}
         style={{
           color: menu === 0 ? '#fff' : '#aaa',
-          border: '1px white solid',
+          border: '1px #999 solid',
           backgroundColor:
             menu === 0 ? "#292929" : "rgba(0,0,0,0)",
         }}

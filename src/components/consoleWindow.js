@@ -11,7 +11,7 @@ export const ConsoleWindow = ({
   embedded, // styling for when the console is in the control panel
   showIntroductionFlow
 }) => {  
-  return <div className="absolute w-full h-full z-[9999]">
+  return <div className="absolute h-full z-[9999]">
     <div className="relative w-full h-full max-w-[30rem] flex-col justify-between"
       style={{
         border: '1px white solid',

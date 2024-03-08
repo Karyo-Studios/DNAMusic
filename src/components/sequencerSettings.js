@@ -32,10 +32,10 @@ export const SequencerSettings = ({
   setShowHelp,
 }) => {
   return (
-    <div className="flex z-[9999]">
+    <div className="flex">
       <div className="flex items-center justify-between"
         style={{
-          border: "1px white solid",
+          border: "1px #999 solid",
           width: showControls ? '37.5rem' : '55rem'
         }}>
         <PlayPauseButton
@@ -189,7 +189,7 @@ export const SequencerSettings = ({
                 }, 400);
               }}
               style={{
-                borderLeft: '1px white solid',
+                borderLeft: '1px #999 solid',
                 height: showControls ? '2.5rem' : '3.5rem'
               }}
             >

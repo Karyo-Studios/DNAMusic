@@ -16,17 +16,17 @@ export const InstrumentMenu = ({
 }) => {
   const p = playheads[selectedPlayhead]
   return <div className="w-[16.5rem] px-[0.5rem]">
-    <div className="w-full my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-left text-[0.8rem] select-none uppercase text-[#fff]"
+    <div className="my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-left text-[0.8rem] select-none uppercase text-[#fff]"
       style={{
-        // backgroundColor: p.color,
+        borderBottom: `solid ${p.color} 2px`,
       }}
     >
-      Playhead {selectedPlayhead + 1}: <span><u>{p.preset}</u></span>
+      Playhead {selectedPlayhead + 1}: <span>{p.preset}</span>
     </div>
     <div className="flex">
       <div className=" flex">
-        <div className="h-[8.5rem] w-[8.2rem]"
-          style={{border: '1px white solid'}}
+        <div className="h-[8.5rem] w-[8.2rem] bg-[#232323]"
+          
         >
           {p.midiEnabled ? (
             <div>

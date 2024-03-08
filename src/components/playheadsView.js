@@ -16,6 +16,7 @@ export const PlayheadsView = ({
   setSelectedPlayhead,
   activeNotes,
   setMenu,
+  menu,
   selectedPlayhead,
   setPlayheadCount,
   setShowHelp,
@@ -152,32 +153,25 @@ export const PlayheadsView = ({
         </div>
         {
           false &&
-          <div className="relative h-full text-center text-[0.8rem]">
+          <div className="pt-[1.5rem] relative h-full text-center text-[0.8rem] z-[99]">
             {playheads.map((p, index) => {
-              const buttonLabel = p.midiEnabled ? `MIDI ${p.midiOutputDevice.index}` : p.preset;
               if (index >= playheadCount) return;
               return (
                 <div key={index} className="flex items-center relative">
-                  <div className="w-[5.25rem] mb-1">
-                    <button
-                      className="w-[5.25rem] h-[1.85rem] p-1 rounded-[0.25rem] bg-[#232323] hover:bg-[#353535] uppercase"
-                      onClick={() => {
-                        setShowHelp(false)
-                        setMenu(1);
-                        setSelectedPlayhead(index)
+                  <div className="mb-1">
+                    <div
+                      className="w-[0.7rem] h-[1.85rem] ml-[0.2rem] bg-[#181818]"
+                      style={{
+                        borderTop: '1px #999 solid',
+                        borderBottom: '1px #999 solid',
+                        opacity: menu === 1 && selectedPlayhead === index ? '1' : 0
                       }}
                     >
-                      {buttonLabel}
-                    </button>
+                    </div>
                   </div>
                 </div>
               );
             })}
-            <div className="flex text-center select-none uppercase">
-              <p className="pb-[0.25rem] w-[5.25rem] text-[#888] text-[0.8rem]">
-                SOUND
-              </p>
-            </div>
           </div>
         }
       </div>
