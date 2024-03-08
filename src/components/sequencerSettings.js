@@ -36,7 +36,8 @@ export const SequencerSettings = ({
       <div className="flex items-center justify-between"
         style={{
           border: "1px #999 solid",
-          width: showControls ? '37.5rem' : '55rem'
+          // width: showControls ? '37.5rem' : '55rem'
+          width: showControls ? '37.5rem' : '37.5rem'
         }}>
         <PlayPauseButton
           playing={playing}
@@ -71,33 +72,6 @@ export const SequencerSettings = ({
                   })}
                 </div>
               )}
-              <div className="flex mr-[2rem] items-center">
-                <div className="leading-[1rem] text-[#888] w-[3rem] text-center"
-                  style={{ marginLeft: showControls ? '0rem' : '0.5rem' }}
-                >
-                  <p className="text-[0.7rem]">BPM</p>
-                  <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{bpm / 2}</p>
-                </div>
-                <div className="rounded-[0.25rem]"
-                  style={{
-                    width: showControls ? '8rem' : '10rem',
-                    marginRight: showControls ? '0rem' : '1.25rem',
-                  }}
-                >
-                  <ReactSlider
-                    className={showControls ? 'tempo-slider' : 'tempo-slider expanded'}
-                    thumbClassName={showControls ? 'tempo-thumb' : 'tempo-thumb expanded'}
-                    trackClassName={showControls ? 'tempo-track' : 'tempo-track expanded'}
-                    min={60}
-                    max={300}
-                    step={1}
-                    value={bpm}
-                    onChange={(value) => {
-                      updateTempo(value);
-                    }}
-                  ></ReactSlider>
-                </div>
-              </div>
               {
                 showControls && <div className="flex items-center mr-[1rem]">
                   <div className="leading-[1rem] px-1 ml-[0.5rem] text-[#888] text-center">
@@ -152,6 +126,39 @@ export const SequencerSettings = ({
                   />
                 </div>
               }
+              <div className="flex items-center"
+                style={{
+                  marginRight: showControls ? '2rem' : '1rem' 
+                }}
+              >
+                <div className="leading-[1rem] text-[#888]  text-center"
+                  style={{ 
+                    marginLeft: showControls ? '0rem' : '0.5rem',
+                    width: showControls ? '2.5rem' : '2.0rem'
+                  }}
+                >
+                  <p className="text-[0.7rem]">BPM</p>
+                  <p className="text-[#fff] text-[1rem] mt-[-0.15rem]">{(bpm / 2).toFixed(0)}</p>
+                </div>
+                <div className="rounded-[0.25rem]"
+                  style={{
+                    width: showControls ? '8rem' : '6rem',
+                  }}
+                >
+                  <ReactSlider
+                    className={showControls ? 'tempo-slider' : 'tempo-slider expanded'}
+                    thumbClassName={showControls ? 'tempo-thumb' : 'tempo-thumb expanded'}
+                    trackClassName={showControls ? 'tempo-track' : 'tempo-track expanded'}
+                    min={60}
+                    max={300}
+                    step={1}
+                    value={bpm}
+                    onChange={(value) => {
+                      updateTempo(value);
+                    }}
+                  ></ReactSlider>
+                </div>
+              </div>
             </div>
 
             {
@@ -207,15 +214,15 @@ export const SequencerSettings = ({
                       <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 35.0669)" fill="#D9D9D9" />
                     </mask>
                     <g mask="url(#mask1_317_1325)">
-                      <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 21.2012)" fill="white" />
-                      <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 24.5425)" fill="white" />
+                      <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 21.2012)" fill="#999" />
+                      <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 24.5425)" fill="#999" />
                     </g>
                     <mask id="mask2_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="4" width="39" height="15">
                       <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 18.4307)" fill="#D9D9D9" />
                     </mask>
                     <g mask="url(#mask2_317_1325)">
-                      <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 4.56494)" fill="white" />
-                      <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 7.90625)" fill="white" />
+                      <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 4.56494)" fill="#999" />
+                      <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 7.90625)" fill="#999" />
                     </g>
                   </g>
                 </svg>

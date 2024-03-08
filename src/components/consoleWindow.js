@@ -8,20 +8,19 @@ export const ConsoleWindow = ({
   setShowHelp,
   helpIndex,
   setHelpIndex,
-  embedded, // styling for when the console is in the control panel
   showIntroductionFlow
 }) => {  
   return <div className="absolute h-full z-[9999]">
     <div className="relative w-full h-full max-w-[30rem] flex-col justify-between"
       style={{
         border: '1px white solid',
-        backgroundColor: embedded ? '#181818' : 'rgba(30,30,30,0.4)',
+        backgroundColor: 'rgba(20,20,20,0.8)',
       }}
     >
       <div className="overflow-y-scroll pl-[0.75rem] pr-[3rem] py-[0.5rem] pb-[3rem]"
         style={{
           height: 'calc(100% - 2rem)',
-          marginTop: embedded ? '2rem' : '0',
+          marginTop: '0',
         }}
       >
         <p className="mb-[0.25rem]">{helpMessage.name}</p>
@@ -51,10 +50,10 @@ export const ConsoleWindow = ({
       </div>
       <div className="absolute w-full"
         style={{
-          borderTop: !showIntroductionFlow ? 'none' : embedded ? 'none' : '1px white solid',
-          borderBottom: !showIntroductionFlow ? 'none' : !embedded ? 'none' : '1px white solid',
-          top: embedded ? '0px' : 'initial',
-          bottom: embedded ? 'initial' : '0px',
+          borderTop: !showIntroductionFlow ? 'none' :  '1px white solid',
+          borderBottom: !showIntroductionFlow ? 'none' : '1px white solid',
+          top: 'initial',
+          bottom: '0px',
         }}
         >
         <div className="flex justify-between">
@@ -88,8 +87,8 @@ export const ConsoleWindow = ({
             className="console-button uppercase py-[0.35rem] px-[0.5rem] text-[0.8rem]"
             style={{
               borderLeft: '1px white solid',
-              borderBottom: !showIntroductionFlow && embedded ? '1px white solid' : 'none',
-              borderTop: !showIntroductionFlow && !embedded ? '1px white solid' : 'none',
+              borderBottom: !showIntroductionFlow && 'none',
+              borderTop: !showIntroductionFlow && '1px white solid',
             }}
             onClick={() => {
               setShowHelp(false);

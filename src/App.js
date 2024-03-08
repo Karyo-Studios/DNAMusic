@@ -2,11 +2,6 @@
 /*
 
 - enter button on input
-- ifx popup menu things to be more prominant and background bug
-- bug when switching from dna sequence to phrase when phrase is already populated
-- design for the menu
-- add about page 
-- fix height of the fullscreen version
 - add rhythm controls to the main section  
 
 */
@@ -64,14 +59,13 @@ function App() {
   const [showLearn, setShowLearn] = useState(false);
 
   const [showControls, setShowControls] = useState(false);
+  const [showExtraControls, setShowExtraControls] = useState(false);
   const [showControlsTransition, setShowControlsTransition] = useState(false);
 
   const transitionRef = useRef(0);
   useEffect(() => {
     transitionRef.current = showControlsTransition;
-  }, showControlsTransition);
-
-  const [showSequenceAbove, setShowSequenceAbove] = useState(false);
+  }, [showControlsTransition]);
 
   const [showIntroductionFlow, setShowIntroductionFlow] = useState(false);
 
@@ -209,22 +203,45 @@ function App() {
 
   const captureKeyboardEvent = (event) => {
     const active = document.activeElement;
-    if (active.id === "user-input-dna" || active.id === "user-input-name")
-      return;
+    if (active.id === "user-input-dna" || active.id === "user-input-name") {
+      if (event.keyCode === 13 && userSequence.length > 0) {
+        setModal(false);
+        play();
+        setInitialMenu(false);
+        setShowEntireSequence(false);
+      }
+      return
+    }
+    // space bar
     if (event.keyCode === 32) {
       event.preventDefault();
       getAudioContext();
       setPlaying(!playing);
     }
+    // number keys
     if (event.keyCode >= 49 && event.keyCode < 54) {
       const index = event.keyCode - 49;
       updatePlayhead(index, {
         ...playheads[index],
         playing: !playheads[index].playing,
       });
+      setSelectedPlayhead(index);
     }
-    if (event.keyCode === 13) {
-      console.log("enter button! TODO");
+    // enter
+    if (event.keyCode === 13 && modal) {
+      if (userModeSelect === 1) {
+        setModal(false);
+        play();
+        setUserInputSequence(selectedSequence.sequence);
+        setShowEntireSequence(true);
+      } else {
+        if (userSequence.length > 0) {
+          setModal(false);
+          play();
+          setInitialMenu(false);
+          setShowEntireSequence(false);
+        }
+      }
     }
   };
 
@@ -1004,12 +1021,10 @@ function App() {
               }
               <div className="flex justify-center mx-auto h-full relative">
                 <div
-                  className={` 
-                    relative mr-[0.5rem]
-                    `}
                   style={{
                     border: "1px #999 solid",
-                    width: showControls ? '32rem' : '40rem'
+                    width: showControls ? '32rem' : '32rem',
+                    marginLeft: showControls ? '2.2rem' : 0,
                   }}
                 >
                   <SequencerSettings
@@ -1063,55 +1078,98 @@ function App() {
                 </div>
                 {
                   showControls &&
-                  <div
-                    className="w-[16.5rem] relative h-[15rem]"
-                    style={{
-                      border: '1px #999 solid'
-                    }}
-                  >
-                    <ConsoleSelectButtons
-                      setMenu={setMenu}
-                      menu={menu}
-                      setShowHelp={setShowHelp}
-                      showHelp={showHelp}
-                      helpMessage={helpMessage}
-                      showControls={showControls}
-                    />
-                    {menu === 0 ? (
-                      <div className="w-full">
-                        <VisualizerMappings
-                          playheads={playheads}
-                          countRefs={countRefs}
-                          counters={counters}
-                          activeNodes={activeNodes}
-                          playheadCount={playheadCount}
-                        />
-                      </div>
-                    ) : menu === 1 ? (
-                      <InstrumentMenu
-                        playheads={playheads}
-                        selectedPlayhead={selectedPlayhead}
-                        updatePlayhead={updatePlayhead}
-                        WebMidi={WebMidi}
-                        presetMappings={presetMappings}
-                        playheadCount={playheadCount}
-                        setSelectedPlayhead={setSelectedPlayhead}
-                        updatePlayer={updatePlayer}
+                  <div className="flex">
+                    <div
+                      className="relative h-[15rem] ml-[0.5rem]"
+                      style={{
+                        border: showExtraControls ? '1px #999 solid' : 'none',
+                        width: showExtraControls ? '16.5rem' : '0rem',
+                        overflow: 'hidden',
+                        transition: "width 200ms",
+                      }}
+                    >
+                      <ConsoleSelectButtons
+                        setMenu={setMenu}
+                        menu={menu}
+                        setShowHelp={setShowHelp}
+                        showHelp={showHelp}
+                        helpMessage={helpMessage}
+                        showControls={showControls}
                       />
-                    ) : (
-                      <div className="w-full">
-                        <PresetMenu
+                      {menu === 0 ? (
+                        <div className="w-full">
+                          <VisualizerMappings
+                            playheads={playheads}
+                            countRefs={countRefs}
+                            counters={counters}
+                            activeNodes={activeNodes}
+                            playheadCount={playheadCount}
+                          />
+                        </div>
+                      ) : menu === 1 ? (
+                        <InstrumentMenu
                           playheads={playheads}
+                          selectedPlayhead={selectedPlayhead}
+                          updatePlayhead={updatePlayhead}
+                          WebMidi={WebMidi}
+                          presetMappings={presetMappings}
+                          playheadCount={playheadCount}
+                          setSelectedPlayhead={setSelectedPlayhead}
                           updatePlayer={updatePlayer}
                           setPlayheads={setPlayheads}
-                          updateTempo={updateTempo}
-                          setMasterSteps={setMasterSteps}
-                          noteOffset={noteOffset}
-                          setNoteOffset={setNoteOffset}
-                          updatePlayhead={updatePlayhead}
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="w-full">
+                          <PresetMenu
+                            playheads={playheads}
+                            updatePlayer={updatePlayer}
+                            setPlayheads={setPlayheads}
+                            updateTempo={updateTempo}
+                            setMasterSteps={setMasterSteps}
+                            noteOffset={noteOffset}
+                            setNoteOffset={setNoteOffset}
+                            updatePlayhead={updatePlayhead}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center">
+                      <button
+                        className="bg-[#232323] hover:bg-[#353535] rounded-[0.2rem] py-[3rem] px-[0.25rem] mt-[2rem]"
+                        style={{
+                          marginLeft: showExtraControls ? '0.5rem' : '0'
+                        }}
+                        onClick={() => setShowExtraControls(!showExtraControls)}
+                      >
+                        <div className="w-[1.2rem] h-[1.2rem]"
+                          style={{
+                            transform: showExtraControls ? 'rotate(-90deg)' : 'rotate(90deg)'
+                          }}
+                        >
+                          <svg viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <mask id="mask0_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="39" height="39">
+                              <rect x="0.619141" y="0.574219" width="38.335" height="38.335" fill="#D9D9D9" />
+                            </mask>
+                            <g mask="url(#mask0_317_1325)">
+                              <mask id="mask1_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="21" width="39" height="15">
+                                <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 35.0669)" fill="#D9D9D9" />
+                              </mask>
+                              <g mask="url(#mask1_317_1325)">
+                                <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 21.2012)" fill="#999" />
+                                <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 24.5425)" fill="#999" />
+                              </g>
+                              <mask id="mask2_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="4" width="39" height="15">
+                                <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 18.4307)" fill="#D9D9D9" />
+                              </mask>
+                              <g mask="url(#mask2_317_1325)">
+                                <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 4.56494)" fill="#999" />
+                                <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 7.90625)" fill="#999" />
+                              </g>
+                            </g>
+                          </svg>
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 }
               </div>

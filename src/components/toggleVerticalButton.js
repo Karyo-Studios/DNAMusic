@@ -15,10 +15,10 @@ export const ToggleVerticalButton = ({
         >
           {playhead.playing ? 'on' : 'off'}
         </button>
-        <div className={`w-[1.85rem] bg-[#232323] hover:bg-[#353535] 
+        <div className={`w-[1.7rem] bg-[#232323] hover:bg-[#353535] 
         p-[0.25rem] h-[2.75rem] ml-[0.5rem] rounded-[0.25rem] relative`} style={{ cursor: 'pointer' }}>
           <div
-            className={'absolute w-[1.35rem] h-[1.35rem] rounded-[0.4rem] transition-translate'}
+            className={'absolute w-[1.25rem] h-[1.35rem] rounded-[0.4rem] transition-translate'}
             style={{
               // backgroundColor: playhead.playing ? playhead.color : ,
               bottom: playhead.playing ? '1.3rem' : '0.125rem',

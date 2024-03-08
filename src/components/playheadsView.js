@@ -26,7 +26,7 @@ export const PlayheadsView = ({
     <div className="pt-[0.5rem]">
       <div className="flex">
         <div 
-          classNames={!showControls && `select-none`}
+          className={!showControls && `select-none`}
         >
         <div className="flex pb-[0.25rem] text-center text-[#888] text-[0.8rem] select-none uppercase">
             <p className="w-[2.5rem]"></p>

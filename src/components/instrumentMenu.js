@@ -12,22 +12,40 @@ export const InstrumentMenu = ({
   presetMappings,
   playheadCount,
   setSelectedPlayhead,
-  updatePlayer
+  updatePlayer,
+  setPlayheads,
+  prevPlaying,
 }) => {
   const p = playheads[selectedPlayhead]
   return <div className="w-[16.5rem] px-[0.5rem]">
-    <div className="my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-left text-[0.8rem] select-none uppercase text-[#fff]"
+    <div className="flex justify-between my-[0.5rem] pt-[0.125rem] pb-[0.125rem] text-left text-[0.8rem] select-none uppercase text-[#fff]"
       style={{
         borderBottom: `solid ${p.color} 2px`,
       }}
     >
-      Playhead {selectedPlayhead + 1}: <span>{p.preset}</span>
+      <div>
+        Playhead {selectedPlayhead + 1}: <span>{p.preset}</span>
+      </div>
+      <button
+        onClick={()=>{
+          const ps = [...playheads];
+          for (let i=0; i<playheads.length; i++) {
+            ps[i].playing = selectedPlayhead === i 
+          }
+          setPlayheads(ps);
+        }}
+        className='pt-[0.25rem] pb-[0.125rem] px-[0.25rem] mb-[-0.25rem] rounded-[0.25rem]'
+        style={{
+          backgroundColor: p.color,
+          color: '#fff',
+        }}
+      >
+        SOLO
+      </button>
     </div>
     <div className="flex">
       <div className=" flex">
-        <div className="h-[8.5rem] w-[8.2rem] bg-[#232323]"
-          
-        >
+        <div className="h-[8.5rem] w-[8.2rem] bg-[#232323]" >
           {p.midiEnabled ? (
             <div>
               <div className="flex flex-col overflow-y-scroll h-[8.4rem] w-[8rem]">
