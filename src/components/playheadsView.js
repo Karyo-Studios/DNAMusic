@@ -19,7 +19,7 @@ export const PlayheadsView = ({
   menu,
   selectedPlayhead,
   setPlayheadCount,
-  setShowHelp,
+  setShowHelpWindow,
   showControls,
 }) => {
   return (
@@ -50,7 +50,7 @@ export const PlayheadsView = ({
                   }}
                   onClick={() => {
                     setMenu(1)
-                    setShowHelp(false)
+                    setShowHelpWindow(false)
                     setSelectedPlayhead(index)
                   }}
                 >
@@ -61,7 +61,7 @@ export const PlayheadsView = ({
                     onClick={() => {
                       updatePlayhead(index, { ...p, playing: !p.playing });
                       setSelectedPlayhead(index);
-                      setShowHelp(false)
+                      setShowHelpWindow(false)
                       setMenu(1);
                     }}
                     playhead={p}
@@ -81,7 +81,7 @@ export const PlayheadsView = ({
                 <div className="flex items-center ml-2">
                   <HitsToggle
                     leftOnClick={() => {
-                      setShowHelp(false)
+                      setShowHelpWindow(false)
                       if (p.events > 1) {
                         updatePlayhead(
                           index,
@@ -108,7 +108,7 @@ export const PlayheadsView = ({
                 <div className="ml-2">
                   <RotationToggle
                     onClick={() => {
-                      setShowHelp(false)
+                      setShowHelpWindow(false)
                       updatePlayhead(
                         index,
                         updateEuclid({
@@ -129,7 +129,7 @@ export const PlayheadsView = ({
                 <div className="ml-1 mr-2">
                   <RotationToggle
                     onClick={() => {
-                      setShowHelp(false)
+                      setShowHelpWindow(false)
                       updatePlayhead(
                         index,
                         updateEuclid({

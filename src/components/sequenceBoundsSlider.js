@@ -7,7 +7,7 @@ export const SequenceBoundsSlider = ({
   selectedSequence,
   sequenceRef,
   boundsRef,
-  setShowHelp,
+  setShowHelpWindow,
   setHelpMessage,
 }) => {
   return <div>
@@ -44,7 +44,7 @@ export const SequenceBoundsSlider = ({
               description: selectedSequence.description,
             }
             
-            setShowHelp(true)
+            setShowHelpWindow(true)
             setHelpMessage(helpMessage)
           }}
         >

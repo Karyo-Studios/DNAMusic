@@ -1,7 +1,7 @@
 export const ConsoleSelectButtons = ({
   setMenu,
   menu,
-  setShowHelp,
+  setShowHelpWindow,
   showControls,
 }) => {
   return <div className="flex relative">
@@ -15,7 +15,7 @@ export const ConsoleSelectButtons = ({
         className="uppercase text-[#aaa] grow text-center"
         onClick={() => {
           setMenu(1);
-          setShowHelp(false);
+          setShowHelpWindow(false);
         }}
         style={{
           color: menu === 1 ? '#fff' : '#aaa',
@@ -30,7 +30,7 @@ export const ConsoleSelectButtons = ({
         className="uppercase text-[#aaa] grow text-center"
         onClick={() => {
           setMenu(2);
-          setShowHelp(false);
+          setShowHelpWindow(false);
         }}
         style={{
           color: menu === 2 ? '#fff' : '#aaa',
@@ -45,7 +45,7 @@ export const ConsoleSelectButtons = ({
         className="uppercase text-[#aaa] grow text-center"
         onClick={() => {
           setMenu(0);
-          setShowHelp(false);
+          setShowHelpWindow(false);
         }}
         style={{
           color: menu === 0 ? '#fff' : '#aaa',

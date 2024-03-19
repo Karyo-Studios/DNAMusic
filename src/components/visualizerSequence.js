@@ -16,7 +16,7 @@ export const VisualizerSequence = ({
   zoom,
   width,
   height,
-  setShowHelp,
+  setShowHelpWindow,
   setHelpMessage,
   playheads,
   getNote,
@@ -200,7 +200,7 @@ export const VisualizerSequence = ({
                               }
                             }
                             setMenu(0)
-                            setShowHelp(true)
+                            setShowHelpWindow(true)
                             setShowIntroductionFlow(false)
                             setHelpMessage(
                               helpMessage

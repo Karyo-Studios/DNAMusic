@@ -17,7 +17,7 @@ A codon is the basic unit of information in DNA. Each three-letter codon corresp
 The special codons are "start" codons and "stop" codons. A start codon (ATG) signals the beginning of a protein-coding sequence, while three different stop codons (TGA, TAG, TAA) signal its end.
 
 Let’s translate a word into a DNA sequence. This is an over-simplified and not entirely accurate example, because not every alphabetical letter maps directly to a codon in biology. Like there’s no “O” or “B” amino acid. In our hypothetical example, we'll assign each letter in "HELLO" to a codon. 
-  
+   
 H = CAT (Histidine)  
 E = GAG (Glutamicacid)  
 L = CTA (Leucine)  

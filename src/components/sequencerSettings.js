@@ -29,7 +29,7 @@ export const SequencerSettings = ({
   setShowControls,
   activeNotes,
   setShowControlsTransition,
-  setShowHelp,
+  setShowHelpWindow,
 }) => {
   return (
     <div className="flex">
@@ -188,7 +188,7 @@ export const SequencerSettings = ({
             <button
               className="bg-[#232323] hover:bg-[#353535] w-[3.5rem] text-[1.2rem]"
               onClick={() => {
-                // setShowHelp(false);
+                // setShowHelpWindow(false);
                 setShowControls(!showControls);
                 setShowControlsTransition(true);
                 setTimeout(() => {

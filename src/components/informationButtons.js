@@ -4,7 +4,7 @@ export const InformationButtons = ({
   showIntroduction,
   setHelpMessage,
   setMenu,
-  setShowHelp,
+  setShowHelpWindow,
   helpIndex,
   setHelpIndex,
   setShowIntroductionFlow,
@@ -20,7 +20,7 @@ export const InformationButtons = ({
                 if (index === helpIndex) {
                   setHelpMessage(intro);
                   setMenu(0);
-                  setShowHelp(true);
+                  setShowHelpWindow(true);
                   setHelpIndex(index);
                   setShowIntroductionFlow(true);
                 }

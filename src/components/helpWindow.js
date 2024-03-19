@@ -2,13 +2,14 @@ import Markdown from "react-markdown";
 
 import { helpMessages } from "../information";
 
-export const ConsoleWindow = ({
+export const HelpWindow = ({
   helpMessage,
   setHelpMessage,
-  setShowHelp,
+  setShowHelpWindow,
   helpIndex,
   setHelpIndex,
-  showIntroductionFlow
+  showIntroductionFlow,
+  setShowHelpButtons,
 }) => {  
   return <div className="absolute h-full z-[9999]">
     <div className="relative w-full h-full max-w-[30rem] flex-col justify-between"
@@ -91,7 +92,8 @@ export const ConsoleWindow = ({
               borderTop: !showIntroductionFlow && '1px white solid',
             }}
             onClick={() => {
-              setShowHelp(false);
+              setShowHelpWindow(false);
+              setShowHelpButtons(false);
             }}
           >
             close

@@ -33,13 +33,10 @@ import { InstrumentMenu } from "./components/instrumentMenu";
 import { SequencerSettings } from "./components/sequencerSettings";
 import { PresetMenu } from "./components/presetMenu";
 import { InformationButtons } from "./components/informationButtons";
-import { ConsoleWindow } from "./components/consoleWindow";
+import { HelpWindow } from "./components/helpWindow";
 
 import { noteMappings } from "./mappings";
-import {
-  savedSequences,
-  textSequences,
-} from "./loadedSequences";
+import { savedSequences, textSequences } from "./loadedSequences";
 
 import "./App.css";
 import { SequenceBoundsSlider } from "./components/sequenceBoundsSlider";
@@ -56,7 +53,15 @@ function App() {
 
   const [showIntroduction, setShowIntroduction] = useState(true);
   const [showAbout, setShowAbout] = useState(false);
-  const [showLearn, setShowLearn] = useState(false);
+  const [showHelpButtons, setShowHelpButtons] = useState(false);
+  const [showHelpWindow, setShowHelpWindow] = useState(false);
+  const [helpIndex, setHelpIndex] = useState(0);
+  const [helpMessage, setHelpMessage] = useState({
+    name: "",
+    description: "",
+    img: "",
+    source: "",
+  });
 
   const [showControls, setShowControls] = useState(false);
   const [showExtraControls, setShowExtraControls] = useState(false);
@@ -68,15 +73,6 @@ function App() {
   }, [showControlsTransition]);
 
   const [showIntroductionFlow, setShowIntroductionFlow] = useState(false);
-
-  const [showHelp, setShowHelp] = useState(false);
-  const [helpIndex, setHelpIndex] = useState(0);
-  const [helpMessage, setHelpMessage] = useState({
-    name: "",
-    description: "",
-    img: "",
-    source: "",
-  });
 
   const [showEntireSequence, setShowEntireSequence] = useState(false);
   const [selectedSequence, setSelectedSequence] = useState(savedSequences[0]);
@@ -210,7 +206,7 @@ function App() {
         setInitialMenu(false);
         setShowEntireSequence(false);
       }
-      return
+      return;
     }
     // space bar
     if (event.keyCode === 32) {
@@ -634,8 +630,9 @@ function App() {
           }}
           className="visible fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999999] flex items-center"
         >
-          <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
-            style={{ border: '1px white solid' }}
+          <div
+            className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
+            style={{ border: "1px white solid" }}
           >
             <h3 className="text-[1.4rem]">DNA Music Maker</h3>
             <p className="">Translate DNA into music</p>
@@ -643,16 +640,16 @@ function App() {
               <button
                 className="w-[50%]"
                 style={{
-                  backgroundColor: userModeSelect === 0
-                    ? "#555"
-                    : "rgba(50,50,50,0.4)",
-                  textDecoration: userModeSelect !== 0 ? "initial" : "underline",
+                  backgroundColor:
+                    userModeSelect === 0 ? "#555" : "rgba(50,50,50,0.4)",
+                  textDecoration:
+                    userModeSelect !== 0 ? "initial" : "underline",
                 }}
                 onClick={() => {
                   const seq = interpretSequence(userSequence);
                   setUserInputSequence(seq);
                   setShowEntireSequence(false);
-                  setUserModeSelect(0)
+                  setUserModeSelect(0);
                 }}
               >
                 phrase
@@ -660,13 +657,13 @@ function App() {
               <button
                 className="w-[50%]"
                 style={{
-                  backgroundColor: userModeSelect !== 0
-                    ? "#555"
-                    : "rgba(50,50,50,0.4)",
-                  textDecoration: userModeSelect === 0 ? "initial" : "underline",
+                  backgroundColor:
+                    userModeSelect !== 0 ? "#555" : "rgba(50,50,50,0.4)",
+                  textDecoration:
+                    userModeSelect === 0 ? "initial" : "underline",
                 }}
                 onClick={() => {
-                  setUserModeSelect(1)
+                  setUserModeSelect(1);
                   setUserInputSequence(savedSequences[0].sequence);
                   setShowEntireSequence(true);
                 }}
@@ -769,25 +766,50 @@ function App() {
           </div>
         </div>
       )}
-      {
-        showAbout && <div
+      {showAbout && (
+        <div
           onClick={() => {
             getAudioContext();
           }}
           className="visible about-page fixed w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-[999999] flex items-center"
         >
-          <div className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
-            style={{ border: '1px white solid' }}
+          <div
+            className="enter relative text-[#fff] text-center h-[28rem] w-[25rem] bg-[#222] px-[1rem] py-[2rem] mx-auto"
+            style={{ border: "1px white solid" }}
           >
             <h3 className="text-[1.4rem]">About</h3>
             <div>
               <div>
                 <p className="mt-[1.5rem] text-[0.9rem] text-left">
-                  DNA Music Maker is an experiment exploring how to create music from DNA sequences. This project is created by <a href="https://www.karyostudios.com/" target="_blank">Karyo Studios</a> in collaboration with <a href="https://dan.dog" target="_blank">Dan Gorelick</a>. We also want to offer thanks to <a href="https://crastina.se/science-sound/dr-mark-temple-dna-sonification/" target="_blank">Mark Temple</a> for documenting his research on this topic. This project is open-source, and we welcome the community to reference the code and make contributions. Visit the <a href="https://github.com/Karyo-Studios/dnamusic" target="_blank">Github repository</a> for more information on getting involved.
+                  DNA Music Maker is an experiment exploring how to create music
+                  from DNA sequences. This project is created by{" "}
+                  <a href="https://www.karyostudios.com/" target="_blank">
+                    Karyo Studios
+                  </a>{" "}
+                  in collaboration with{" "}
+                  <a href="https://dan.dog" target="_blank">
+                    Dan Gorelick
+                  </a>
+                  . We also want to offer thanks to{" "}
+                  <a
+                    href="https://crastina.se/science-sound/dr-mark-temple-dna-sonification/"
+                    target="_blank"
+                  >
+                    Mark Temple
+                  </a>{" "}
+                  for documenting his research on this topic. This project is
+                  open-source, and we welcome the community to reference the
+                  code and make contributions. Visit the{" "}
+                  <a
+                    href="https://github.com/Karyo-Studios/dnamusic"
+                    target="_blank"
+                  >
+                    Github repository
+                  </a>{" "}
+                  for more information on getting involved.
                 </p>
                 <div className="flex flex-col items-center">
-                  <div>
-                  </div>
+                  <div></div>
                   <button
                     className="mt-3 absolute bottom-[2rem] py-[0.25rem] px-[2rem] bg-[#333] hover:bg-[#444] rounded-[0.25rem] mt-1"
                     style={{
@@ -795,7 +817,7 @@ function App() {
                       opacity: userSequence.length > 0 ? 1 : 0.5,
                     }}
                     onClick={() => {
-                      setShowAbout(false)
+                      setShowAbout(false);
                     }}
                   >
                     Close
@@ -805,23 +827,33 @@ function App() {
             </div>
           </div>
         </div>
-      }
+      )}
       <div className="absolute w-[100%] h-[8rem] z-[9]">
-        <div style={{ borderBottom: "1px solid #fff", }}>
+        <div style={{ borderBottom: "1px solid #fff" }}>
           <div className="mx-auto py-[1rem] w-[60rem]">
             <div className="text-[#fff] flex justify-between">
               <div>
-                <h3>DNA Music Maker</h3>
+                <h3>DNA Music Maker </h3>
               </div>
               <div className="flex">
-                <button onClick={() => {
-                  setShowLearn(!showLearn)
-                }} className="mr-[1rem]">
+                <button
+                  onClick={() => {
+                    setShowHelpButtons(!showHelpButtons);
+                    setShowHelpWindow(false);
+                  }}
+                  className="mr-[1rem]"
+                  style={{
+                    color: showHelpButtons ? '#888' : '#fff'
+                  }}
+                >
                   <h3>learn</h3>
                 </button>
-                <button onClick={() => {
-                  setShowAbout(!showAbout)
-                }} className="mr-[1rem]">
+                <button
+                  onClick={() => {
+                    setShowAbout(!showAbout);
+                  }}
+                  className="mr-[1rem]"
+                >
                   <h3>about</h3>
                 </button>
                 <button
@@ -837,42 +869,41 @@ function App() {
             </div>
           </div>
         </div>
-        {
-          true &&
-          <div className="mx-auto"
+        {true && (
+          <div
+            className="mx-auto"
             style={{
-              width: '39.5rem',
+              width: "39.5rem",
               zIndex: 9,
             }}
           >
-            {
-              showLearn &&
+            {showHelpButtons && (
               <InformationButtons
                 showIntroduction={showIntroduction}
                 setHelpMessage={setHelpMessage}
                 setMenu={setMenu}
-                setShowHelp={setShowHelp}
+                setShowHelpWindow={setShowHelpWindow}
                 helpIndex={helpIndex}
                 setHelpIndex={setHelpIndex}
                 setShowIntroductionFlow={setShowIntroductionFlow}
               />
-            }
-            {
-              showHelp && true &&
+            )}
+            {showHelpWindow && true && (
               <div className="relative h-[15rem]">
-                <ConsoleWindow
+                <HelpWindow
                   helpMessage={helpMessage}
                   setHelpMessage={setHelpMessage}
-                  setShowHelp={setShowHelp}
+                  setShowHelpWindow={setShowHelpWindow}
                   helpIndex={helpIndex}
                   setHelpIndex={setHelpIndex}
+                  setShowHelpButtons={setShowHelpButtons}
                   embedded={false}
                   showIntroductionFlow={showIntroductionFlow}
                 />
               </div>
-            }
+            )}
           </div>
-        }
+        )}
       </div>
       <div>
         <div
@@ -921,7 +952,7 @@ function App() {
             height={height}
             width={width}
             playheadCount={playheadCount}
-            setShowHelp={setShowHelp}
+            setShowHelpWindow={setShowHelpWindow}
             setHelpMessage={setHelpMessage}
             playheads={playheads}
             getNote={getNote}
@@ -964,7 +995,7 @@ function App() {
                   sequence={sequence}
                   sequenceRef={sequenceRef}
                   boundsRef={boundsRef}
-                  setShowHelp={setShowHelp}
+                  setShowHelpWindow={setShowHelpWindow}
                   setHelpMessage={setHelpMessage}
                 />
               </div>
@@ -983,13 +1014,12 @@ function App() {
                   <div className="absolute left-[-2.5rem] top-[0.6rem]">
                     <RemixButton
                       onclick={() => {
-                        const seq = textSequences[
-                          Math.floor(Math.random() * textSequences.length)
-                        ].value
-                        console.log(seq)
-                        setUserSequence(
-                          seq
-                        );
+                        const seq =
+                          textSequences[
+                            Math.floor(Math.random() * textSequences.length)
+                          ].value;
+                        console.log(seq);
+                        setUserSequence(seq);
                       }}
                     />
                   </div>
@@ -1002,29 +1032,30 @@ function App() {
                 transitionDuration: "200ms",
               }}
             >
-              {
-                false &&
-                <div className="mx-auto"
+              {false && (
+                <div
+                  className="mx-auto"
                   style={{
-                    width: '49rem',
-                  }}>
+                    width: "49rem",
+                  }}
+                >
                   <InformationButtons
                     showIntroduction={showIntroduction}
                     setHelpMessage={setHelpMessage}
                     setMenu={setMenu}
-                    setShowHelp={setShowHelp}
+                    setShowHelpWindow={setShowHelpWindow}
                     helpIndex={helpIndex}
                     setHelpIndex={setHelpIndex}
                     setShowIntroductionFlow={setShowIntroductionFlow}
                   />
                 </div>
-              }
+              )}
               <div className="flex justify-center mx-auto h-full relative">
                 <div
                   style={{
                     border: "1px #999 solid",
-                    width: showControls ? '32rem' : '32rem',
-                    marginLeft: showControls ? '2.2rem' : 0,
+                    width: showControls ? "32rem" : "32rem",
+                    marginLeft: showControls ? "2.2rem" : 0,
                   }}
                 >
                   <SequencerSettings
@@ -1052,7 +1083,7 @@ function App() {
                     updatePlayhead={updatePlayhead}
                     activeNotes={activeNoteRefs}
                     setShowControlsTransition={setShowControlsTransition}
-                    setShowHelp={setShowHelp}
+                    setShowHelpWindow={setShowHelpWindow}
                   />
                   <div className="flex">
                     <PlayheadsView
@@ -1072,27 +1103,26 @@ function App() {
                       showControls={showControls}
                       setMenu={setMenu}
                       menu={menu}
-                      setShowHelp={setShowHelp}
+                      setShowHelpWindow={setShowHelpWindow}
                     />
                   </div>
                 </div>
-                {
-                  showControls &&
+                {showControls && (
                   <div className="flex">
                     <div
                       className="relative h-[15rem] ml-[0.5rem]"
                       style={{
-                        border: showExtraControls ? '1px #999 solid' : 'none',
-                        width: showExtraControls ? '16.5rem' : '0rem',
-                        overflow: 'hidden',
+                        border: showExtraControls ? "1px #999 solid" : "none",
+                        width: showExtraControls ? "16.5rem" : "0rem",
+                        overflow: "hidden",
                         transition: "width 200ms",
                       }}
                     >
                       <ConsoleSelectButtons
                         setMenu={setMenu}
                         menu={menu}
-                        setShowHelp={setShowHelp}
-                        showHelp={showHelp}
+                        setShowHelpWindow={setShowHelpWindow}
+                        showHelpWindow={showHelpWindow}
                         helpMessage={helpMessage}
                         showControls={showControls}
                       />
@@ -1137,33 +1167,100 @@ function App() {
                       <button
                         className="bg-[#232323] hover:bg-[#353535] rounded-[0.2rem] py-[3rem] px-[0.25rem] mt-[2rem]"
                         style={{
-                          marginLeft: showExtraControls ? '0.5rem' : '0'
+                          marginLeft: showExtraControls ? "0.5rem" : "0",
                         }}
                         onClick={() => setShowExtraControls(!showExtraControls)}
                       >
-                        <div className="w-[1.2rem] h-[1.2rem]"
+                        <div
+                          className="w-[1.2rem] h-[1.2rem]"
                           style={{
-                            transform: showExtraControls ? 'rotate(-90deg)' : 'rotate(90deg)'
+                            transform: showExtraControls
+                              ? "rotate(-90deg)"
+                              : "rotate(90deg)",
                           }}
                         >
-                          <svg viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <mask id="mask0_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="39" height="39">
-                              <rect x="0.619141" y="0.574219" width="38.335" height="38.335" fill="#D9D9D9" />
+                          <svg
+                            viewBox="0 0 39 39"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <mask
+                              id="mask0_317_1325"
+                              style={{ maskType: "alpha" }}
+                              maskUnits="userSpaceOnUse"
+                              x="0"
+                              y="0"
+                              width="39"
+                              height="39"
+                            >
+                              <rect
+                                x="0.619141"
+                                y="0.574219"
+                                width="38.335"
+                                height="38.335"
+                                fill="#D9D9D9"
+                              />
                             </mask>
                             <g mask="url(#mask0_317_1325)">
-                              <mask id="mask1_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="21" width="39" height="15">
-                                <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 35.0669)" fill="#D9D9D9" />
+                              <mask
+                                id="mask1_317_1325"
+                                style={{ maskType: "alpha" }}
+                                maskUnits="userSpaceOnUse"
+                                x="0"
+                                y="21"
+                                width="39"
+                                height="15"
+                              >
+                                <rect
+                                  width="38.2188"
+                                  height="14.0137"
+                                  transform="matrix(1 0 0 -1 0.677734 35.0669)"
+                                  fill="#D9D9D9"
+                                />
                               </mask>
                               <g mask="url(#mask1_317_1325)">
-                                <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 21.2012)" fill="#999" />
-                                <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 24.5425)" fill="#999" />
+                                <rect
+                                  width="22.3832"
+                                  height="5.39961"
+                                  transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 21.2012)"
+                                  fill="#999"
+                                />
+                                <rect
+                                  width="22.3832"
+                                  height="5.39961"
+                                  transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 24.5425)"
+                                  fill="#999"
+                                />
                               </g>
-                              <mask id="mask2_317_1325" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="4" width="39" height="15">
-                                <rect width="38.2188" height="14.0137" transform="matrix(1 0 0 -1 0.677734 18.4307)" fill="#D9D9D9" />
+                              <mask
+                                id="mask2_317_1325"
+                                style={{ maskType: "alpha" }}
+                                maskUnits="userSpaceOnUse"
+                                x="0"
+                                y="4"
+                                width="39"
+                                height="15"
+                              >
+                                <rect
+                                  width="38.2188"
+                                  height="14.0137"
+                                  transform="matrix(1 0 0 -1 0.677734 18.4307)"
+                                  fill="#D9D9D9"
+                                />
                               </mask>
                               <g mask="url(#mask2_317_1325)">
-                                <rect width="22.3832" height="5.39961" transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 4.56494)" fill="#999" />
-                                <rect width="22.3832" height="5.39961" transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 7.90625)" fill="#999" />
+                                <rect
+                                  width="22.3832"
+                                  height="5.39961"
+                                  transform="matrix(0.785731 0.618568 -0.785731 0.618568 20.5215 4.56494)"
+                                  fill="#999"
+                                />
+                                <rect
+                                  width="22.3832"
+                                  height="5.39961"
+                                  transform="matrix(-0.785731 0.618568 -0.785731 -0.618568 24.7646 7.90625)"
+                                  fill="#999"
+                                />
                               </g>
                             </g>
                           </svg>
@@ -1171,7 +1268,7 @@ function App() {
                       </button>
                     </div>
                   </div>
-                }
+                )}
               </div>
             </div>
           </div>
